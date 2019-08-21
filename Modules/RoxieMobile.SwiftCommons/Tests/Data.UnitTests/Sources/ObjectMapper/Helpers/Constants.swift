@@ -155,6 +155,14 @@ final class Constants: NonCreatable
         JsonKeys.z: "\(Int32.max)"
     ]
 
+    // MARK: - Mixed models
+
+    static let dictionaryMixed: [String: Any] = [
+        JsonKeys.number: 25,
+        JsonKeys.string: "String",
+        JsonKeys.array: ["\(Int32.max)", 25]
+    ]
+
 // MARK: - RawRepresentable types
 
     static let stringRawValues: [String: Any] = [
