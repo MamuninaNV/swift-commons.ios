@@ -9,22 +9,12 @@
 //
 // ----------------------------------------------------------------------------
 
-#ifndef __OSUnarchiver_H__
-#define __OSUnarchiver_H__
-
-// ----------------------------------------------------------------------------
-
-#include <Foundation/NSCoder.h>
-#include <Foundation/NSMapTable.h>
-#include <Foundation/NSHashTable.h>
-
-#include "OSSerialization.h"
+#import "OSSerialization.h"
 
 // ----------------------------------------------------------------------------
 
 @interface OSUnarchiver : NSCoder < OSObjCTypeSerializationCallBack >
 {
-    unsigned    inArchiverVersion;    // archiver's version that wrote the data
     NSMapTable  *inObjects;           // decoded objects: key -> object
     NSMapTable  *inClasses;           // decoded classes: key -> class info
     NSMapTable  *inPointers;          // decoded pointers: key -> pointer
@@ -41,6 +31,14 @@
     void (*deserData)(id, SEL, void *, const char *, unsigned *, id);
 }
 
+// - Properties
+
+// Managing an Unarchiver
+@property(readonly, assign, getter=isAtEnd) BOOL atEnd;
+@property(readonly, assign) unsigned int systemVersion;
+
+// - Methods
+
 - (id)initForReadingWithData:(NSData*)data;
 
 /* Decoding Objects */
@@ -49,10 +47,8 @@
 
 /* Managing an OSUnarchiver */
 
-- (BOOL)isAtEnd;
 - (NSZone *)objectZone;
 - (void)setObjectZone:(NSZone *)_zone;
-- (unsigned int)systemVersion;
 
 // decoding
 
@@ -67,9 +63,5 @@
 // not supported yet: replaceObject:withObject:
 
 @end
-
-// ----------------------------------------------------------------------------
-
-#endif /* __OSUnarchiver_H__ */
 
 // ----------------------------------------------------------------------------

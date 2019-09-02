@@ -9,16 +9,7 @@
 //
 // ----------------------------------------------------------------------------
 
-#ifndef __OSArchiver_H__
-#define __OSArchiver_H__
-
-// ----------------------------------------------------------------------------
-
-#include <Foundation/NSCoder.h>
-#include <Foundation/NSMapTable.h>
-#include <Foundation/NSHashTable.h>
-
-#include "OSSerialization.h"
+#import "OSSerialization.h"
 
 // ----------------------------------------------------------------------------
 
@@ -43,14 +34,18 @@
     void (*serData)(id, SEL, const void *, const char *, id);
 }
 
+// - Properties
+
+// Getting the archived data
+@property(readonly, strong) NSMutableData *archiverData;
+
+// - Methods
+
 - (id)initForWritingWithMutableData:(NSMutableData*)mdata;
 
 /* Archiving Data */
 + (NSData*)archivedDataWithRootObject:(id)rootObject;
 + (BOOL)archiveRootObject:(id)rootObject toFile:(NSString*)path;
-
-/* Getting Data from the OSArchiver */
-- (NSMutableData *)archiverData;
 
 /* encoding */
 
@@ -64,9 +59,5 @@
 // not supported yet: replaceObject:withObject:
 
 @end
-
-// ----------------------------------------------------------------------------
-
-#endif /* __OSArchiver_H__ */
 
 // ----------------------------------------------------------------------------

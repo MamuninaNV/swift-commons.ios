@@ -9,15 +9,11 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <Foundation/NSData.h>
-#include <Foundation/NSAutoreleasePool.h>
-#include <Foundation/NSException.h>
-
-#include "objc-runtime.h"
-#include "common.h"
-#include "OSUtilities.h"
-#include "OSArchiver.h"
-#include "NSData+OpenStep.h"
+#import "objc-runtime.h"
+#import "common.h"
+#import "OSUtilities.h"
+#import "OSArchiver.h"
+#import "NSData+OpenStep.h"
 
 // ----------------------------------------------------------------------------
 
@@ -68,7 +64,33 @@ FINAL NSTagType tagValue(NSTagType _tag) {
 static const char *OSCoderSignature = "roxie:stc";  // Stream Typed Coder
 static int         OSCoderVersion   = 1909;         // 2019-09
 
+// ----------------------------------------------------------------------------
+#pragma mark -
+// ----------------------------------------------------------------------------
+
 @implementation OSArchiver
+
+// ----------------------------------------------------------------------------
+#pragma mark - Properties
+// ----------------------------------------------------------------------------
+
+@dynamic archiverData;
+
+// ----------------------------------------------------------------------------
+
+- (NSMutableData *)archiverData {
+    return self->data;
+}
+
+// ----------------------------------------------------------------------------
+#pragma mark - Private Methods
+// ----------------------------------------------------------------------------
+
+// TODO:
+
+// ----------------------------------------------------------------------------
+#pragma mark - Methods
+// ----------------------------------------------------------------------------
 
 - (id)initForWritingWithMutableData:(NSMutableData *)_data
 {
@@ -135,13 +157,6 @@ static int         OSCoderVersion   = 1909;         // 2019-09
     [super dealloc];
 }
 #endif
-
-// ******************** Getting Data from the OSArchiver ******
-
-- (NSMutableData *)archiverData
-{
-    return self->data;
-}
 
 // ******************** archive id's **************************
 

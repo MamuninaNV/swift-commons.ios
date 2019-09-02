@@ -25,8 +25,7 @@
 #ifndef __OSSerialization_h__
 #define __OSSerialization_h__
 
-#include <objc/objc.h>
-#include <Foundation/NSObject.h>
+#import <Foundation/Foundation.h>
 
 @class NSData;
 @class NSMutableData;

@@ -9,15 +9,13 @@
 //
 // ----------------------------------------------------------------------------
 
-#include <Foundation/NSData.h>
-#include <Foundation/NSAutoreleasePool.h>
-#include <Foundation/NSException.h>
+#import <dispatch/once.h>
 
-#include "objc-runtime.h"
-#include "common.h"
-#include "OSUtilities.h"
-#include "OSUnarchiver.h"
-#include "NSData+OpenStep.h"
+#import "objc-runtime.h"
+#import "common.h"
+#import "OSUtilities.h"
+#import "OSUnarchiver.h"
+#import "NSData+OpenStep.h"
 
 // ----------------------------------------------------------------------------
 
@@ -70,22 +68,58 @@ FINAL NSTagType tagValue(NSTagType _tag) {
 static const char *OSCoderSignature = "roxie:stc";  // Stream Typed Coder
 static int         OSCoderVersion   = 1909;         // 2019-09
 
+// ----------------------------------------------------------------------------
+
+@interface OSUnarchiver ()
+
+// - Properties
+
+@property(assign) unsigned int systemVersion;  // Archiver's version that wrote the data
+
+// --
+
+@end
+
+// ----------------------------------------------------------------------------
+#pragma mark -
+// ----------------------------------------------------------------------------
+
 @implementation OSUnarchiver
 
-static NSMapTable *classToAliasMappings = NULL; // archive name => decoded name
+static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
+
+// ----------------------------------------------------------------------------
+#pragma mark - Properties
+// ----------------------------------------------------------------------------
+
+@dynamic atEnd;
+
+// ----------------------------------------------------------------------------
+
+- (BOOL)isAtEnd {
+    return (self->cursor >= [self->data length]);
+}
+
+// ----------------------------------------------------------------------------
+#pragma mark - Private Methods
+// ----------------------------------------------------------------------------
+
+// TODO:
+
+// ----------------------------------------------------------------------------
+#pragma mark - Methods
+// ----------------------------------------------------------------------------
 
 + (void)initialize
 {
-    static BOOL isInitialized = NO;
-    if (!isInitialized) {
-        isInitialized = YES;
-
-        classToAliasMappings = NSCreateMapTable(NSObjectMapKeyCallBacks,
-                                                NSObjectMapValueCallBacks,
-                                                19);
-    }
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _classToAliasMappings = [NSMapTable strongToStrongObjectsMapTable];
+    });
 }
-  
+
+// ----------------------------------------------------------------------------
+
 - (id)initForReadingWithData:(NSData*)_data
 {
     if ((self = [super init])) {
@@ -155,11 +189,6 @@ static NSMapTable *classToAliasMappings = NULL; // archive name => decoded name
 
 /* Managing an OSUnarchiver */
 
-- (BOOL)isAtEnd
-{
-    return ([self->data length] <= self->cursor) ? YES : NO;
-}
-
 - (void)setObjectZone:(NSZone *)_zone
 {
     self->objectZone = _zone;
@@ -167,11 +196,6 @@ static NSMapTable *classToAliasMappings = NULL; // archive name => decoded name
 - (NSZone *)objectZone
 {
     return self->objectZone;
-}
-
-- (unsigned int)systemVersion
-{
-    return self->inArchiverVersion;
 }
 
 // ******************** primitive decoding ********************
@@ -196,7 +220,7 @@ FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type);
     if (self->didReadHeader == NO) {
         char *archiver = _readCString(self);
 
-        self->inArchiverVersion = _readInt(self);
+        self.systemVersion = _readInt(self);
 
         //NGLogT(@"decoder", @"decoding archive archived using '%s':%i ..",
         //       archiver, archiverVersion);
@@ -286,7 +310,7 @@ FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type);
             if (newName)
                 name = newName;
             else {
-                newName = NSMapGet(classToAliasMappings, name);
+                newName = [_classToAliasMappings objectForKey:name];
                 if (newName)
                     name = newName;
             }
@@ -611,14 +635,14 @@ FINAL void _checkType2(char _code, char _reqCode1, char _reqCode2)
 
 + (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive
 {
-    NSString *className = NSMapGet(classToAliasMappings, nameInArchive);
+    NSString *className = [_classToAliasMappings objectForKey:nameInArchive];
     return className ? className : nameInArchive;
 }
 
 + (void)decodeClassName:(NSString *)nameInArchive
             asClassName:(NSString *)trueName
 {
-    NSMapInsert(classToAliasMappings, nameInArchive, trueName);
+    [_classToAliasMappings setObject:trueName forKey:nameInArchive];
 }
 
 - (NSString *)classNameDecodedForArchiveClassName:(NSString *)_nameInArchive
