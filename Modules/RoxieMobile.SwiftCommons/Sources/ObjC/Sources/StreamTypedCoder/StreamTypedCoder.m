@@ -11,11 +11,11 @@
 #import "StreamTypedCoder.h"
 //#import "LFEncoding.h"
 
-//#import "LFArchiver.h"
-//#import "LFUnarchiver.h"
-
-#import "encoding.h"
 #import "OSArchiver.h"
+#import "OSUnarchiver.h"
+
+// TODO: Rename to "OSEncoding.h"
+#import "encoding.h"
 
 // ----------------------------------------------------------------------------
 

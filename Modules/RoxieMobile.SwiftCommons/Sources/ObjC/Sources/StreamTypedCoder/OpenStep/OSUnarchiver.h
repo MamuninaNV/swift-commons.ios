@@ -1,5 +1,5 @@
 /* 
-   OSArchiver.h
+   OSUnarchiver.h
 
    Copyright (C) 1998 MDlink online service center, Helge Hess
    All rights reserved.
@@ -27,7 +27,7 @@
    The basic archiving algorithm is based on libFoundation's OSArchiver by
    Ovidiu Predescu:
    
-   OSArchiver.h
+   OSUnarchiver.h
 
    Copyright (C) 1995, 1996 Ovidiu Predescu and Mircea Oancea.
    All rights reserved.
@@ -52,8 +52,8 @@
 */
 // $Id$
 
-#ifndef __OSArchiver_H__
-#define __OSArchiver_H__
+#ifndef __OSUnarchiver_H__
+#define __OSUnarchiver_H__
 
 #include <Foundation/NSCoder.h>
 // #include <Foundation/NSSerialization.h>
@@ -62,50 +62,53 @@
 
 #include "OSSerialization.h"
 
-@interface OSArchiver : NSCoder < OSObjCTypeSerializationCallBack >
+@interface OSUnarchiver : NSCoder < OSObjCTypeSerializationCallBack >
 {
-    NSHashTable *outObjects;          // objects written so far
-    NSHashTable *outConditionals;     // conditional objects
-    NSHashTable *outPointers;         // set of pointers
-    NSMapTable  *outClassAlias;       // class name -> archive name
-    NSMapTable  *replacements;        // src-object to replacement
-    NSMapTable  *outKeys;             // src-address -> archive-address
-    BOOL        traceMode;            // YES if finding conditionals
-    BOOL        didWriteHeader;
-    SEL         classForCoder;        // default: classForCoder:
-    SEL         replObjectForCoder;   // default: replacementObjectForCoder:
-    BOOL        encodingRoot;
-    int         archiveAddress;
+    unsigned    inArchiverVersion;    // archiver's version that wrote the data
+    NSMapTable  *inObjects;           // decoded objects: key -> object
+    NSMapTable  *inClasses;           // decoded classes: key -> class info
+    NSMapTable  *inPointers;          // decoded pointers: key -> pointer
+    NSMapTable  *inClassAlias;        // archive name -> decoded name
+    NSMapTable  *inClassVersions;     // archive name -> class info
+    NSZone      *objectZone;
+    BOOL        decodingRoot;
+    BOOL        didReadHeader;
 
-    // destination
-    NSMutableData *data;
-    void (*addData)(id, SEL, const void *, unsigned);
-    void (*serData)(id, SEL, const void *, const char *, id);
+    // source
+    NSData       *data;
+    unsigned int cursor;
+    void (*getData)(id, SEL, void *, unsigned, unsigned *);
+    void (*deserData)(id, SEL, void *, const char *, unsigned *, id);
 }
 
-- (id)initForWritingWithMutableData:(NSMutableData*)mdata;
+- (id)initForReadingWithData:(NSData*)data;
 
-/* Archiving Data */
-+ (NSData*)archivedDataWithRootObject:(id)rootObject;
-+ (BOOL)archiveRootObject:(id)rootObject toFile:(NSString*)path;
+/* Decoding Objects */
++ (id)unarchiveObjectWithData:(NSData*)data;
++ (id)unarchiveObjectWithFile:(NSString*)path;
 
-/* Getting Data from the OSArchiver */
-- (NSMutableData *)archiverData;
+/* Managing an OSUnarchiver */
 
-/* encoding */
+- (BOOL)isAtEnd;
+- (NSZone *)objectZone;
+- (void)setObjectZone:(NSZone *)_zone;
+- (unsigned int)systemVersion;
 
-- (void)encodeConditionalObject:(id)_object;
-- (void)encodeRootObject:(id)_object;
+// decoding
+
+- (id)decodeObject;
 
 /* Substituting One Class for Another */
 
-- (NSString *)classNameEncodedForTrueClassName:(NSString *)_trueName;
-- (void)encodeClassName:(NSString *)_trueName intoClassName:(NSString *)_archiveName;
++ (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive;
++ (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName;
+- (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive;
+- (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName;
 // not supported yet: replaceObject:withObject:
 
 @end
 
-#endif /* __OSArchiver_H__ */
+#endif /* __OSUnarchiver_H__ */
 /*
   Local Variables:
   c-basic-offset: 4
