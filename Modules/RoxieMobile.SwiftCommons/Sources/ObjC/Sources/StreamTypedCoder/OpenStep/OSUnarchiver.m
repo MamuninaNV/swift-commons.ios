@@ -116,7 +116,9 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
 {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _classToAliasMappings = [NSMapTable strongToStrongObjectsMapTable];
+        _classToAliasMappings = NSCreateMapTable(NSObjectMapKeyCallBacks,
+                                                NSObjectMapValueCallBacks,
+                                                19);
     });
 }
 
@@ -312,7 +314,7 @@ FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type);
             if (newName)
                 name = newName;
             else {
-                newName = [_classToAliasMappings objectForKey:name];
+                newName = NSMapGet(_classToAliasMappings, name);
                 if (newName)
                     name = newName;
             }
@@ -637,14 +639,14 @@ FINAL void _checkType2(char _code, char _reqCode1, char _reqCode2)
 
 + (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive
 {
-    NSString *className = [_classToAliasMappings objectForKey:nameInArchive];
+    NSString *className = NSMapGet(_classToAliasMappings, nameInArchive);
     return className ? className : nameInArchive;
 }
 
 + (void)decodeClassName:(NSString *)nameInArchive
             asClassName:(NSString *)trueName
 {
-    [_classToAliasMappings setObject:trueName forKey:nameInArchive];
+    NSMapInsert(_classToAliasMappings, nameInArchive, trueName);
 }
 
 - (NSString *)classNameDecodedForArchiveClassName:(NSString *)_nameInArchive
