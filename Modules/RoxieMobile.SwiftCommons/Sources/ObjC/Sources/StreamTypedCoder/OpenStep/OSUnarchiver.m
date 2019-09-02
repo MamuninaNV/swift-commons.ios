@@ -13,8 +13,12 @@
 
 #import "objc-runtime.h"
 #import "common.h"
-#import "OSUtilities.h"
+
 #import "OSUnarchiver.h"
+#import "OSUnarchiver+Decoding.h"
+
+#import "OSEncoding.h"
+#import "OSUtilities.h"
 #import "NSData+OpenStep.h"
 
 // ----------------------------------------------------------------------------
@@ -23,8 +27,6 @@
 #define ARCHIVE_DEBUGGING      0
 
 #define FINAL static inline
-
-typedef unsigned char NSTagType;
 
 #define REFERENCE 128
 #define VALUE     127
@@ -56,12 +58,12 @@ FINAL BOOL isBaseType(const char *_type)
     }
 }
 
-FINAL BOOL isReferenceTag(NSTagType _tag)
+FINAL BOOL isReferenceTag(OSTagType _tag)
 {
     return (_tag & REFERENCE) ? YES : NO;
 }
 
-FINAL NSTagType tagValue(NSTagType _tag) {
+FINAL OSTagType tagValue(OSTagType _tag) {
     return _tag & VALUE; // mask out bit 8
 }
 
@@ -202,7 +204,7 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
 
 FINAL void _readBytes(OSUnarchiver *self, void *_bytes, unsigned _len);
 
-FINAL NSTagType _readTag(OSUnarchiver *self);
+FINAL OSTagType _readTag(OSUnarchiver *self);
 
 FINAL char  _readChar (OSUnarchiver *self);
 FINAL short _readShort(OSUnarchiver *self);
@@ -453,7 +455,7 @@ FINAL void _checkType2(char _code, char _reqCode1, char _reqCode2)
   at:(void *)_value
 {
     BOOL      startedDecoding = NO;
-    NSTagType tag             = 0;
+    OSTagType tag             = 0;
     BOOL      isReference     = NO;
 
     if (self->decodingRoot == NO) {
@@ -563,7 +565,7 @@ FINAL void _checkType2(char _code, char _reqCode1, char _reqCode2)
   at:(void *)_array
 {
     BOOL      startedDecoding = NO;
-    NSTagType tag   = _readTag(self);
+    OSTagType tag   = _readTag(self);
     int       count = _readInt(self);
 
     if (self->decodingRoot == NO) {
@@ -663,7 +665,7 @@ FINAL void _readBytes(OSUnarchiver *self, void *_bytes, unsigned _len)
                   _bytes, _len, &(self->cursor));
 }
 
-FINAL NSTagType _readTag(OSUnarchiver *self)
+FINAL OSTagType _readTag(OSUnarchiver *self)
 {
     unsigned char c;
     NSCAssert(self, @"invalid self ..");
@@ -673,7 +675,7 @@ FINAL NSTagType _readTag(OSUnarchiver *self)
         [NSException raise:NSInconsistentArchiveException
                      format:@"found invalid type tag (0)"];
     }
-    return (NSTagType)c;
+    return (OSTagType)c;
 }
 FINAL char _readChar(OSUnarchiver *self)
 {
@@ -747,7 +749,7 @@ FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type)
   fromData:(NSData *)_data
   atCursor:(unsigned int *)_cursor
 {
-    NSTagType tag             = 0;
+    OSTagType tag             = 0;
     BOOL      isReference     = NO;
 
     tag         = _readTag(self);

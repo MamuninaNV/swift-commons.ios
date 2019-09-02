@@ -11,8 +11,12 @@
 
 #import "objc-runtime.h"
 #import "common.h"
-#import "OSUtilities.h"
+
 #import "OSArchiver.h"
+#import "OSArchiver+Encoding.h"
+
+#import "OSEncoding.h"
+#import "OSUtilities.h"
 #import "NSData+OpenStep.h"
 
 // ----------------------------------------------------------------------------
@@ -21,8 +25,6 @@
 #define ARCHIVE_DEBUGGING      0
 
 #define FINAL static inline
-
-typedef unsigned char NSTagType;
 
 #define REFERENCE 128
 #define VALUE     127
@@ -52,12 +54,12 @@ FINAL BOOL isBaseType(const char *_type)
     }
 }
 
-FINAL BOOL isReferenceTag(NSTagType _tag)
+FINAL BOOL isReferenceTag(OSTagType _tag)
 {
     return (_tag & REFERENCE) ? YES : NO;
 }
 
-FINAL NSTagType tagValue(NSTagType _tag) {
+FINAL OSTagType tagValue(OSTagType _tag) {
     return _tag & VALUE; // mask out bit 8
 }
 
@@ -194,7 +196,7 @@ FINAL int _archiveIdOfClass(OSArchiver *self, Class _class)
 
 FINAL void _writeBytes(OSArchiver *self, const void *_bytes, unsigned _len);
 
-FINAL void _writeTag  (OSArchiver *self, NSTagType _tag);
+FINAL void _writeTag  (OSArchiver *self, OSTagType _tag);
 
 FINAL void _writeChar (OSArchiver *self, char _value);
 FINAL void _writeShort(OSArchiver *self, short _value);
@@ -383,7 +385,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 }
 - (void)_encodeObject:(id)_object
 {
-    NSTagType tag;
+    OSTagType tag;
     int       archiveId = _archiveIdOfObject(self, _object);
 
     if (_object == nil) { // nil object or class
@@ -697,7 +699,7 @@ FINAL void _writeBytes(OSArchiver *self, const void *_bytes, unsigned _len)
     NSCAssert(self->traceMode == NO, @"nothing can be written during trace-mode ..");
     self->addData(self->data, @selector(appendBytes:length:), _bytes, _len);
 }
-FINAL void _writeTag(OSArchiver *self, NSTagType _tag)
+FINAL void _writeTag(OSArchiver *self, OSTagType _tag)
 {
     unsigned char t = _tag;
     NSCAssert(self, @"invalid self ..");
