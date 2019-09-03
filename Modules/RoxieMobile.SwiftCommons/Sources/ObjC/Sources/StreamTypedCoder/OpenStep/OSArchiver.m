@@ -357,29 +357,115 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
 // ----------------------------------------------------------------------------
 
-// - (void)encodeObject:(nullable id)object;
-// - (void)encodeRootObject:(id)rootObject;
-// - (void)encodeBycopyObject:(nullable id)anObject;
-// - (void)encodeByrefObject:(nullable id)anObject;
-// - (void)encodeConditionalObject:(nullable id)object;
-// - (void)encodeValuesOfObjCTypes:(const char *)types, ...;
-// - (void)encodeArrayOfObjCType:(const char *)type count:(NSUInteger)count at:(const void *)array;
-// - (void)encodeBytes:(nullable const void *)byteaddr length:(NSUInteger)length;
+- (void)encodeBycopyObject:(id)anObject {
+    NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
+}
 
 // ----------------------------------------------------------------------------
 
-// - (nullable id)decodeObject;
-// - (nullable id)decodeTopLevelObjectAndReturnError:(NSError **)error API_AVAILABLE(macos(10.11), ios(9.0), watchos(2.0), tvos(9.0)) NS_SWIFT_UNAVAILABLE("Use 'decodeTopLevelObject() throws' instead");
-// - (void)decodeValuesOfObjCTypes:(const char *)types, ...;
-// - (void)decodeArrayOfObjCType:(const char *)itemType count:(NSUInteger)count at:(void *)array;
-// - (nullable void *)decodeBytesWithReturnedLength:(NSUInteger *)lengthp NS_RETURNS_INNER_POINTER;
+- (void)encodeByrefObject:(id)anObject {
+    NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)encodeValuesOfObjCTypes:(const char *)types, ... {
+
+    va_list args;
+    va_start(args, types);
+
+    while (types && *types) {
+        [self encodeValueOfObjCType:types at:va_arg(args, void *)];
+        types = objc_skip_typespec(types);
+    }
+
+    va_end(args);
+}
+
+// ----------------------------------------------------------------------------
+
+// TODO: Refactoring is required
+- (void)encodeArrayOfObjCType:(const char *)type count:(NSUInteger)count at:(const void *)array {
+
+    if ((self.didWriteHeader == NO) && (self.traceMode == NO)) {
+        [self __writeArchiveHeader];
+    }
+
+    // array header
+    if (self.traceMode == NO) { // nothing is written during trace-mode
+        [self writeTag:_C_ARY_B];
+        [self writeInt:count];
+    }
+
+    // Optimize writing arrays of elementary types. If such an array has to
+    // be written, write the type and then the elements of array.
+
+    if ((*type == _C_ID) || (*type == _C_CLASS)) { // object array
+        int i;
+
+        if (self.traceMode == NO)
+            [self writeTag:*type]; // object array
+
+        for (i = 0; i < count; i++)
+            [self encodeObject:((id *)array)[i]];
+    }
+    else if ((*type == _C_CHR) || (*type == _C_UCHR)) { // byte array
+        if (self.traceMode == NO) {
+            //NGLogT(@"encoder", @"encode byte-array (base='%c', count=%i)", *_type, _count);
+
+            // write base type tag
+            [self writeTag:*type];
+
+            // write buffer
+            [self writeBytes:array length:count];
+        }
+    }
+    else if (isBaseType(type)) {
+        if (self.traceMode == NO) {
+            unsigned offset, itemSize = objc_sizeof_type(type);
+            int      i;
+
+            /*
+              NGLogT(@"encoder",
+              @"encode basetype-array (base='%c', itemSize=%i, count=%i)",
+              *_type, itemSize, _count);
+              */
+
+            // write base type tag
+            [self writeTag:*type];
+
+            // write contents
+            for (i = offset = 0; i < count; i++, offset += itemSize)
+                _writeObjC(self, (char *)array + offset, type);
+        }
+    }
+    else { // encoded using normal method
+        IMP      encodeValue = NULL;
+        unsigned offset, itemSize = objc_sizeof_type(type);
+        int      i;
+
+        encodeValue = [self methodForSelector:@selector(encodeValueOfObjCType:at:)];
+
+        for (i = offset = 0; i < count; i++, offset += itemSize) {
+//             encodeValue(self, @selector(encodeValueOfObjCType:at:),
+//                         (char *)_array + offset, _type);
+            [self encodeValueOfObjCType:type at:(char *)array + offset];
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)encodeBytes:(const void *)byteaddr length:(NSUInteger)length {
+
+    [self writeUnsignedInteger:length];
+    [self writeBytes:byteaddr length:length];
+}
 
 // ----------------------------------------------------------------------------
 
 // - (void)setObjectZone:(nullable NSZone *)zone NS_AUTOMATED_REFCOUNT_UNAVAILABLE;
 // - (nullable NSZone *)objectZone NS_AUTOMATED_REFCOUNT_UNAVAILABLE;
-
-// ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
 #pragma mark - Protected Methods
@@ -729,77 +815,6 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
         default:
             NSLog(@"unsupported C type %s ..", _type);
             break;
-    }
-}
-
-- (void)encodeArrayOfObjCType:(const char *)_type
-                        count:(unsigned int)_count
-                           at:(const void *)_array
-{
-
-    if ((self.didWriteHeader == NO) && (self.traceMode == NO))
-        [self __writeArchiveHeader];
-
-    // array header
-    if (self.traceMode == NO) { // nothing is written during trace-mode
-        [self writeTag:_C_ARY_B];
-        [self writeInt:_count];
-    }
-
-    // Optimize writing arrays of elementary types. If such an array has to
-    // be written, write the type and then the elements of array.
-
-    if ((*_type == _C_ID) || (*_type == _C_CLASS)) { // object array
-        int i;
-
-        if (self.traceMode == NO)
-            [self writeTag:*_type]; // object array
-
-        for (i = 0; i < _count; i++)
-            [self encodeObject:((id *)_array)[i]];
-    }
-    else if ((*_type == _C_CHR) || (*_type == _C_UCHR)) { // byte array
-        if (self.traceMode == NO) {
-            //NGLogT(@"encoder", @"encode byte-array (base='%c', count=%i)", *_type, _count);
-
-            // write base type tag
-            [self writeTag:*_type];
-
-            // write buffer
-            [self writeBytes:_array length:_count];
-        }
-    }
-    else if (isBaseType(_type)) {
-        if (self.traceMode == NO) {
-            unsigned offset, itemSize = objc_sizeof_type(_type);
-            int      i;
-
-            /*
-              NGLogT(@"encoder",
-              @"encode basetype-array (base='%c', itemSize=%i, count=%i)",
-              *_type, itemSize, _count);
-              */
-
-            // write base type tag
-            [self writeTag:*_type];
-
-            // write contents
-            for (i = offset = 0; i < _count; i++, offset += itemSize)
-                _writeObjC(self, (char *)_array + offset, _type);
-        }
-    }
-    else { // encoded using normal method
-        IMP      encodeValue = NULL;
-        unsigned offset, itemSize = objc_sizeof_type(_type);
-        int      i;
-
-        encodeValue = [self methodForSelector:@selector(encodeValueOfObjCType:at:)];
-
-        for (i = offset = 0; i < _count; i++, offset += itemSize) {
-//             encodeValue(self, @selector(encodeValueOfObjCType:at:),
-//                         (char *)_array + offset, _type);
-            [self encodeValueOfObjCType:_type at:(char *)_array + offset];
-        }
     }
 }
 

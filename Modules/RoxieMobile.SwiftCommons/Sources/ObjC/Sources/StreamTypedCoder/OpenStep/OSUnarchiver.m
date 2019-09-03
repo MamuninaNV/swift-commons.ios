@@ -422,16 +422,6 @@ FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type);
     return result;
 }
 
-- (id)decodeObject
-{
-    id result = nil;
-
-    [self decodeValueOfObjCType:"@" at:&result];
-  
-    // result is retained
-    return AUTORELEASE(result);
-}
-
 FINAL void _checkType(char _code, char _reqCode)
 {
     if (_code != _reqCode) {
@@ -447,100 +437,25 @@ FINAL void _checkType2(char _code, char _reqCode1, char _reqCode2)
     }
 }
 
-- (void)decodeArrayOfObjCType:(const char *)_type
-  count:(unsigned int)_count
-  at:(void *)_array
-{
-    BOOL      startedDecoding = NO;
-    OSTagType tag   = [self readTag];
-    int       count = [self readInt];
-
-    if (self.decodingRoot == NO) {
-        self.decodingRoot = YES;
-        startedDecoding = YES;
-        [self beginDecoding];
-    }
-  
-    //NGLogT(@"decoder", @"decoding array[%i/%i] of ObjC-type '%s' array-tag='%c'",
-    //       _count, count, _type, tag);
-  
-    NSAssert(tag == _C_ARY_B, @"invalid type ..");
-    NSAssert(count == _count, @"invalid array size ..");
-
-    // Arrays of elementary types are written optimized: the type is written
-    // then the elements of array follow.
-    if ((*_type == _C_ID) || (*_type == _C_CLASS)) { // object array
-        int i;
-
-        //NGLogT(@"decoder", @"decoding object-array[%i] type='%s'", _count, _type);
-    
-        tag = [self readTag]; // object array
-        NSAssert(tag == *_type, @"invalid array element type ..");
-      
-        for (i = 0; i < _count; i++)
-            ((id *)_array)[i] = [self decodeObject];
-    }
-    else if ((*_type == _C_CHR) || (*_type == _C_UCHR)) { // byte array
-        tag = [self readTag];
-        NSAssert((tag == _C_CHR) || (tag == _C_UCHR), @"invalid byte array type ..");
-
-        //NGLogT(@"decoder", @"decoding byte-array[%i] type='%s' tag='%c'",
-        //       _count, _type, tag);
-    
-        // read buffer
-        [self readBytes:_array length:_count];
-    }
-    else if (isBaseType(_type)) {
-        unsigned offset, itemSize = objc_sizeof_type(_type);
-        int      i;
-      
-        tag = [self readTag];
-        NSAssert(tag == *_type, @"invalid array base type ..");
-
-        for (i = offset = 0; i < _count; i++, offset += itemSize)
-            _readObjC(self, (char *)_array + offset, _type);
-    }
-    else {
-        IMP      decodeValue = NULL;
-        unsigned offset, itemSize = objc_sizeof_type(_type);
-        int      i;
-
-        decodeValue = [self methodForSelector:@selector(decodeValueOfObjCType:at:)];
-    
-        for (i = offset = 0; i < count; i++, offset += itemSize) {
-//             decodeValue(self, @selector(decodeValueOfObjCType:at:),
-//                         (char *)_array + offset, _type);
-            [self decodeValueOfObjCType:_type at:(char *)_array + offset];
-        }
-    }
-
-    if (startedDecoding) {
-        [self endDecoding];
-        self.decodingRoot = NO;
-    }
-}
-
 /* Substituting One Class for Another */
 
-+ (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive
-{
++ (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive {
+
     NSString *className = NSMapGet(_classToAliasMappings, nameInArchive);
     return className ? className : nameInArchive;
 }
 
-+ (void)decodeClassName:(NSString *)nameInArchive
-            asClassName:(NSString *)trueName
-{
++ (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName {
     NSMapInsert(_classToAliasMappings, nameInArchive, trueName);
 }
 
-- (NSString *)classNameDecodedForArchiveClassName:(NSString *)_nameInArchive
-{
-    NSString *className = NSMapGet(self.inClassAlias, _nameInArchive);
-    return className ? className : _nameInArchive;
+- (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive {
+
+    NSString *className = NSMapGet(self.inClassAlias, nameInArchive);
+    return className ? className : nameInArchive;
 }
-- (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName
-{
+
+- (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName {
     NSMapInsert(self.inClassAlias, nameInArchive, trueName);
 }
 
@@ -756,6 +671,126 @@ FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type)
 
     id version = NSMapGet(self.inClassVersions, className);
     return (version ? [version integerValue] : NSNotFound);
+}
+
+// ----------------------------------------------------------------------------
+
+- (id)decodeObject {
+
+    id object = nil;
+
+    // Decode object
+    const char type[] = {_C_ID, 0};
+    [self decodeValueOfObjCType:type at:&object];
+
+    // Done
+    return AUTORELEASE(object);
+}
+
+// ----------------------------------------------------------------------------
+
+- (id)decodeTopLevelObjectAndReturnError:(NSError **)error {
+    NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
+    return nil;
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)decodeValuesOfObjCTypes:(const char *)types, ... {
+
+    va_list args;
+    va_start(args, types);
+
+    while (types && *types) {
+        [self decodeValueOfObjCType:types at:va_arg(args, void *)];
+        types = objc_skip_typespec(types);
+    }
+
+    va_end(args);
+}
+
+// ----------------------------------------------------------------------------
+
+// TODO: Refactoring is required
+- (void)decodeArrayOfObjCType:(const char *)itemType count:(NSUInteger)count at:(void *)array {
+
+    BOOL      startedDecoding = NO;
+    OSTagType tag    = [self readTag];
+    int       length = [self readInt];
+
+    if (self.decodingRoot == NO) {
+        self.decodingRoot = YES;
+        startedDecoding = YES;
+        [self beginDecoding];
+    }
+
+    NSAssert(tag == _C_ARY_B, @"invalid type ..");
+    NSAssert(count == length, @"invalid array size ..");
+
+    // Arrays of elementary types are written optimized: the type is written
+    // then the elements of array follow.
+    if ((*itemType == _C_ID) || (*itemType == _C_CLASS)) { // object array
+        int i;
+
+        tag = [self readTag]; // object array
+        NSAssert(tag == *itemType, @"invalid array element type ..");
+
+        for (i = 0; i < count; i++)
+            ((id *)array)[i] = [self decodeObject];
+    }
+    else if ((*itemType == _C_CHR) || (*itemType == _C_UCHR)) { // byte array
+        tag = [self readTag];
+        NSAssert((tag == _C_CHR) || (tag == _C_UCHR), @"invalid byte array type ..");
+
+        // read buffer
+        [self readBytes:array length:count];
+    }
+    else if (isBaseType(itemType)) {
+        unsigned offset, itemSize = objc_sizeof_type(itemType);
+        int      i;
+
+        tag = [self readTag];
+        NSAssert(tag == *itemType, @"invalid array base type ..");
+
+        for (i = offset = 0; i < count; i++, offset += itemSize)
+            _readObjC(self, (char *)array + offset, itemType);
+    }
+    else {
+        IMP      decodeValue = NULL;
+        unsigned offset, itemSize = objc_sizeof_type(itemType);
+        int      i;
+
+        decodeValue = [self methodForSelector:@selector(decodeValueOfObjCType:at:)];
+
+        for (i = offset = 0; i < length; i++, offset += itemSize) {
+            [self decodeValueOfObjCType:itemType at:(char *)array + offset];
+        }
+    }
+
+    if (startedDecoding) {
+        [self endDecoding];
+        self.decodingRoot = NO;
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+- (void *)decodeBytesWithReturnedLength:(NSUInteger *)lengthp {
+
+    NSUInteger length = [self readUnsignedInteger];
+    void *bytes = nil;
+
+    if (length > 0) {
+        bytes = (void *) ((Byte *) self.data.bytes + self.cursor);
+        self.cursor += length;
+    }
+
+    if (lengthp != nil) {
+        *lengthp = length;
+    }
+
+    // Done
+    return bytes;
 }
 
 // ----------------------------------------------------------------------------
