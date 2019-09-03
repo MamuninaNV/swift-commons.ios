@@ -33,6 +33,59 @@
 		1AC0FC1320502930007F72FA /* TransformOperatorsTests.MappableObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AB4DDAA204FD74000DD1134 /* TransformOperatorsTests.MappableObjects.swift */; };
 		1AC0FC1A20503C86007F72FA /* TransformOperatorsTests.ArrayOfMappableObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AC0FC1920503C86007F72FA /* TransformOperatorsTests.ArrayOfMappableObjects.swift */; };
 		1AD56543205011F20029C0B5 /* TransformOperatorsTests.ArrayOfBasicTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD56542205011F20029C0B5 /* TransformOperatorsTests.ArrayOfBasicTypes.swift */; };
+		1AD84CEE231EA35600BAEAC4 /* STCBasicTypeTests.String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CAF231EA35600BAEAC4 /* STCBasicTypeTests.String.swift */; };
+		1AD84CEF231EA35600BAEAC4 /* STCBasicTypeTests.Integer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CB0231EA35600BAEAC4 /* STCBasicTypeTests.Integer.swift */; };
+		1AD84CF0231EA35600BAEAC4 /* STCBasicTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CB1231EA35600BAEAC4 /* STCBasicTypeTests.swift */; };
+		1AD84CF1231EA35600BAEAC4 /* STCBasicTypeTests.Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CB2231EA35600BAEAC4 /* STCBasicTypeTests.Double.swift */; };
+		1AD84CF2231EA35600BAEAC4 /* STCBasicTypeTests.Float.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CB3231EA35600BAEAC4 /* STCBasicTypeTests.Float.swift */; };
+		1AD84CF3231EA35600BAEAC4 /* STCBasicTypeTests.Bool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CB4231EA35600BAEAC4 /* STCBasicTypeTests.Bool.swift */; };
+		1AD84CF4231EA35600BAEAC4 /* STCArrayTests.Integer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CB7231EA35600BAEAC4 /* STCArrayTests.Integer.swift */; };
+		1AD84CF5231EA35600BAEAC4 /* STCArrayTests.String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CB8231EA35600BAEAC4 /* STCArrayTests.String.swift */; };
+		1AD84CF6231EA35600BAEAC4 /* STCArrayTests.Float.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CB9231EA35600BAEAC4 /* STCArrayTests.Float.swift */; };
+		1AD84CF7231EA35600BAEAC4 /* STCArrayTests.Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CBA231EA35600BAEAC4 /* STCArrayTests.Double.swift */; };
+		1AD84CF8231EA35600BAEAC4 /* STCArrayTests.Bool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CBB231EA35600BAEAC4 /* STCArrayTests.Bool.swift */; };
+		1AD84CF9231EA35600BAEAC4 /* STCArrayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CBC231EA35600BAEAC4 /* STCArrayTests.swift */; };
+		1AD84CFA231EA35600BAEAC4 /* STCArrayTests.SerializableModelFloat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CBE231EA35600BAEAC4 /* STCArrayTests.SerializableModelFloat.swift */; };
+		1AD84CFB231EA35600BAEAC4 /* STCArrayTests.SerializableModelDouble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CBF231EA35600BAEAC4 /* STCArrayTests.SerializableModelDouble.swift */; };
+		1AD84CFC231EA35600BAEAC4 /* STCArrayTests.SerializableModelBool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CC0231EA35600BAEAC4 /* STCArrayTests.SerializableModelBool.swift */; };
+		1AD84CFD231EA35600BAEAC4 /* STCArrayTests.SerializableModelInteger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CC1231EA35600BAEAC4 /* STCArrayTests.SerializableModelInteger.swift */; };
+		1AD84CFE231EA35600BAEAC4 /* STCArrayTests.SerializableModelString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CC2231EA35600BAEAC4 /* STCArrayTests.SerializableModelString.swift */; };
+		1AD84CFF231EA35600BAEAC4 /* StreamTypedCoderTests.MixedModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CC3231EA35600BAEAC4 /* StreamTypedCoderTests.MixedModelTests.swift */; };
+		1AD84D00231EA35600BAEAC4 /* StreamTypedCoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CC4231EA35600BAEAC4 /* StreamTypedCoderTests.swift */; };
+		1AD84D01231EA35600BAEAC4 /* STCSignedInteger16Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CC7231EA35600BAEAC4 /* STCSignedInteger16Model.swift */; };
+		1AD84D02231EA35600BAEAC4 /* STCUnsignedInteger32Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CC8231EA35600BAEAC4 /* STCUnsignedInteger32Model.swift */; };
+		1AD84D03231EA35600BAEAC4 /* STCSignedInteger8Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CC9231EA35600BAEAC4 /* STCSignedInteger8Model.swift */; };
+		1AD84D04231EA35600BAEAC4 /* STCSignedInteger32Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CCA231EA35600BAEAC4 /* STCSignedInteger32Model.swift */; };
+		1AD84D05231EA35600BAEAC4 /* STCUnsignedIntegerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CCB231EA35600BAEAC4 /* STCUnsignedIntegerModel.swift */; };
+		1AD84D06231EA35600BAEAC4 /* STCUnsignedInteger16Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CCC231EA35600BAEAC4 /* STCUnsignedInteger16Model.swift */; };
+		1AD84D07231EA35600BAEAC4 /* STCUnsignedInteger8Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CCD231EA35600BAEAC4 /* STCUnsignedInteger8Model.swift */; };
+		1AD84D08231EA35600BAEAC4 /* STCSignedInteger64Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CCE231EA35600BAEAC4 /* STCSignedInteger64Model.swift */; };
+		1AD84D09231EA35600BAEAC4 /* STCSignedIntegerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CCF231EA35600BAEAC4 /* STCSignedIntegerModel.swift */; };
+		1AD84D0A231EA35600BAEAC4 /* STCUnsignedInteger64Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CD0231EA35600BAEAC4 /* STCUnsignedInteger64Model.swift */; };
+		1AD84D0B231EA35600BAEAC4 /* STCDoubleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CD1231EA35600BAEAC4 /* STCDoubleModel.swift */; };
+		1AD84D0C231EA35600BAEAC4 /* STCFloat64Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CD3231EA35600BAEAC4 /* STCFloat64Model.swift */; };
+		1AD84D0D231EA35600BAEAC4 /* STCFloat32Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CD4231EA35600BAEAC4 /* STCFloat32Model.swift */; };
+		1AD84D0E231EA35600BAEAC4 /* STCFloatModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CD5231EA35600BAEAC4 /* STCFloatModel.swift */; };
+		1AD84D0F231EA35600BAEAC4 /* STCStringModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CD6231EA35600BAEAC4 /* STCStringModel.swift */; };
+		1AD84D10231EA35600BAEAC4 /* STCMixedModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CD7231EA35600BAEAC4 /* STCMixedModel.swift */; };
+		1AD84D11231EA35600BAEAC4 /* STCBoolModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CD8231EA35600BAEAC4 /* STCBoolModel.swift */; };
+		1AD84D12231EA35600BAEAC4 /* STCDictionaryTests.String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CDB231EA35600BAEAC4 /* STCDictionaryTests.String.swift */; };
+		1AD84D13231EA35600BAEAC4 /* STCDictionaryTests.Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CDC231EA35600BAEAC4 /* STCDictionaryTests.Double.swift */; };
+		1AD84D14231EA35600BAEAC4 /* STCDictionaryTests.Bool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CDD231EA35600BAEAC4 /* STCDictionaryTests.Bool.swift */; };
+		1AD84D15231EA35600BAEAC4 /* STCDictionaryTests.Float.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CDE231EA35600BAEAC4 /* STCDictionaryTests.Float.swift */; };
+		1AD84D16231EA35600BAEAC4 /* STCDictionaryTests.Integer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CDF231EA35600BAEAC4 /* STCDictionaryTests.Integer.swift */; };
+		1AD84D17231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelFloat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CE1231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelFloat.swift */; };
+		1AD84D18231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelBool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CE2231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelBool.swift */; };
+		1AD84D19231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelDouble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CE3231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelDouble.swift */; };
+		1AD84D1A231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelInteger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CE4231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelInteger.swift */; };
+		1AD84D1B231EA35700BAEAC4 /* STCDictionaryTests.SerializableModelString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CE5231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelString.swift */; };
+		1AD84D1C231EA35700BAEAC4 /* STCDictionaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CE6231EA35600BAEAC4 /* STCDictionaryTests.swift */; };
+		1AD84D1D231EA35700BAEAC4 /* STCSerializableObjectTests.Integer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CE8231EA35600BAEAC4 /* STCSerializableObjectTests.Integer.swift */; };
+		1AD84D1E231EA35700BAEAC4 /* STCSerializableObjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CE9231EA35600BAEAC4 /* STCSerializableObjectTests.swift */; };
+		1AD84D1F231EA35700BAEAC4 /* STCSerializableObjectTests.Bool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CEA231EA35600BAEAC4 /* STCSerializableObjectTests.Bool.swift */; };
+		1AD84D20231EA35700BAEAC4 /* STCSerializableObjectTests.String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CEB231EA35600BAEAC4 /* STCSerializableObjectTests.String.swift */; };
+		1AD84D21231EA35700BAEAC4 /* STCSerializableObjectTests.Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CEC231EA35600BAEAC4 /* STCSerializableObjectTests.Double.swift */; };
+		1AD84D22231EA35700BAEAC4 /* STCSerializableObjectTests.Float.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AD84CED231EA35600BAEAC4 /* STCSerializableObjectTests.Float.swift */; };
 		1AFA5DED2048160E00B2BB15 /* OperatorsTests.MappableObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AFA5DDF2048025D00B2BB15 /* OperatorsTests.MappableObjects.swift */; };
 		1AFA5DF2204816EC00B2BB15 /* OperatorsTests.BasicTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AFA5DF1204816EC00B2BB15 /* OperatorsTests.BasicTypes.swift */; };
 		1AFA5DFA2048219600B2BB15 /* OperatorsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AFA5DF92048219600B2BB15 /* OperatorsTests.swift */; };
@@ -72,6 +125,59 @@
 		1ABBD6C1205006D20049264C /* TransformOperatorsTests.BasicTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformOperatorsTests.BasicTypes.swift; sourceTree = "<group>"; };
 		1AC0FC1920503C86007F72FA /* TransformOperatorsTests.ArrayOfMappableObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformOperatorsTests.ArrayOfMappableObjects.swift; sourceTree = "<group>"; };
 		1AD56542205011F20029C0B5 /* TransformOperatorsTests.ArrayOfBasicTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformOperatorsTests.ArrayOfBasicTypes.swift; sourceTree = "<group>"; };
+		1AD84CAF231EA35600BAEAC4 /* STCBasicTypeTests.String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCBasicTypeTests.String.swift; sourceTree = "<group>"; };
+		1AD84CB0231EA35600BAEAC4 /* STCBasicTypeTests.Integer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCBasicTypeTests.Integer.swift; sourceTree = "<group>"; };
+		1AD84CB1231EA35600BAEAC4 /* STCBasicTypeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCBasicTypeTests.swift; sourceTree = "<group>"; };
+		1AD84CB2231EA35600BAEAC4 /* STCBasicTypeTests.Double.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCBasicTypeTests.Double.swift; sourceTree = "<group>"; };
+		1AD84CB3231EA35600BAEAC4 /* STCBasicTypeTests.Float.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCBasicTypeTests.Float.swift; sourceTree = "<group>"; };
+		1AD84CB4231EA35600BAEAC4 /* STCBasicTypeTests.Bool.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCBasicTypeTests.Bool.swift; sourceTree = "<group>"; };
+		1AD84CB7231EA35600BAEAC4 /* STCArrayTests.Integer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCArrayTests.Integer.swift; sourceTree = "<group>"; };
+		1AD84CB8231EA35600BAEAC4 /* STCArrayTests.String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCArrayTests.String.swift; sourceTree = "<group>"; };
+		1AD84CB9231EA35600BAEAC4 /* STCArrayTests.Float.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCArrayTests.Float.swift; sourceTree = "<group>"; };
+		1AD84CBA231EA35600BAEAC4 /* STCArrayTests.Double.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCArrayTests.Double.swift; sourceTree = "<group>"; };
+		1AD84CBB231EA35600BAEAC4 /* STCArrayTests.Bool.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCArrayTests.Bool.swift; sourceTree = "<group>"; };
+		1AD84CBC231EA35600BAEAC4 /* STCArrayTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCArrayTests.swift; sourceTree = "<group>"; };
+		1AD84CBE231EA35600BAEAC4 /* STCArrayTests.SerializableModelFloat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCArrayTests.SerializableModelFloat.swift; sourceTree = "<group>"; };
+		1AD84CBF231EA35600BAEAC4 /* STCArrayTests.SerializableModelDouble.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCArrayTests.SerializableModelDouble.swift; sourceTree = "<group>"; };
+		1AD84CC0231EA35600BAEAC4 /* STCArrayTests.SerializableModelBool.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCArrayTests.SerializableModelBool.swift; sourceTree = "<group>"; };
+		1AD84CC1231EA35600BAEAC4 /* STCArrayTests.SerializableModelInteger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCArrayTests.SerializableModelInteger.swift; sourceTree = "<group>"; };
+		1AD84CC2231EA35600BAEAC4 /* STCArrayTests.SerializableModelString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCArrayTests.SerializableModelString.swift; sourceTree = "<group>"; };
+		1AD84CC3231EA35600BAEAC4 /* StreamTypedCoderTests.MixedModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamTypedCoderTests.MixedModelTests.swift; sourceTree = "<group>"; };
+		1AD84CC4231EA35600BAEAC4 /* StreamTypedCoderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamTypedCoderTests.swift; sourceTree = "<group>"; };
+		1AD84CC7231EA35600BAEAC4 /* STCSignedInteger16Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCSignedInteger16Model.swift; sourceTree = "<group>"; };
+		1AD84CC8231EA35600BAEAC4 /* STCUnsignedInteger32Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCUnsignedInteger32Model.swift; sourceTree = "<group>"; };
+		1AD84CC9231EA35600BAEAC4 /* STCSignedInteger8Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCSignedInteger8Model.swift; sourceTree = "<group>"; };
+		1AD84CCA231EA35600BAEAC4 /* STCSignedInteger32Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCSignedInteger32Model.swift; sourceTree = "<group>"; };
+		1AD84CCB231EA35600BAEAC4 /* STCUnsignedIntegerModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCUnsignedIntegerModel.swift; sourceTree = "<group>"; };
+		1AD84CCC231EA35600BAEAC4 /* STCUnsignedInteger16Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCUnsignedInteger16Model.swift; sourceTree = "<group>"; };
+		1AD84CCD231EA35600BAEAC4 /* STCUnsignedInteger8Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCUnsignedInteger8Model.swift; sourceTree = "<group>"; };
+		1AD84CCE231EA35600BAEAC4 /* STCSignedInteger64Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCSignedInteger64Model.swift; sourceTree = "<group>"; };
+		1AD84CCF231EA35600BAEAC4 /* STCSignedIntegerModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCSignedIntegerModel.swift; sourceTree = "<group>"; };
+		1AD84CD0231EA35600BAEAC4 /* STCUnsignedInteger64Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCUnsignedInteger64Model.swift; sourceTree = "<group>"; };
+		1AD84CD1231EA35600BAEAC4 /* STCDoubleModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCDoubleModel.swift; sourceTree = "<group>"; };
+		1AD84CD3231EA35600BAEAC4 /* STCFloat64Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCFloat64Model.swift; sourceTree = "<group>"; };
+		1AD84CD4231EA35600BAEAC4 /* STCFloat32Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCFloat32Model.swift; sourceTree = "<group>"; };
+		1AD84CD5231EA35600BAEAC4 /* STCFloatModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCFloatModel.swift; sourceTree = "<group>"; };
+		1AD84CD6231EA35600BAEAC4 /* STCStringModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCStringModel.swift; sourceTree = "<group>"; };
+		1AD84CD7231EA35600BAEAC4 /* STCMixedModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCMixedModel.swift; sourceTree = "<group>"; };
+		1AD84CD8231EA35600BAEAC4 /* STCBoolModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCBoolModel.swift; sourceTree = "<group>"; };
+		1AD84CDB231EA35600BAEAC4 /* STCDictionaryTests.String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCDictionaryTests.String.swift; sourceTree = "<group>"; };
+		1AD84CDC231EA35600BAEAC4 /* STCDictionaryTests.Double.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCDictionaryTests.Double.swift; sourceTree = "<group>"; };
+		1AD84CDD231EA35600BAEAC4 /* STCDictionaryTests.Bool.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCDictionaryTests.Bool.swift; sourceTree = "<group>"; };
+		1AD84CDE231EA35600BAEAC4 /* STCDictionaryTests.Float.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCDictionaryTests.Float.swift; sourceTree = "<group>"; };
+		1AD84CDF231EA35600BAEAC4 /* STCDictionaryTests.Integer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCDictionaryTests.Integer.swift; sourceTree = "<group>"; };
+		1AD84CE1231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelFloat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCDictionaryTests.SerializableModelFloat.swift; sourceTree = "<group>"; };
+		1AD84CE2231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelBool.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCDictionaryTests.SerializableModelBool.swift; sourceTree = "<group>"; };
+		1AD84CE3231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelDouble.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCDictionaryTests.SerializableModelDouble.swift; sourceTree = "<group>"; };
+		1AD84CE4231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelInteger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCDictionaryTests.SerializableModelInteger.swift; sourceTree = "<group>"; };
+		1AD84CE5231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCDictionaryTests.SerializableModelString.swift; sourceTree = "<group>"; };
+		1AD84CE6231EA35600BAEAC4 /* STCDictionaryTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCDictionaryTests.swift; sourceTree = "<group>"; };
+		1AD84CE8231EA35600BAEAC4 /* STCSerializableObjectTests.Integer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCSerializableObjectTests.Integer.swift; sourceTree = "<group>"; };
+		1AD84CE9231EA35600BAEAC4 /* STCSerializableObjectTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCSerializableObjectTests.swift; sourceTree = "<group>"; };
+		1AD84CEA231EA35600BAEAC4 /* STCSerializableObjectTests.Bool.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCSerializableObjectTests.Bool.swift; sourceTree = "<group>"; };
+		1AD84CEB231EA35600BAEAC4 /* STCSerializableObjectTests.String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCSerializableObjectTests.String.swift; sourceTree = "<group>"; };
+		1AD84CEC231EA35600BAEAC4 /* STCSerializableObjectTests.Double.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCSerializableObjectTests.Double.swift; sourceTree = "<group>"; };
+		1AD84CED231EA35600BAEAC4 /* STCSerializableObjectTests.Float.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = STCSerializableObjectTests.Float.swift; sourceTree = "<group>"; };
 		1AFA5DDF2048025D00B2BB15 /* OperatorsTests.MappableObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperatorsTests.MappableObjects.swift; sourceTree = "<group>"; };
 		1AFA5DF1204816EC00B2BB15 /* OperatorsTests.BasicTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperatorsTests.BasicTypes.swift; sourceTree = "<group>"; };
 		1AFA5DF92048219600B2BB15 /* OperatorsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperatorsTests.swift; sourceTree = "<group>"; };
@@ -160,6 +266,7 @@
 			isa = PBXGroup;
 			children = (
 				19AACEDA20596F6500BAE27B /* ObjectMapper */,
+				1AD84CAD231EA35600BAEAC4 /* StreamTypedCoder */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -221,6 +328,154 @@
 				1A7FDBE0205048BA00F62996 /* TransformOperatorsTests.SetOfMappableObjects.swift */,
 			);
 			path = TransformOperators;
+			sourceTree = "<group>";
+		};
+		1AD84CAD231EA35600BAEAC4 /* StreamTypedCoder */ = {
+			isa = PBXGroup;
+			children = (
+				1AD84CAE231EA35600BAEAC4 /* BasicType */,
+				1AD84CB5231EA35600BAEAC4 /* Array */,
+				1AD84CC3231EA35600BAEAC4 /* StreamTypedCoderTests.MixedModelTests.swift */,
+				1AD84CC4231EA35600BAEAC4 /* StreamTypedCoderTests.swift */,
+				1AD84CC5231EA35600BAEAC4 /* Models */,
+				1AD84CD9231EA35600BAEAC4 /* Dictionary */,
+				1AD84CE7231EA35600BAEAC4 /* SerializableObject */,
+			);
+			path = StreamTypedCoder;
+			sourceTree = "<group>";
+		};
+		1AD84CAE231EA35600BAEAC4 /* BasicType */ = {
+			isa = PBXGroup;
+			children = (
+				1AD84CAF231EA35600BAEAC4 /* STCBasicTypeTests.String.swift */,
+				1AD84CB0231EA35600BAEAC4 /* STCBasicTypeTests.Integer.swift */,
+				1AD84CB1231EA35600BAEAC4 /* STCBasicTypeTests.swift */,
+				1AD84CB2231EA35600BAEAC4 /* STCBasicTypeTests.Double.swift */,
+				1AD84CB3231EA35600BAEAC4 /* STCBasicTypeTests.Float.swift */,
+				1AD84CB4231EA35600BAEAC4 /* STCBasicTypeTests.Bool.swift */,
+			);
+			path = BasicType;
+			sourceTree = "<group>";
+		};
+		1AD84CB5231EA35600BAEAC4 /* Array */ = {
+			isa = PBXGroup;
+			children = (
+				1AD84CB6231EA35600BAEAC4 /* BasicTypes */,
+				1AD84CBC231EA35600BAEAC4 /* STCArrayTests.swift */,
+				1AD84CBD231EA35600BAEAC4 /* SerializableObjects */,
+			);
+			path = Array;
+			sourceTree = "<group>";
+		};
+		1AD84CB6231EA35600BAEAC4 /* BasicTypes */ = {
+			isa = PBXGroup;
+			children = (
+				1AD84CB7231EA35600BAEAC4 /* STCArrayTests.Integer.swift */,
+				1AD84CB8231EA35600BAEAC4 /* STCArrayTests.String.swift */,
+				1AD84CB9231EA35600BAEAC4 /* STCArrayTests.Float.swift */,
+				1AD84CBA231EA35600BAEAC4 /* STCArrayTests.Double.swift */,
+				1AD84CBB231EA35600BAEAC4 /* STCArrayTests.Bool.swift */,
+			);
+			path = BasicTypes;
+			sourceTree = "<group>";
+		};
+		1AD84CBD231EA35600BAEAC4 /* SerializableObjects */ = {
+			isa = PBXGroup;
+			children = (
+				1AD84CBE231EA35600BAEAC4 /* STCArrayTests.SerializableModelFloat.swift */,
+				1AD84CBF231EA35600BAEAC4 /* STCArrayTests.SerializableModelDouble.swift */,
+				1AD84CC0231EA35600BAEAC4 /* STCArrayTests.SerializableModelBool.swift */,
+				1AD84CC1231EA35600BAEAC4 /* STCArrayTests.SerializableModelInteger.swift */,
+				1AD84CC2231EA35600BAEAC4 /* STCArrayTests.SerializableModelString.swift */,
+			);
+			path = SerializableObjects;
+			sourceTree = "<group>";
+		};
+		1AD84CC5231EA35600BAEAC4 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1AD84CC6231EA35600BAEAC4 /* STCIntegerModels */,
+				1AD84CD1231EA35600BAEAC4 /* STCDoubleModel.swift */,
+				1AD84CD2231EA35600BAEAC4 /* STCFloatModels */,
+				1AD84CD6231EA35600BAEAC4 /* STCStringModel.swift */,
+				1AD84CD7231EA35600BAEAC4 /* STCMixedModel.swift */,
+				1AD84CD8231EA35600BAEAC4 /* STCBoolModel.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		1AD84CC6231EA35600BAEAC4 /* STCIntegerModels */ = {
+			isa = PBXGroup;
+			children = (
+				1AD84CC7231EA35600BAEAC4 /* STCSignedInteger16Model.swift */,
+				1AD84CC8231EA35600BAEAC4 /* STCUnsignedInteger32Model.swift */,
+				1AD84CC9231EA35600BAEAC4 /* STCSignedInteger8Model.swift */,
+				1AD84CCA231EA35600BAEAC4 /* STCSignedInteger32Model.swift */,
+				1AD84CCB231EA35600BAEAC4 /* STCUnsignedIntegerModel.swift */,
+				1AD84CCC231EA35600BAEAC4 /* STCUnsignedInteger16Model.swift */,
+				1AD84CCD231EA35600BAEAC4 /* STCUnsignedInteger8Model.swift */,
+				1AD84CCE231EA35600BAEAC4 /* STCSignedInteger64Model.swift */,
+				1AD84CCF231EA35600BAEAC4 /* STCSignedIntegerModel.swift */,
+				1AD84CD0231EA35600BAEAC4 /* STCUnsignedInteger64Model.swift */,
+			);
+			path = STCIntegerModels;
+			sourceTree = "<group>";
+		};
+		1AD84CD2231EA35600BAEAC4 /* STCFloatModels */ = {
+			isa = PBXGroup;
+			children = (
+				1AD84CD3231EA35600BAEAC4 /* STCFloat64Model.swift */,
+				1AD84CD4231EA35600BAEAC4 /* STCFloat32Model.swift */,
+				1AD84CD5231EA35600BAEAC4 /* STCFloatModel.swift */,
+			);
+			path = STCFloatModels;
+			sourceTree = "<group>";
+		};
+		1AD84CD9231EA35600BAEAC4 /* Dictionary */ = {
+			isa = PBXGroup;
+			children = (
+				1AD84CDA231EA35600BAEAC4 /* BasicTypes */,
+				1AD84CE0231EA35600BAEAC4 /* SerializableObjects */,
+				1AD84CE6231EA35600BAEAC4 /* STCDictionaryTests.swift */,
+			);
+			path = Dictionary;
+			sourceTree = "<group>";
+		};
+		1AD84CDA231EA35600BAEAC4 /* BasicTypes */ = {
+			isa = PBXGroup;
+			children = (
+				1AD84CDB231EA35600BAEAC4 /* STCDictionaryTests.String.swift */,
+				1AD84CDC231EA35600BAEAC4 /* STCDictionaryTests.Double.swift */,
+				1AD84CDD231EA35600BAEAC4 /* STCDictionaryTests.Bool.swift */,
+				1AD84CDE231EA35600BAEAC4 /* STCDictionaryTests.Float.swift */,
+				1AD84CDF231EA35600BAEAC4 /* STCDictionaryTests.Integer.swift */,
+			);
+			path = BasicTypes;
+			sourceTree = "<group>";
+		};
+		1AD84CE0231EA35600BAEAC4 /* SerializableObjects */ = {
+			isa = PBXGroup;
+			children = (
+				1AD84CE1231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelFloat.swift */,
+				1AD84CE2231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelBool.swift */,
+				1AD84CE3231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelDouble.swift */,
+				1AD84CE4231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelInteger.swift */,
+				1AD84CE5231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelString.swift */,
+			);
+			path = SerializableObjects;
+			sourceTree = "<group>";
+		};
+		1AD84CE7231EA35600BAEAC4 /* SerializableObject */ = {
+			isa = PBXGroup;
+			children = (
+				1AD84CE8231EA35600BAEAC4 /* STCSerializableObjectTests.Integer.swift */,
+				1AD84CE9231EA35600BAEAC4 /* STCSerializableObjectTests.swift */,
+				1AD84CEA231EA35600BAEAC4 /* STCSerializableObjectTests.Bool.swift */,
+				1AD84CEB231EA35600BAEAC4 /* STCSerializableObjectTests.String.swift */,
+				1AD84CEC231EA35600BAEAC4 /* STCSerializableObjectTests.Double.swift */,
+				1AD84CED231EA35600BAEAC4 /* STCSerializableObjectTests.Float.swift */,
+			);
+			path = SerializableObject;
 			sourceTree = "<group>";
 		};
 		1AFA5DE12048124900B2BB15 /* Operators */ = {
@@ -316,37 +571,90 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A2B5D6B204D87A000E165AD /* IntegerOperatorsTests.swift in Sources */,
+				1AD84CFA231EA35600BAEAC4 /* STCArrayTests.SerializableModelFloat.swift in Sources */,
 				1AB4DDAF204FE66A00DD1134 /* StringToIntegerTransform.swift in Sources */,
+				1AD84CFB231EA35600BAEAC4 /* STCArrayTests.SerializableModelDouble.swift in Sources */,
+				1AD84CF6231EA35600BAEAC4 /* STCArrayTests.Float.swift in Sources */,
+				1AD84D1E231EA35700BAEAC4 /* STCSerializableObjectTests.swift in Sources */,
+				1AD84CFF231EA35600BAEAC4 /* StreamTypedCoderTests.MixedModelTests.swift in Sources */,
 				1AFA5DED2048160E00B2BB15 /* OperatorsTests.MappableObjects.swift in Sources */,
+				1AD84CF1231EA35600BAEAC4 /* STCBasicTypeTests.Double.swift in Sources */,
+				1AD84D16231EA35600BAEAC4 /* STCDictionaryTests.Integer.swift in Sources */,
+				1AD84CFD231EA35600BAEAC4 /* STCArrayTests.SerializableModelInteger.swift in Sources */,
 				1AD56543205011F20029C0B5 /* TransformOperatorsTests.ArrayOfBasicTypes.swift in Sources */,
+				1AD84D1B231EA35700BAEAC4 /* STCDictionaryTests.SerializableModelString.swift in Sources */,
 				1AC0FC1320502930007F72FA /* TransformOperatorsTests.MappableObjects.swift in Sources */,
+				1AD84D14231EA35600BAEAC4 /* STCDictionaryTests.Bool.swift in Sources */,
+				1AD84CF8231EA35600BAEAC4 /* STCArrayTests.Bool.swift in Sources */,
 				1AFA5DF2204816EC00B2BB15 /* OperatorsTests.BasicTypes.swift in Sources */,
+				1AD84D09231EA35600BAEAC4 /* STCSignedIntegerModel.swift in Sources */,
+				1AD84D22231EA35700BAEAC4 /* STCSerializableObjectTests.Float.swift in Sources */,
 				1A9D106B2056672100049F39 /* EnumOperatorsTests.DictionaryOfRawRepresentableTypes.swift in Sources */,
 				1A2B5D6D204D88AE00E165AD /* IntegerOperatorsTests.SignedIntegers.swift in Sources */,
+				1AD84CF4231EA35600BAEAC4 /* STCArrayTests.Integer.swift in Sources */,
 				198758032207673B00A61E89 /* OperatorsTests.AnyObjects.swift in Sources */,
 				19136E76205EB2BB00280456 /* Vector3DTransform.swift in Sources */,
+				1AD84CF2231EA35600BAEAC4 /* STCBasicTypeTests.Float.swift in Sources */,
+				1AD84D20231EA35700BAEAC4 /* STCSerializableObjectTests.String.swift in Sources */,
 				19D02ECF2060064B006FB892 /* TransformOperatorsTests.SetOfBasicTypes.swift in Sources */,
+				1AD84D19231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelDouble.swift in Sources */,
 				1A9D106F2056689500049F39 /* EnumOperatorsTests.swift in Sources */,
+				1AD84D00231EA35600BAEAC4 /* StreamTypedCoderTests.swift in Sources */,
+				1AD84D03231EA35600BAEAC4 /* STCSignedInteger8Model.swift in Sources */,
 				1ABBD6C2205006D20049264C /* TransformOperatorsTests.BasicTypes.swift in Sources */,
+				1AD84D0F231EA35600BAEAC4 /* STCStringModel.swift in Sources */,
 				1AFA5E092049653800B2BB15 /* OperatorsTests.ArrayOfMappableObjects.swift in Sources */,
+				1AD84D1A231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelInteger.swift in Sources */,
+				1AD84CF0231EA35600BAEAC4 /* STCBasicTypeTests.swift in Sources */,
 				1A1E0CFF2050225E0062D5AC /* TransformOperatorsTests.DictionaryOfBasicTypes.swift in Sources */,
 				1AFA5DFA2048219600B2BB15 /* OperatorsTests.swift in Sources */,
 				1A176411205044180037F6FB /* TransformOperatorsTests.DictionaryOfMappableObjects.swift in Sources */,
+				1AD84D1F231EA35700BAEAC4 /* STCSerializableObjectTests.Bool.swift in Sources */,
+				1AD84D06231EA35600BAEAC4 /* STCUnsignedInteger16Model.swift in Sources */,
+				1AD84D12231EA35600BAEAC4 /* STCDictionaryTests.String.swift in Sources */,
 				1AFA5E1520499ED000B2BB15 /* OperatorsTests.SetOfMappableObjects.swift in Sources */,
+				1AD84D0A231EA35600BAEAC4 /* STCUnsignedInteger64Model.swift in Sources */,
+				1AD84D0E231EA35600BAEAC4 /* STCFloatModel.swift in Sources */,
 				1A9D107520566C9B00049F39 /* StringRawType.swift in Sources */,
+				1AD84D1D231EA35700BAEAC4 /* STCSerializableObjectTests.Integer.swift in Sources */,
+				1AD84D0C231EA35600BAEAC4 /* STCFloat64Model.swift in Sources */,
+				1AD84D01231EA35600BAEAC4 /* STCSignedInteger16Model.swift in Sources */,
+				1AD84D15231EA35600BAEAC4 /* STCDictionaryTests.Float.swift in Sources */,
+				1AD84CF7231EA35600BAEAC4 /* STCArrayTests.Double.swift in Sources */,
+				1AD84D1C231EA35700BAEAC4 /* STCDictionaryTests.swift in Sources */,
+				1AD84D13231EA35600BAEAC4 /* STCDictionaryTests.Double.swift in Sources */,
 				198758052207777300A61E89 /* OperatorsTests.Floats.swift in Sources */,
+				1AD84D0D231EA35600BAEAC4 /* STCFloat32Model.swift in Sources */,
 				19136E74205EB03900280456 /* Vector3DModel.swift in Sources */,
 				1A7FDBE1205048BA00F62996 /* TransformOperatorsTests.SetOfMappableObjects.swift in Sources */,
 				1AB4DDA4204FD5EB00DD1134 /* TransformOperatorsTests.swift in Sources */,
+				1AD84CF3231EA35600BAEAC4 /* STCBasicTypeTests.Bool.swift in Sources */,
 				1A9D106D2056683000049F39 /* EnumOperatorsTests.RawRepresentableTypes.swift in Sources */,
 				1AC0FC1A20503C86007F72FA /* TransformOperatorsTests.ArrayOfMappableObjects.swift in Sources */,
+				1AD84CF5231EA35600BAEAC4 /* STCArrayTests.String.swift in Sources */,
+				1AD84CF9231EA35600BAEAC4 /* STCArrayTests.swift in Sources */,
+				1AD84D0B231EA35600BAEAC4 /* STCDoubleModel.swift in Sources */,
 				1A3807872056765300605CA6 /* EnumOperatorsTests.ArrayOfRawRepresentableTypes.swift in Sources */,
+				1AD84CFE231EA35600BAEAC4 /* STCArrayTests.SerializableModelString.swift in Sources */,
+				1AD84D11231EA35600BAEAC4 /* STCBoolModel.swift in Sources */,
+				1AD84D07231EA35600BAEAC4 /* STCUnsignedInteger8Model.swift in Sources */,
+				1AD84D04231EA35600BAEAC4 /* STCSignedInteger32Model.swift in Sources */,
+				1AD84CEE231EA35600BAEAC4 /* STCBasicTypeTests.String.swift in Sources */,
+				1AD84D17231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelFloat.swift in Sources */,
+				1AD84D05231EA35600BAEAC4 /* STCUnsignedIntegerModel.swift in Sources */,
+				1AD84D02231EA35600BAEAC4 /* STCUnsignedInteger32Model.swift in Sources */,
+				1AD84D18231EA35600BAEAC4 /* STCDictionaryTests.SerializableModelBool.swift in Sources */,
 				1A2B5D6F204D8DB900E165AD /* IntegerOperatorsTests.UnsignedIntegers.swift in Sources */,
 				1AFA5E20204D390500B2BB15 /* OperatorsTests.DictionaryOfMappableObjects.swift in Sources */,
+				1AD84D08231EA35600BAEAC4 /* STCSignedInteger64Model.swift in Sources */,
 				5AFC97997C417CB8182145EE /* JsonKeys.swift in Sources */,
 				19D02ECD205FEE78006FB892 /* EnumOperatorsTests.SetOfRawRepresentableTypes.swift in Sources */,
 				19136E72205DD82100280456 /* ObjectMapperTests.swift in Sources */,
 				1A2B5D88204ED91800E165AD /* Constants.swift in Sources */,
+				1AD84CEF231EA35600BAEAC4 /* STCBasicTypeTests.Integer.swift in Sources */,
+				1AD84D10231EA35600BAEAC4 /* STCMixedModel.swift in Sources */,
+				1AD84D21231EA35700BAEAC4 /* STCSerializableObjectTests.Double.swift in Sources */,
+				1AD84CFC231EA35600BAEAC4 /* STCArrayTests.SerializableModelBool.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
