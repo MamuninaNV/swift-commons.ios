@@ -114,17 +114,6 @@ UInt16 OSCoderVersion = 1909; // 2019-09
     // Init instance
     if (self = [super init]) {
 
-        // Init instance variables
-        self->classForCoder =
-                @selector(classForCoder);
-        self->replObjectForCoder =
-                @selector(replacementObjectForCoder:);
-
-        self->serData =
-                (void *) [self.data methodForSelector:@selector(serializeDataAt:ofObjCType:context:)];
-        self->addData =
-                (void *) [self.data methodForSelector:@selector(appendBytes:length:)];
-
         // Caches
         self.outObjects      = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 119);
         self.outConditionals = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 119);
@@ -145,6 +134,17 @@ UInt16 OSCoderVersion = 1909; // 2019-09
         // Destination
         self.data = RETAIN(mdata);
         self.archiveAddress = 1;
+
+        // Init instance variables
+        self->classForCoder =
+                @selector(classForCoder);
+        self->replObjectForCoder =
+                @selector(replacementObjectForCoder:);
+
+        self->serData =
+                (void *) [self.data methodForSelector:@selector(serializeDataAt:ofObjCType:context:)];
+        self->addData =
+                (void *) [self.data methodForSelector:@selector(appendBytes:length:)];
     }
 
     // Done
@@ -525,7 +525,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
             }
             
             if (object_is_instance(_object)) {
-                archiveClass = [_object performSelector:self.classForCoder];
+                archiveClass = [_object performSelector:self->classForCoder];
             }
             
             [self encodeObject:archiveClass];
@@ -597,7 +597,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
               _object = [_object performSelector:self.replObjectForCoder
               withObject:self];
             */
-            archiveClass = [_object performSelector:self.classForCoder];
+            archiveClass = [_object performSelector:self->classForCoder];
             
             NSAssert(archiveClass, @"no archive class found ..");
 
