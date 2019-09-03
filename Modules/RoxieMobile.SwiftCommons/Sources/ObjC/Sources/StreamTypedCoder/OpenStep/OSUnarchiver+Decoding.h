@@ -9,7 +9,7 @@
 // ----------------------------------------------------------------------------
 
 #import "OSUnarchiver.h"
-#import "OSEncoding.h"
+#import "OSBasicTypes.h"
 
 // ----------------------------------------------------------------------------
 
@@ -19,50 +19,50 @@
 
 - (void)readBytes:(void *)bytes length:(NSUInteger)length;
 
-- (OSTagType )readTag;
 - (NSString *)readStringWithTag:(BOOL)withTag;
+- (OSTagType)readTag;
 
-- (long long)readLongLong;
 - (long long)readLongLongWithTag:(BOOL)withTag;
+- (long long)readLongLong;
 
-- (unsigned long long)readUnsignedLongLong;
 - (unsigned long long)readUnsignedLongLongWithTag:(BOOL)withTag;
+- (unsigned long long)readUnsignedLongLong;
 
-- (long)readLong;
 - (long)readLongWithTag:(BOOL)withTag;
+- (long)readLong;
 
-- (unsigned long)readUnsignedLong;
 - (unsigned long)readUnsignedLongWithTag:(BOOL)withTag;
+- (unsigned long)readUnsignedLong;
 
-- (int)readInt;
 - (int)readIntWithTag:(BOOL)withTag;
+- (int)readInt;
 
-- (unsigned int)readUnsignedInt;
 - (unsigned int)readUnsignedIntWithTag:(BOOL)withTag;
+- (unsigned int)readUnsignedInt;
 
-- (short)readShort;
 - (short)readShortWithTag:(BOOL)withTag;
+- (short)readShort;
 
-- (unsigned short)readUnsignedShort;
 - (unsigned short)readUnsignedShortWithTag:(BOOL)withTag;
+- (unsigned short)readUnsignedShort;
 
-- (char)readChar;
 - (char)readCharWithTag:(BOOL)withTag;
+- (char)readChar;
 
-- (unsigned char)readUnsignedChar;
 - (unsigned char)readUnsignedCharWithTag:(BOOL)withTag;
+- (unsigned char)readUnsignedChar;
 
-- (NSInteger )readInteger;
 - (NSUInteger)readUnsignedInteger;
+- (NSInteger)readInteger;
 
-- (float)readFloat;
 - (float)readFloatWithTag:(BOOL)withTag;
+- (float)readFloat;
 
-- (double)readDouble;
 - (double)readDoubleWithTag:(BOOL)withTag;
+- (double)readDouble;
 
-- (BOOL)readBool;
 - (BOOL)readBoolWithTag:(BOOL)withTag;
+- (BOOL)readBool;
 
 // --
 

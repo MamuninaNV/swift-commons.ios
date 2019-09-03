@@ -25,8 +25,8 @@
     BOOL        didReadHeader;
 
     // source
-    NSData       *data;
-    unsigned int cursor;
+    NSData      *data;
+    NSUInteger  cursor;
     void (*getData)(id, SEL, void *, unsigned, unsigned *);
     void (*deserData)(id, SEL, void *, const char *, unsigned *, id);
 }
@@ -63,5 +63,9 @@
 // not supported yet: replaceObject:withObject:
 
 @end
+
+// ----------------------------------------------------------------------------
+
+FOUNDATION_EXPORT NSString *const OSInconsistentArchiveException;
 
 // ----------------------------------------------------------------------------

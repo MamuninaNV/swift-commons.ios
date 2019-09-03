@@ -9,7 +9,7 @@
 // ----------------------------------------------------------------------------
 
 #import "OSArchiver.h"
-#import "OSEncoding.h"
+#import "OSBasicTypes.h"
 
 // ----------------------------------------------------------------------------
 
@@ -19,50 +19,50 @@
 
 - (void)writeBytes:(const void *)bytes length:(NSUInteger)length;
 
-- (void)writeTag:(OSTagType)tag;
 - (void)writeString:(NSString *)value withTag:(BOOL)withTag;
+- (void)writeTag:(OSTagType)tag;
 
-- (void)writeLongLong:(long long)value;
 - (void)writeLongLong:(long long)value withTag:(BOOL)withTag;
+- (void)writeLongLong:(long long)value;
 
-- (void)writeUnsignedLongLong:(unsigned long long)value;
 - (void)writeUnsignedLongLong:(unsigned long long)value withTag:(BOOL)withTag;
+- (void)writeUnsignedLongLong:(unsigned long long)value;
 
-- (void)writeLong:(long)value;
 - (void)writeLong:(long)value withTag:(BOOL)withTag;
+- (void)writeLong:(long)value;
 
-- (void)writeUnsignedLong:(unsigned long)value;
 - (void)writeUnsignedLong:(unsigned long)value withTag:(BOOL)withTag;
+- (void)writeUnsignedLong:(unsigned long)value;
 
-- (void)writeInt:(int)value;
 - (void)writeInt:(int)value withTag:(BOOL)withTag;
+- (void)writeInt:(int)value;
 
-- (void)writeUnsignedInt:(unsigned int)value;
 - (void)writeUnsignedInt:(unsigned int)value withTag:(BOOL)withTag;
+- (void)writeUnsignedInt:(unsigned int)value;
 
-- (void)writeShort:(short)value;
 - (void)writeShort:(short)value withTag:(BOOL)withTag;
+- (void)writeShort:(short)value;
 
-- (void)writeUnsignedShort:(unsigned short)value;
 - (void)writeUnsignedShort:(unsigned short)value withTag:(BOOL)withTag;
+- (void)writeUnsignedShort:(unsigned short)value;
 
-- (void)writeChar:(char)value;
 - (void)writeChar:(char)value withTag:(BOOL)withTag;
+- (void)writeChar:(char)value;
 
-- (void)writeUnsignedChar:(unsigned char)value;
 - (void)writeUnsignedChar:(unsigned char)value withTag:(BOOL)withTag;
+- (void)writeUnsignedChar:(unsigned char)value;
 
-- (void)writeInteger:(NSInteger)value;
 - (void)writeUnsignedInteger:(NSUInteger)value;
+- (void)writeInteger:(NSInteger)value;
 
-- (void)writeFloat:(float)value;
 - (void)writeFloat:(float)value withTag:(BOOL)withTag;
+- (void)writeFloat:(float)value;
 
-- (void)writeDouble:(double)value;
 - (void)writeDouble:(double)value withTag:(BOOL)withTag;
+- (void)writeDouble:(double)value;
 
-- (void)writeBool:(BOOL)value;
 - (void)writeBool:(BOOL)value withTag:(BOOL)withTag;
+- (void)writeBool:(BOOL)value;
 
 // --
 

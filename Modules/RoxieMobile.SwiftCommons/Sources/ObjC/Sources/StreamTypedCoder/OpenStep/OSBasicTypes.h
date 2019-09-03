@@ -1,6 +1,6 @@
 // ----------------------------------------------------------------------------
 //
-//  OSEncoding.h
+//  OSBasicTypes.h
 //  Based on part of GNU CC.
 //
 //  @author     Alexander Bragin <bragin-av@roxiemobile.com>
@@ -13,10 +13,6 @@
 
 // ----------------------------------------------------------------------------
 
-float objc_ntohf(float value);
-float objc_htonf(float value);
-
-double objc_ntohd(double value);
-double objc_htond(double value);
+typedef Byte OSTagType;
 
 // ----------------------------------------------------------------------------

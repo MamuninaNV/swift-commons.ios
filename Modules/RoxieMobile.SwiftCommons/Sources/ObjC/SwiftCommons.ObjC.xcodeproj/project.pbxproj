@@ -39,6 +39,7 @@
 		198479AB231D7BC100FE310A /* OSUnarchiver+Decoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 198479A9231D7BC000FE310A /* OSUnarchiver+Decoding.m */; };
 		198479AE231D7C7200FE310A /* OSEncoding.h in Headers */ = {isa = PBXBuildFile; fileRef = 198479AC231D7C7200FE310A /* OSEncoding.h */; };
 		198479AF231D7C7200FE310A /* OSEncoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 198479AD231D7C7200FE310A /* OSEncoding.m */; };
+		198479B1231E679A00FE310A /* OSBasicTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 198479B0231E679A00FE310A /* OSBasicTypes.h */; };
 		19C9FD861FCCAAD30069F3D1 /* TryCatchFinally.h in Headers */ = {isa = PBXBuildFile; fileRef = 19C7B7501F8648EB0030F1D8 /* TryCatchFinally.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		19C9FD871FCCAAD30069F3D1 /* TryCatchFinally.m in Sources */ = {isa = PBXBuildFile; fileRef = 19C7B7511F8648EB0030F1D8 /* TryCatchFinally.m */; };
 		19C9FD8C1FCCABBB0069F3D1 /* SwiftCommonsObjC.h in Headers */ = {isa = PBXBuildFile; fileRef = 19C9FD8A1FCCABBB0069F3D1 /* SwiftCommonsObjC.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -93,6 +94,7 @@
 		198479A9231D7BC000FE310A /* OSUnarchiver+Decoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "OSUnarchiver+Decoding.m"; sourceTree = "<group>"; };
 		198479AC231D7C7200FE310A /* OSEncoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSEncoding.h; sourceTree = "<group>"; };
 		198479AD231D7C7200FE310A /* OSEncoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSEncoding.m; sourceTree = "<group>"; };
+		198479B0231E679A00FE310A /* OSBasicTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSBasicTypes.h; sourceTree = "<group>"; };
 		19C7B7501F8648EB0030F1D8 /* TryCatchFinally.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TryCatchFinally.h; sourceTree = "<group>"; };
 		19C7B7511F8648EB0030F1D8 /* TryCatchFinally.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TryCatchFinally.m; sourceTree = "<group>"; };
 		19C9FD6B1FCCA85D0069F3D1 /* SwiftCommonsObjC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftCommonsObjC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -144,6 +146,7 @@
 				195F9315230B30D800D0DCF2 /* OSArchiver.m */,
 				198479A4231D7BB800FE310A /* OSArchiver+Encoding.h */,
 				198479A5231D7BB800FE310A /* OSArchiver+Encoding.m */,
+				198479B0231E679A00FE310A /* OSBasicTypes.h */,
 				198479AC231D7C7200FE310A /* OSEncoding.h */,
 				198479AD231D7C7200FE310A /* OSEncoding.m */,
 				195F92FF230B28C900D0DCF2 /* OSSerialization.h */,
@@ -295,6 +298,7 @@
 				19CCD0F31FCD0144008CEA38 /* StreamTypedCoder.h in Headers */,
 				19CCD10E1FCD0191008CEA38 /* SSZipArchiveDelegate.h in Headers */,
 				19CCD1031FCD0191008CEA38 /* crypt.h in Headers */,
+				198479B1231E679A00FE310A /* OSBasicTypes.h in Headers */,
 				195F9324230C9C5200D0DCF2 /* NSData+OpenStep.h in Headers */,
 				198479A6231D7BB800FE310A /* OSArchiver+Encoding.h in Headers */,
 				19C9FD861FCCAAD30069F3D1 /* TryCatchFinally.h in Headers */,
