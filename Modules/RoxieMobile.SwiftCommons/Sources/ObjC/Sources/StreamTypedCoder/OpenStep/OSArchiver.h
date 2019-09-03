@@ -41,7 +41,7 @@
 - (void)encodeConditionalObject:(id)object;
 - (void)encodeRootObject:(id)rootObject;
 
-// Substituting one Class for Another
+// Substituting one Class for another
 - (NSString *)classNameEncodedForTrueClassName:(NSString *)trueName;
 - (void)encodeClassName:(NSString *)trueName intoClassName:(NSString *)inArchiveName;
 

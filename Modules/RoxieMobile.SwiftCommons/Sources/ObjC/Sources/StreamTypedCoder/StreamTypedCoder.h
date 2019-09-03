@@ -14,12 +14,12 @@
 
 @interface StreamTypedEncoder : NSCoder
 
-// -- properties
+// - Properties
 
 // Getting the archived data
 @property(readonly, strong) NSMutableData *archiverData;
 
-// -- functions
+// - Methods
 
 // Initializing an Encoder
 - (instancetype)initForWritingWithMutableData:(NSMutableData *)data;
@@ -28,12 +28,15 @@
 + (NSData *)archivedDataWithRootObject:(id)rootObject;
 + (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path;
 
-- (void)encodeRootObject:(id)rootObject;
+// Encoding
 - (void)encodeConditionalObject:(id)object;
+- (void)encodeRootObject:(id)rootObject;
 
-// Substituting classes or objects
+// Substituting one Class for another
 - (NSString *)classNameEncodedForTrueClassName:(NSString *)trueName;
 - (void)encodeClassName:(NSString *)trueName intoClassName:(NSString *)inArchiveName;
+
+// NOTE: Not supported yet
 - (void)replaceObject:(id)object withObject:(id)newObject;
 
 // --
@@ -44,6 +47,7 @@
 #pragma mark -
 // ----------------------------------------------------------------------------
 
+// TODO: Refactoring is required
 @interface StreamTypedDecoder : NSCoder
 
 // -- properties

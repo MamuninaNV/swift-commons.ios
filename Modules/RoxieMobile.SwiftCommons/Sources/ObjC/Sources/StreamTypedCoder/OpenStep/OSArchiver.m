@@ -20,7 +20,6 @@
 
 // ----------------------------------------------------------------------------
 
-#define ENCODE_AUTORELEASEPOOL 0
 #define ARCHIVE_DEBUGGING      0
 
 #define FINAL static inline
@@ -102,87 +101,356 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 }
 
 // ----------------------------------------------------------------------------
-#pragma mark - Private Methods
-// ----------------------------------------------------------------------------
-
-// TODO:
-
-// ----------------------------------------------------------------------------
 #pragma mark - Methods
 // ----------------------------------------------------------------------------
 
-- (id)initForWritingWithMutableData:(NSMutableData *)mdata
-{
-    if ((self = [super init])) {
-        self->classForCoder      = @selector(classForCoder);
-        self->replObjectForCoder = @selector(replacementObjectForCoder:);
-        
+- (instancetype)initForWritingWithMutableData:(NSMutableData *)mdata {
+
+    // Validate incoming params
+    if (mdata == nil) {
+        return nil;
+    }
+
+    // Init instance
+    if (self = [super init]) {
+
+        // Init instance variables
+        self->classForCoder =
+                @selector(classForCoder);
+        self->replObjectForCoder =
+                @selector(replacementObjectForCoder:);
+
+        self->serData =
+                (void *) [self.data methodForSelector:@selector(serializeDataAt:ofObjCType:context:)];
+        self->addData =
+                (void *) [self.data methodForSelector:@selector(appendBytes:length:)];
+
+        // Caches
         self.outObjects      = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 119);
         self.outConditionals = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 119);
         self.outPointers     = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 0);
-        self.replacements    = NSCreateMapTable(NSIdentityObjectMapKeyCallbacks,
-                                                 NSObjectMapValueCallBacks,
-                                                 19);
-        self.outClassAlias   = NSCreateMapTable(NSObjectMapKeyCallBacks,
-                                                 NSObjectMapValueCallBacks,
-                                                 19);
-        self.outKeys         = NSCreateMapTable(NSObjectMapKeyCallBacks,
-                                                 NSIntMapValueCallBacks,
-                                                 119);
+        self.replacements    = NSCreateMapTable(NSIdentityObjectMapKeyCallbacks, NSObjectMapValueCallBacks, 19);
+        self.outClassAlias   = NSCreateMapTable(NSObjectMapKeyCallBacks, NSObjectMapValueCallBacks, 19);
+        self.outKeys         = NSCreateMapTable(NSObjectMapKeyCallBacks, NSIntMapValueCallBacks, 119);
 
+// FIXME: Uncomment!
+//        // Caches
+//        self.outObjects      = [NSHashTable hashTableWithOptions:NSHashTableStrongMemory];
+//        self.outConditionals = [NSHashTable hashTableWithOptions:NSHashTableStrongMemory];
+//        self.outPointers     = [NSHashTable hashTableWithOptions:NSHashTableStrongMemory];
+//        self.outClassAlias   = [NSMapTable strongToStrongObjectsMapTable];
+//        self.replacements    = [NSMapTable strongToStrongObjectsMapTable];
+//        self.outKeys         = [NSMapTable strongToStrongObjectsMapTable];
+
+        // Destination
+        self.data = RETAIN(mdata);
         self.archiveAddress = 1;
-
-        self.data    = RETAIN(mdata);
-        self->serData = (void *)
-            [self.data methodForSelector:@selector(serializeDataAt:ofObjCType:context:)];
-        self->addData = (void *)
-            [self.data methodForSelector:@selector(appendBytes:length:)];
     }
+
+    // Done
     return self;
 }
 
-- (id)init
-{
+// ----------------------------------------------------------------------------
+
+- (instancetype)init {
     return [self initForWritingWithMutableData:[NSMutableData data]];
 }
 
-+ (NSData *)archivedDataWithRootObject:(id)_root
-{
+// ----------------------------------------------------------------------------
+
++ (NSData *)archivedDataWithRootObject:(id)rootObject {
+
     OSArchiver *archiver = AUTORELEASE([self new]);
-    NSData     *rdata    = nil;
-    
-    [archiver encodeRootObject:_root];
+    NSData *rdata = nil;
+
+    [archiver encodeRootObject:rootObject];
     rdata = [archiver.data copy];
+
+    // Done
     return AUTORELEASE(rdata);
 }
-+ (BOOL)archiveRootObject:(id)_root toFile:(NSString *)_path
-{
-    NSData *rdata = [self archivedDataWithRootObject:_root];
-    return [rdata writeToFile:_path atomically:YES];
+
+// ----------------------------------------------------------------------------
+
++ (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path {
+
+    NSData *rdata = [self archivedDataWithRootObject:rootObject];
+    return [rdata writeToFile:path atomically:YES];
 }
 
-#if !LIB_FOUNDATION_BOEHM_GC
-- (void)dealloc
-{
-    RELEASE(self.data);
-    
-    if (self.outKeys)         NSFreeMapTable(self.outKeys);
-    if (self.outObjects)      NSFreeHashTable(self.outObjects);
-    if (self.outConditionals) NSFreeHashTable(self.outConditionals);
-    if (self.outPointers)     NSFreeHashTable(self.outPointers);
-    if (self.replacements)    NSFreeMapTable(self.replacements);
-    if (self.outClassAlias)   NSFreeMapTable(self.outClassAlias);
-  
+// ----------------------------------------------------------------------------
+
+- (void)encodeConditionalObject:(id)object {
+
+    // Pass 1: Start tracing for conditionals
+    if (self.traceMode) {
+
+        /*
+         * This is the first pass of the determining the conditionals
+         * algorithm. We traverse the graph and insert into the `conditionals'
+         * set. In the second pass all objects that are still in this set will
+         * be encoded as Nil when they receive -encodeConditionalObject:. An
+         * object is removed from this set when it receives -encodeObject:.
+         */
+
+        if (object) {
+
+            if (NSHashGet(self.outObjects, object)) {
+                // Object isn't conditional any more (was stored using encodeObject:)
+            }
+            else if (NSHashGet(self.outConditionals, object)) {
+                // Object is already stored as conditional
+            }
+            else {
+                // Insert object in conditionals set
+                NSHashInsert(self.outConditionals, object);
+            }
+        }
+    }
+    // Pass2: Start writing
+    else {
+        BOOL isConditional = (NSHashGet(self.outConditionals, object) != nil);
+
+        // If anObject is still in the ‘conditionals’ set, it is encoded as Nil.
+        [self encodeObject:(isConditional ? nil : object)];
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)encodeRootObject:(id)rootObject {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool allocWithZone:[self zone]] init];
+
+    [self __beginEncoding];
+
+    NS_DURING {
+
+        /*
+         * Prepare for writing the graph objects for which `rootObject' is the root
+         * node. The algorithm consists from two passes. In the first pass it
+         * determines the nodes so-called 'conditionals' - the nodes encoded *only*
+         * with -encodeConditionalObject:. They represent nodes that are not
+         * related directly to the graph. In the second pass objects are encoded
+         * normally, except for the conditional objects which are encoded as Nil.
+         */
+
+        // Pass 1: Start tracing for conditionals
+        [self __traceObjectsWithRoot:rootObject];
+
+        // Pass 2: Start writing
+        [self __writeArchiveHeader];
+        [self encodeObjectsWithRoot:rootObject];
+        [self __writeArchiveTrailer];
+    }
+    NS_HANDLER {
+
+        // Release resources
+        [self __endEncoding];
+
+        // Re-throw exception
+        [localException raise];
+    }
+    NS_ENDHANDLER;
+
+    // Release resources
+    [self __endEncoding];
+
+    RELEASE(pool);
+}
+
+// ----------------------------------------------------------------------------
+
+- (NSString *)classNameEncodedForTrueClassName:(NSString *)trueName {
+
+    NSString *name = NSMapGet(self.outClassAlias, trueName);
+    return (name ? name : trueName);
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)encodeClassName:(NSString *)trueName intoClassName:(NSString *)inArchiveName {
+    NSMapInsert(self.outClassAlias, trueName, inArchiveName);
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)replaceObject:(id)object withObject:(id)newObject {
+    NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)dealloc {
+
+    if (self.data) {
+        RELEASE(self.data);
+    }
+
+    if (self.outKeys) {
+        NSFreeMapTable(self.outKeys);
+    }
+
+    if (self.outObjects) {
+        NSFreeHashTable(self.outObjects);
+    }
+
+    if (self.outConditionals) {
+        NSFreeHashTable(self.outConditionals);
+    }
+
+    if (self.outPointers) {
+        NSFreeHashTable(self.outPointers);
+    }
+
+    if (self.replacements) {
+        NSFreeMapTable(self.replacements);
+    }
+
+    if (self.outClassAlias) {
+        NSFreeMapTable(self.outClassAlias);
+    }
+
     [super dealloc];
 }
-#endif
+
+// ----------------------------------------------------------------------------
+#pragma mark - @interface NSCoder
+// ----------------------------------------------------------------------------
+
+- (void)encodeValueOfObjCType:(const char *)type at:(const void *)addr {
+
+    if (self.traceMode) {
+        [self _traceValueOfObjCType:type at:addr];
+    }
+    else {
+
+        if (self.didWriteHeader == NO) {
+            [self __writeArchiveHeader];
+        }
+        [self _encodeValueOfObjCType:type at:addr];
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)encodeDataObject:(NSData *)data {
+
+    if (self.traceMode == NO) {
+        [self encodeBytes:data.bytes length:data.length];
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)encodeObject:(id)object {
+
+    if (self.encodingRoot) {
+
+        const char type[] = {(const char) (object_is_instance(object) ? _C_ID : _C_CLASS), 0};
+        [self encodeValueOfObjCType:type at:&object];
+    }
+    else {
+        [self encodeRootObject:object];
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+// - (void)encodeObject:(nullable id)object;
+// - (void)encodeRootObject:(id)rootObject;
+// - (void)encodeBycopyObject:(nullable id)anObject;
+// - (void)encodeByrefObject:(nullable id)anObject;
+// - (void)encodeConditionalObject:(nullable id)object;
+// - (void)encodeValuesOfObjCTypes:(const char *)types, ...;
+// - (void)encodeArrayOfObjCType:(const char *)type count:(NSUInteger)count at:(const void *)array;
+// - (void)encodeBytes:(nullable const void *)byteaddr length:(NSUInteger)length;
+
+// ----------------------------------------------------------------------------
+
+// - (nullable id)decodeObject;
+// - (nullable id)decodeTopLevelObjectAndReturnError:(NSError **)error API_AVAILABLE(macos(10.11), ios(9.0), watchos(2.0), tvos(9.0)) NS_SWIFT_UNAVAILABLE("Use 'decodeTopLevelObject() throws' instead");
+// - (void)decodeValuesOfObjCTypes:(const char *)types, ...;
+// - (void)decodeArrayOfObjCType:(const char *)itemType count:(NSUInteger)count at:(void *)array;
+// - (nullable void *)decodeBytesWithReturnedLength:(NSUInteger *)lengthp NS_RETURNS_INNER_POINTER;
+
+// ----------------------------------------------------------------------------
+
+// - (void)setObjectZone:(nullable NSZone *)zone NS_AUTOMATED_REFCOUNT_UNAVAILABLE;
+// - (nullable NSZone *)objectZone NS_AUTOMATED_REFCOUNT_UNAVAILABLE;
+
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+#pragma mark - Protected Methods
+// ----------------------------------------------------------------------------
+
+- (void)__beginEncoding {
+
+    self.traceMode = NO;
+    self.encodingRoot = YES;
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)__endEncoding {
+
+    self.traceMode = NO;
+    self.encodingRoot = NO;
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)__traceObjectsWithRoot:(id)rootObject {
+
+    // Pass 1: Start tracing for conditionals
+    NS_DURING {
+
+        self.traceMode = YES;
+        [self encodeObject:rootObject];
+    }
+    NS_HANDLER {
+
+        self.traceMode = NO;
+        NSResetHashTable(self.outObjects);
+
+        // Re-throw exception
+        [localException raise];
+    }
+    NS_ENDHANDLER;
+
+    self.traceMode = NO;
+    NSResetHashTable(self.outObjects);
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)__writeArchiveHeader {
+
+    if (self.didWriteHeader == NO) {
+        self.didWriteHeader = YES;
+
+        // Write archive header
+        [self writeString:OSCoderSignature withTag:NO];
+        [self writeUnsignedShort:OSCoderVersion];
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)__writeArchiveTrailer {
+    // Do nothing
+}
+
+// ----------------------------------------------------------------------------
 
 // ******************** archive id's **************************
 
 FINAL int _archiveIdOfObject(OSArchiver *self, id _object)
 {
-    if (_object == nil)
+    if (_object == nil) {
         return 0;
+    }
 #if 0 /* this does not work with 64bit */
     else
         return (int)_object;
@@ -204,6 +472,7 @@ FINAL int _archiveIdOfObject(OSArchiver *self, id _object)
     }
 #endif
 }
+
 FINAL int _archiveIdOfClass(OSArchiver *self, Class _class)
 {
     return _archiveIdOfObject(self, _class);
@@ -216,136 +485,10 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 
 // ******************** complex encoding **********************
 
-- (void)beginEncoding
-{
-    self.traceMode    = NO;
-    self.encodingRoot = YES;
-}
-- (void)endEncoding
-{
-#if 0
-    NSResetHashTable(self.outObjects);
-    NSResetHashTable(self.outConditionals);
-    NSResetHashTable(self.outPointers);
-    NSResetMapTable(self.outClassAlias);
-    NSResetMapTable(self.replacements);
-    NSResetMapTable(self.outKeys);
-#endif
-
-    self.traceMode      = NO;
-    self.encodingRoot   = NO;
-}
-
-- (void)writeArchiveHeader {
-
-    if (self.didWriteHeader == NO) {
-        self.didWriteHeader = YES;
-
-        // Write archive header
-        [self writeString:OSCoderSignature withTag:NO];
-        [self writeUnsignedShort:OSCoderVersion];
-    }
-}
-
-- (void)writeArchiveTrailer
-{
-}
-
-- (void)traceObjectsWithRoot:(id)_root
-{
-    // encoding pass 1
-    NS_DURING {
-        self.traceMode = YES;
-        [self encodeObject:_root];
-    }
-    NS_HANDLER {
-        self.traceMode = NO;
-        NSResetHashTable(self.outObjects);
-        [localException raise];
-    }
-    NS_ENDHANDLER;
-    
-    self.traceMode = NO;
-    NSResetHashTable(self.outObjects);
-}
-
 - (void)encodeObjectsWithRoot:(id)_root
 {
     // encoding pass 2
     [self encodeObject:_root];
-}
-
-- (void)encodeRootObject:(id)_object
-{
-#if ENCODE_AUTORELEASEPOOL
-    NSAutoreleasePool *pool =
-        [[NSAutoreleasePool allocWithZone:[self zone]] init];
-#endif
-    
-    [self beginEncoding];
-
-    NS_DURING {
-        /*
-         * Prepare for writing the graph objects for which `rootObject' is the root
-         * node. The algorithm consists from two passes. In the first pass it
-         * determines the nodes so-called 'conditionals' - the nodes encoded *only*
-         * with -encodeConditionalObject:. They represent nodes that are not
-         * related directly to the graph. In the second pass objects are encoded
-         * normally, except for the conditional objects which are encoded as nil.
-         */
-
-        // pass1: start tracing for conditionals
-        [self traceObjectsWithRoot:_object];
-        
-        // pass2: start writing
-        [self writeArchiveHeader];
-        [self encodeObjectsWithRoot:_object];
-        [self writeArchiveTrailer];
-    }
-    NS_HANDLER {
-        [self endEncoding]; // release resources
-        [localException raise];
-    }
-    NS_ENDHANDLER;
-    
-    [self endEncoding]; // release resources
-
-#if ENCODE_AUTORELEASEPOOL
-    RELEASE(pool); pool = nil;
-#endif
-}
-
-- (void)encodeConditionalObject:(id)_object
-{
-    if (self.traceMode) { // pass 1
-        /*
-         * This is the first pass of the determining the conditionals
-         * algorithm. We traverse the graph and insert into the `conditionals'
-         * set. In the second pass all objects that are still in this set will
-         * be encoded as nil when they receive -encodeConditionalObject:. An
-         * object is removed from this set when it receives -encodeObject:.
-         */
-
-        if (_object) {
-            if (NSHashGet(self.outObjects, _object))
-                // object isn't conditional any more .. (was stored using encodeObject:)
-                ;
-            else if (NSHashGet(self.outConditionals, _object))
-                // object is already stored as conditional
-                ;
-            else
-                // insert object in conditionals set
-                NSHashInsert(self.outConditionals, _object);
-        }
-    }
-    else { // pass 2
-        BOOL isConditional;
-
-        isConditional = (NSHashGet(self.outConditionals, _object) != nil);
-
-        // If anObject is still in the `conditionals' set, it is encoded as nil.
-        [self encodeObject:isConditional ? nil : _object];
-    }
 }
 
 - (void)_traceObject:(id)_object
@@ -461,18 +604,6 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
             [self encodeObject:archiveClass];
             [_object encodeWithCoder:self];
         }
-    }
-}
-
-- (void)encodeObject:(id)_object
-{
-    if (self.encodingRoot) {
-        [self encodeValueOfObjCType:
-                object_is_instance(_object) ? "@" : "#"
-              at:&_object];
-    }
-    else {
-        [self encodeRootObject:_object];
     }
 }
 
@@ -601,33 +732,14 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
     }
 }
 
-- (void)encodeValueOfObjCType:(const char *)_type
-                           at:(const void *)_value
-{
-    if (self.traceMode) {
-        //NSLog(@"trace value at 0x%p of type %s", _value, _type);
-        [self _traceValueOfObjCType:_type at:_value];
-    }
-    else {
-        if (self.didWriteHeader == NO) {
-            [self writeArchiveHeader];
-        }
-  
-        [self _encodeValueOfObjCType:_type at:_value];
-    }
-}
-
 - (void)encodeArrayOfObjCType:(const char *)_type
                         count:(unsigned int)_count
                            at:(const void *)_array
 {
 
     if ((self.didWriteHeader == NO) && (self.traceMode == NO))
-        [self writeArchiveHeader];
+        [self __writeArchiveHeader];
 
-    //NGLogT(@"encoder", @"%s array[%i] of ObjC-type '%s'",
-    //       self.traceMode ? "tracing" : "encoding", _count, _type);
-  
     // array header
     if (self.traceMode == NO) { // nothing is written during trace-mode
         [self writeTag:_C_ARY_B];
@@ -689,18 +801,6 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
             [self encodeValueOfObjCType:_type at:(char *)_array + offset];
         }
     }
-}
-
-// Substituting One Class for Another
-
-- (NSString *)classNameEncodedForTrueClassName:(NSString *)_trueName
-{
-    NSString *name = NSMapGet(self.outClassAlias, _trueName);
-    return name ? name : _trueName;
-}
-- (void)encodeClassName:(NSString *)_name intoClassName:(NSString *)_archiveName
-{
-    NSMapInsert(self.outClassAlias, _name, _archiveName);
 }
 
 // ******************** primitive encoding ********************
