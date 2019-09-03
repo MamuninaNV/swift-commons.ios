@@ -35,7 +35,7 @@
 - (void)writeBytes:(const void *)bytes length:(NSUInteger)length {
     NSAssert(self.traceMode == NO, @"Nothing can be written during trace-mode.");
 
-    if ((length > 0) && (bytes != nil)) {
+    if ((bytes != nil) && (length > 0)) {
         [self.archiverData appendBytes:bytes length:length];
     }
 }

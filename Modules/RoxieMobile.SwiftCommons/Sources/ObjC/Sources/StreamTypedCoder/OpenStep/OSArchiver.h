@@ -13,23 +13,12 @@
 
 // ----------------------------------------------------------------------------
 
-@interface OSArchiver : NSCoder < OSObjCTypeSerializationCallBack >
+@interface OSArchiver : NSCoder <OSObjCTypeSerializationCallBack>
 {
-    NSHashTable *outObjects;          // objects written so far
-    NSHashTable *outConditionals;     // conditional objects
-    NSHashTable *outPointers;         // set of pointers
-    NSMapTable  *outClassAlias;       // class name -> archive name
-    NSMapTable  *replacements;        // src-object to replacement
-    NSMapTable  *outKeys;             // src-address -> archive-address
-    BOOL        traceMode;            // YES if finding conditionals
-    BOOL        didWriteHeader;
     SEL         classForCoder;        // default: classForCoder:
     SEL         replObjectForCoder;   // default: replacementObjectForCoder:
-    BOOL        encodingRoot;
-    int         archiveAddress;
 
     // destination
-    NSMutableData *data;
     void (*addData)(id, SEL, const void *, unsigned);
     void (*serData)(id, SEL, const void *, const char *, id);
 }
@@ -41,23 +30,31 @@
 
 // - Methods
 
-- (id)initForWritingWithMutableData:(NSMutableData*)mdata;
+// Initializing an Encoder
+- (instancetype)initForWritingWithMutableData:(NSMutableData *)mdata;
 
-/* Archiving Data */
-+ (NSData*)archivedDataWithRootObject:(id)rootObject;
-+ (BOOL)archiveRootObject:(id)rootObject toFile:(NSString*)path;
+// Archiving data
++ (NSData *)archivedDataWithRootObject:(id)rootObject;
++ (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path;
 
-/* encoding */
+// Encoding
+- (void)encodeConditionalObject:(id)object;
+- (void)encodeRootObject:(id)rootObject;
 
-- (void)encodeConditionalObject:(id)_object;
-- (void)encodeRootObject:(id)_object;
+// Substituting one Class for Another
+- (NSString *)classNameEncodedForTrueClassName:(NSString *)trueName;
+- (void)encodeClassName:(NSString *)trueName intoClassName:(NSString *)inArchiveName;
 
-/* Substituting One Class for Another */
+// NOTE: Not supported yet
+- (void)replaceObject:(id)object withObject:(id)newObject;
 
-- (NSString *)classNameEncodedForTrueClassName:(NSString *)_trueName;
-- (void)encodeClassName:(NSString *)_trueName intoClassName:(NSString *)_archiveName;
-// not supported yet: replaceObject:withObject:
+// --
 
 @end
+
+// ----------------------------------------------------------------------------
+
+FOUNDATION_EXPORT NSString *const OSCoderSignature;
+FOUNDATION_EXPORT UInt16 OSCoderVersion;
 
 // ----------------------------------------------------------------------------

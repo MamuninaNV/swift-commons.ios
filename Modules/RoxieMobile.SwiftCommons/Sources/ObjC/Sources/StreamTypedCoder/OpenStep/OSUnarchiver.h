@@ -15,18 +15,9 @@
 
 @interface OSUnarchiver : NSCoder < OSObjCTypeSerializationCallBack >
 {
-    NSMapTable  *inObjects;           // decoded objects: key -> object
-    NSMapTable  *inClasses;           // decoded classes: key -> class info
-    NSMapTable  *inPointers;          // decoded pointers: key -> pointer
-    NSMapTable  *inClassAlias;        // archive name -> decoded name
-    NSMapTable  *inClassVersions;     // archive name -> class info
     NSZone      *objectZone;
-    BOOL        decodingRoot;
-    BOOL        didReadHeader;
 
     // source
-    NSData      *data;
-    NSUInteger  cursor;
     void (*getData)(id, SEL, void *, unsigned, unsigned *);
     void (*deserData)(id, SEL, void *, const char *, unsigned *, id);
 }

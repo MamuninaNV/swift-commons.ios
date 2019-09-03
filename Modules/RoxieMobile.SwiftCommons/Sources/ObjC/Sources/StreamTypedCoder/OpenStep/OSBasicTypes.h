@@ -16,3 +16,13 @@
 typedef Byte OSTagType;
 
 // ----------------------------------------------------------------------------
+
+#ifndef REFERENCE
+#define REFERENCE  ((Byte) 128)
+#endif
+
+#ifndef VALUE
+#define VALUE      ((Byte) 127)
+#endif
+
+// ----------------------------------------------------------------------------

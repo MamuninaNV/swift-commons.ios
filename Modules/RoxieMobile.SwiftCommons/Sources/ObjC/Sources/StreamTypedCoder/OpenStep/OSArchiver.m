@@ -15,7 +15,6 @@
 #import "OSArchiver.h"
 #import "OSArchiver+Encoding.h"
 
-#import "OSEncoding.h"
 #import "OSUtilities.h"
 #import "NSData+OpenStep.h"
 
@@ -25,9 +24,6 @@
 #define ARCHIVE_DEBUGGING      0
 
 #define FINAL static inline
-
-#define REFERENCE 128
-#define VALUE     127
 
 static NSMapTableKeyCallBacks NSIdentityObjectMapKeyCallbacks = {
   (unsigned(*)(NSMapTable *, const void *))          __NSHashPointer,
@@ -54,17 +50,38 @@ FINAL BOOL isBaseType(const char *_type)
     }
 }
 
-FINAL BOOL isReferenceTag(OSTagType _tag)
-{
-    return (_tag & REFERENCE) ? YES : NO;
-}
+// ----------------------------------------------------------------------------
 
-FINAL OSTagType tagValue(OSTagType _tag) {
-    return _tag & VALUE; // mask out bit 8
-}
+NSString *const OSCoderSignature = @"roxie:stc";
 
-static const char *OSCoderSignature = "roxie:stc";  // Stream Typed Coder
-static int         OSCoderVersion   = 1909;         // 2019-09
+UInt16 OSCoderVersion = 1909; // 2019-09
+
+// ----------------------------------------------------------------------------
+
+@interface OSArchiver ()
+
+// - Properties
+
+// Caches
+@property(nonatomic, strong) NSHashTable *outObjects;       // Objects written so far
+@property(nonatomic, strong) NSHashTable *outConditionals;  // Conditional objects
+@property(nonatomic, strong) NSHashTable *outPointers;      // Set of pointers
+@property(nonatomic, strong) NSMapTable  *outClassAlias;    // Class name -> Archive name
+@property(nonatomic, strong) NSMapTable  *replacements;     // Src-object to replacement
+@property(nonatomic, strong) NSMapTable  *outKeys;          // Src-address -> Archive-address
+
+// Destination
+@property(nonatomic, strong) NSMutableData *data;
+@property(nonatomic, assign) NSUInteger archiveAddress;
+
+// Flags
+@property(nonatomic, assign) BOOL traceMode;                // YES if finding conditionals
+@property(nonatomic, assign) BOOL didWriteHeader;
+@property(nonatomic, assign) BOOL encodingRoot;
+
+// --
+
+@end
 
 // ----------------------------------------------------------------------------
 #pragma mark -
@@ -81,7 +98,7 @@ static int         OSCoderVersion   = 1909;         // 2019-09
 // ----------------------------------------------------------------------------
 
 - (NSMutableData *)archiverData {
-    return self->data;
+    return self.data;
 }
 
 // ----------------------------------------------------------------------------
@@ -94,32 +111,32 @@ static int         OSCoderVersion   = 1909;         // 2019-09
 #pragma mark - Methods
 // ----------------------------------------------------------------------------
 
-- (id)initForWritingWithMutableData:(NSMutableData *)_data
+- (id)initForWritingWithMutableData:(NSMutableData *)mdata
 {
     if ((self = [super init])) {
         self->classForCoder      = @selector(classForCoder);
         self->replObjectForCoder = @selector(replacementObjectForCoder:);
         
-        self->outObjects      = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 119);
-        self->outConditionals = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 119);
-        self->outPointers     = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 0);
-        self->replacements    = NSCreateMapTable(NSIdentityObjectMapKeyCallbacks,
+        self.outObjects      = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 119);
+        self.outConditionals = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 119);
+        self.outPointers     = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 0);
+        self.replacements    = NSCreateMapTable(NSIdentityObjectMapKeyCallbacks,
                                                  NSObjectMapValueCallBacks,
                                                  19);
-        self->outClassAlias   = NSCreateMapTable(NSObjectMapKeyCallBacks,
+        self.outClassAlias   = NSCreateMapTable(NSObjectMapKeyCallBacks,
                                                  NSObjectMapValueCallBacks,
                                                  19);
-        self->outKeys         = NSCreateMapTable(NSObjectMapKeyCallBacks,
+        self.outKeys         = NSCreateMapTable(NSObjectMapKeyCallBacks,
                                                  NSIntMapValueCallBacks,
                                                  119);
 
-        self->archiveAddress = 1;
+        self.archiveAddress = 1;
 
-        self->data    = RETAIN(_data);
+        self.data    = RETAIN(mdata);
         self->serData = (void *)
-            [self->data methodForSelector:@selector(serializeDataAt:ofObjCType:context:)];
+            [self.data methodForSelector:@selector(serializeDataAt:ofObjCType:context:)];
         self->addData = (void *)
-            [self->data methodForSelector:@selector(appendBytes:length:)];
+            [self.data methodForSelector:@selector(appendBytes:length:)];
     }
     return self;
 }
@@ -135,7 +152,7 @@ static int         OSCoderVersion   = 1909;         // 2019-09
     NSData     *rdata    = nil;
     
     [archiver encodeRootObject:_root];
-    rdata = [archiver->data copy];
+    rdata = [archiver.data copy];
     return AUTORELEASE(rdata);
 }
 + (BOOL)archiveRootObject:(id)_root toFile:(NSString *)_path
@@ -147,14 +164,14 @@ static int         OSCoderVersion   = 1909;         // 2019-09
 #if !LIB_FOUNDATION_BOEHM_GC
 - (void)dealloc
 {
-    RELEASE(self->data);
+    RELEASE(self.data);
     
-    if (self->outKeys)         NSFreeMapTable(self->outKeys);
-    if (self->outObjects)      NSFreeHashTable(self->outObjects);
-    if (self->outConditionals) NSFreeHashTable(self->outConditionals);
-    if (self->outPointers)     NSFreeHashTable(self->outPointers);
-    if (self->replacements)    NSFreeMapTable(self->replacements);
-    if (self->outClassAlias)   NSFreeMapTable(self->outClassAlias);
+    if (self.outKeys)         NSFreeMapTable(self.outKeys);
+    if (self.outObjects)      NSFreeHashTable(self.outObjects);
+    if (self.outConditionals) NSFreeHashTable(self.outConditionals);
+    if (self.outPointers)     NSFreeHashTable(self.outPointers);
+    if (self.replacements)    NSFreeMapTable(self.replacements);
+    if (self.outClassAlias)   NSFreeMapTable(self.outClassAlias);
   
     [super dealloc];
 }
@@ -173,14 +190,14 @@ FINAL int _archiveIdOfObject(OSArchiver *self, id _object)
     else {
         int archiveId;
 
-        archiveId = (long)NSMapGet(self->outKeys, _object);
+        archiveId = (long)NSMapGet(self.outKeys, _object);
         if (archiveId == 0) {
-            archiveId = self->archiveAddress;
-            NSMapInsert(self->outKeys, _object, (void*)(long)archiveId);
+            archiveId = self.archiveAddress;
+            NSMapInsert(self.outKeys, _object, (void*)(long)archiveId);
 #if ARCHIVE_DEBUGGING
             NSLog(@"mapped 0x%p => %i", _object, archiveId);
 #endif
-            self->archiveAddress++;
+            self.archiveAddress++;
         }
 
         return archiveId;
@@ -194,16 +211,6 @@ FINAL int _archiveIdOfClass(OSArchiver *self, Class _class)
 
 // ******************** primitive encoding ********************
 
-FINAL void _writeBytes(OSArchiver *self, const void *_bytes, unsigned _len);
-
-FINAL void _writeTag  (OSArchiver *self, OSTagType _tag);
-
-FINAL void _writeChar (OSArchiver *self, char _value);
-FINAL void _writeShort(OSArchiver *self, short _value);
-FINAL void _writeInt  (OSArchiver *self, int _value);
-FINAL void _writeLong (OSArchiver *self, long _value);
-FINAL void _writeFloat(OSArchiver *self, float _value);
-
 FINAL void _writeCString(OSArchiver *self, const char *_value);
 FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 
@@ -211,32 +218,35 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 
 - (void)beginEncoding
 {
-    self->traceMode    = NO;
-    self->encodingRoot = YES;
+    self.traceMode    = NO;
+    self.encodingRoot = YES;
 }
 - (void)endEncoding
 {
 #if 0
-    NSResetHashTable(self->outObjects);
-    NSResetHashTable(self->outConditionals);
-    NSResetHashTable(self->outPointers);
-    NSResetMapTable(self->outClassAlias);
-    NSResetMapTable(self->replacements);
-    NSResetMapTable(self->outKeys);
+    NSResetHashTable(self.outObjects);
+    NSResetHashTable(self.outConditionals);
+    NSResetHashTable(self.outPointers);
+    NSResetMapTable(self.outClassAlias);
+    NSResetMapTable(self.replacements);
+    NSResetMapTable(self.outKeys);
 #endif
 
-    self->traceMode      = NO;
-    self->encodingRoot   = NO;
+    self.traceMode      = NO;
+    self.encodingRoot   = NO;
 }
 
-- (void)writeArchiveHeader
-{
-    if (self->didWriteHeader == NO) {
-        _writeCString(self, OSCoderSignature);
-        _writeInt(self, OSCoderVersion);
-        self->didWriteHeader = YES;
+- (void)writeArchiveHeader {
+
+    if (self.didWriteHeader == NO) {
+        self.didWriteHeader = YES;
+
+        // Write archive header
+        [self writeString:OSCoderSignature withTag:NO];
+        [self writeUnsignedShort:OSCoderVersion];
     }
 }
+
 - (void)writeArchiveTrailer
 {
 }
@@ -245,18 +255,18 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 {
     // encoding pass 1
     NS_DURING {
-        self->traceMode = YES;
+        self.traceMode = YES;
         [self encodeObject:_root];
     }
     NS_HANDLER {
-        self->traceMode = NO;
-        NSResetHashTable(self->outObjects);
+        self.traceMode = NO;
+        NSResetHashTable(self.outObjects);
         [localException raise];
     }
     NS_ENDHANDLER;
     
-    self->traceMode = NO;
-    NSResetHashTable(self->outObjects);
+    self.traceMode = NO;
+    NSResetHashTable(self.outObjects);
 }
 
 - (void)encodeObjectsWithRoot:(id)_root
@@ -307,7 +317,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 
 - (void)encodeConditionalObject:(id)_object
 {
-    if (self->traceMode) { // pass 1
+    if (self.traceMode) { // pass 1
         /*
          * This is the first pass of the determining the conditionals
          * algorithm. We traverse the graph and insert into the `conditionals'
@@ -317,21 +327,21 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
          */
 
         if (_object) {
-            if (NSHashGet(self->outObjects, _object))
+            if (NSHashGet(self.outObjects, _object))
                 // object isn't conditional any more .. (was stored using encodeObject:)
                 ;
-            else if (NSHashGet(self->outConditionals, _object))
+            else if (NSHashGet(self.outConditionals, _object))
                 // object is already stored as conditional
                 ;
             else
                 // insert object in conditionals set
-                NSHashInsert(self->outConditionals, _object);
+                NSHashInsert(self.outConditionals, _object);
         }
     }
     else { // pass 2
         BOOL isConditional;
 
-        isConditional = (NSHashGet(self->outConditionals, _object) != nil);
+        isConditional = (NSHashGet(self.outConditionals, _object) != nil);
 
         // If anObject is still in the `conditionals' set, it is encoded as nil.
         [self encodeObject:isConditional ? nil : _object];
@@ -343,21 +353,21 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
     if (_object == nil) // don't trace nil objects ..
         return;
 
-    //NSLog(@"lookup 0x%p in outObjs=0x%p", _object, self->outObjects);
+    //NSLog(@"lookup 0x%p in outObjs=0x%p", _object, self.outObjects);
     
-    if (NSHashGet(self->outObjects, _object) == nil) {
+    if (NSHashGet(self.outObjects, _object) == nil) {
         //NSLog(@"lookup failed, object wasn't traced yet !");
         
         // object wasn't traced yet
         // Look-up the object in the `conditionals' set. If the object is
         // there, then remove it because it is no longer a conditional one.
-        if (NSHashGet(self->outConditionals, _object)) {
+        if (NSHashGet(self.outConditionals, _object)) {
             // object was marked conditional ..
-            NSHashRemove(self->outConditionals, _object);
+            NSHashRemove(self.outConditionals, _object);
         }
         
         // mark object as traced
-        NSHashInsert(self->outObjects, _object);
+        NSHashInsert(self.outObjects, _object);
         
         if (object_is_instance(_object)) {
             Class archiveClass = Nil;
@@ -367,12 +377,12 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
                                    withObject:self];
             
             if (replacement != _object) {
-                NSMapInsert(self->replacements, _object, replacement);
+                NSMapInsert(self.replacements, _object, replacement);
                 _object = replacement;
             }
             
             if (object_is_instance(_object)) {
-                archiveClass = [_object performSelector:self->classForCoder];
+                archiveClass = [_object performSelector:self.classForCoder];
             }
             
             [self encodeObject:archiveClass];
@@ -389,20 +399,20 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
     int       archiveId = _archiveIdOfObject(self, _object);
 
     if (_object == nil) { // nil object or class
-        _writeTag(self, _C_ID | REFERENCE);
-        _writeInt(self, archiveId);
+        [self writeTag:_C_ID | REFERENCE];
+        [self writeInt:archiveId];
         return;
     }
     
     tag = object_is_instance(_object) ? _C_ID : _C_CLASS;
     
-    if (NSHashGet(self->outObjects, _object)) { // object was already written
-        _writeTag(self, tag | REFERENCE);
-        _writeInt(self, archiveId);
+    if (NSHashGet(self.outObjects, _object)) { // object was already written
+        [self writeTag:tag | REFERENCE];
+        [self writeInt:archiveId];
     }
     else {
         // mark object as written
-        NSHashInsert(self->outObjects, _object);
+        NSHashInsert(self.outObjects, _object);
 
         /*
           if (tag == _C_CLASS) { // a class object
@@ -415,8 +425,8 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
           }
         */
     
-        _writeTag(self, tag);
-        _writeInt(self, archiveId);
+        [self writeTag:tag];
+        [self writeInt:archiveId];
 
         if (tag == _C_CLASS) { // a class object
             NSString *className;
@@ -428,23 +438,23 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
             len = [className lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
             buf = malloc(len + 4);
             [className getCString:buf maxLength:len + 4 encoding:NSUTF8StringEncoding]; buf[len] = '\0';
-            
+
             _writeCString(self, buf);
-            _writeLong(self, [_object version]);
+            [self writeLong:[_object version]];
             if (buf) free(buf);
         }
         else {
             Class archiveClass = Nil;
             id    replacement  = nil;
 
-            replacement = NSMapGet(self->replacements, _object);
+            replacement = NSMapGet(self.replacements, _object);
             if (replacement) _object = replacement;
 
             /*
-              _object = [_object performSelector:self->replObjectForCoder
+              _object = [_object performSelector:self.replObjectForCoder
               withObject:self];
             */
-            archiveClass = [_object performSelector:self->classForCoder];
+            archiveClass = [_object performSelector:self.classForCoder];
             
             NSAssert(archiveClass, @"no archive class found ..");
 
@@ -456,7 +466,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 
 - (void)encodeObject:(id)_object
 {
-    if (self->encodingRoot) {
+    if (self.encodingRoot) {
         [self encodeValueOfObjCType:
                 object_is_instance(_object) ? "@" : "#"
               at:&_object];
@@ -514,14 +524,14 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 - (void)_encodeValueOfObjCType:(const char *)_type at:(const void *)_value
 {
     //NGLogT(@"encoder", @"encoding value of ObjC-type '%s' at %i",
-    //       _type, [self->data length]);
+    //       _type, [self.data length]);
   
     switch (*_type) {
         case _C_ID:
         case _C_CLASS:
             // ?? Write another tag just to be possible to read using the
             // ?? decodeObject method. (Otherwise a lookahead would be required)
-            // ?? _writeTag(self, *_type);
+            // ?? [self writeTag:*_type];
             [self _encodeObject:*(id *)_value];
             break;
 
@@ -533,7 +543,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 
             // Write another tag just to be possible to read using the
             // decodeArrayOfObjCType:count:at: method.
-            _writeTag(self, _C_ARY_B);
+            [self writeTag:_C_ARY_B];
             [self encodeArrayOfObjCType:itemType count:count at:_value];
             break;
         }
@@ -541,7 +551,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
         case _C_STRUCT_B: { // C-structure begin '{'
             int offset = 0;
 
-            _writeTag(self, '{');
+            [self writeTag:'{'];
 
             while ((*_type != _C_STRUCT_E) && (*_type++ != '=')); // skip "<name>="
         
@@ -565,12 +575,12 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
         }
 
         case _C_SEL:
-            _writeTag(self, _C_SEL);
+            [self writeTag:_C_SEL];
             _writeCString(self, (*(SEL *)_value) ? sel_get_name(*(SEL *)_value) : NULL);
             break;
       
         case _C_PTR:
-            _writeTag(self, *_type);
+            [self writeTag:*_type];
             _writeObjC(self, *(char **)_value, _type + 1);
             break;
 
@@ -581,7 +591,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
         case _C_LNG:     case _C_ULNG:
         case _C_LNG_LNG: case _C_ULNG_LNG:
         case _C_FLT:     case _C_DBL:
-            _writeTag(self, *_type);
+            [self writeTag:*_type];
             _writeObjC(self, _value, _type);
             break;
       
@@ -594,13 +604,14 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 - (void)encodeValueOfObjCType:(const char *)_type
                            at:(const void *)_value
 {
-    if (self->traceMode) {
+    if (self.traceMode) {
         //NSLog(@"trace value at 0x%p of type %s", _value, _type);
         [self _traceValueOfObjCType:_type at:_value];
     }
     else {
-        if (self->didWriteHeader == NO)
+        if (self.didWriteHeader == NO) {
             [self writeArchiveHeader];
+        }
   
         [self _encodeValueOfObjCType:_type at:_value];
     }
@@ -611,16 +622,16 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
                            at:(const void *)_array
 {
 
-    if ((self->didWriteHeader == NO) && (self->traceMode == NO))
+    if ((self.didWriteHeader == NO) && (self.traceMode == NO))
         [self writeArchiveHeader];
 
     //NGLogT(@"encoder", @"%s array[%i] of ObjC-type '%s'",
-    //       self->traceMode ? "tracing" : "encoding", _count, _type);
+    //       self.traceMode ? "tracing" : "encoding", _count, _type);
   
     // array header
-    if (self->traceMode == NO) { // nothing is written during trace-mode
-        _writeTag(self, _C_ARY_B);
-        _writeInt(self, _count);
+    if (self.traceMode == NO) { // nothing is written during trace-mode
+        [self writeTag:_C_ARY_B];
+        [self writeInt:_count];
     }
 
     // Optimize writing arrays of elementary types. If such an array has to
@@ -629,25 +640,25 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
     if ((*_type == _C_ID) || (*_type == _C_CLASS)) { // object array
         int i;
 
-        if (self->traceMode == NO)
-            _writeTag(self, *_type); // object array
+        if (self.traceMode == NO)
+            [self writeTag:*_type]; // object array
 
         for (i = 0; i < _count; i++)
             [self encodeObject:((id *)_array)[i]];
     }
     else if ((*_type == _C_CHR) || (*_type == _C_UCHR)) { // byte array
-        if (self->traceMode == NO) {
+        if (self.traceMode == NO) {
             //NGLogT(@"encoder", @"encode byte-array (base='%c', count=%i)", *_type, _count);
 
             // write base type tag
-            _writeTag(self, *_type);
+            [self writeTag:*_type];
 
             // write buffer
-            _writeBytes(self, _array, _count);
+            [self writeBytes:_array length:_count];
         }
     }
     else if (isBaseType(_type)) {
-        if (self->traceMode == NO) {
+        if (self.traceMode == NO) {
             unsigned offset, itemSize = objc_sizeof_type(_type);
             int      i;
 
@@ -658,7 +669,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
               */
 
             // write base type tag
-            _writeTag(self, *_type);
+            [self writeTag:*_type];
 
             // write contents
             for (i = offset = 0; i < _count; i++, offset += itemSize)
@@ -684,56 +695,19 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 
 - (NSString *)classNameEncodedForTrueClassName:(NSString *)_trueName
 {
-    NSString *name = NSMapGet(self->outClassAlias, _trueName);
+    NSString *name = NSMapGet(self.outClassAlias, _trueName);
     return name ? name : _trueName;
 }
 - (void)encodeClassName:(NSString *)_name intoClassName:(NSString *)_archiveName
 {
-    NSMapInsert(self->outClassAlias, _name, _archiveName);
+    NSMapInsert(self.outClassAlias, _name, _archiveName);
 }
 
 // ******************** primitive encoding ********************
 
-FINAL void _writeBytes(OSArchiver *self, const void *_bytes, unsigned _len)
-{
-    NSCAssert(self->traceMode == NO, @"nothing can be written during trace-mode ..");
-    self->addData(self->data, @selector(appendBytes:length:), _bytes, _len);
-}
-FINAL void _writeTag(OSArchiver *self, OSTagType _tag)
-{
-    unsigned char t = _tag;
-    NSCAssert(self, @"invalid self ..");
-    _writeBytes(self, &t, sizeof(t));
-}
-FINAL void _writeChar(OSArchiver *self, char _value)
-{
-    _writeBytes(self, &_value, sizeof(_value));
-}
-
-FINAL void _writeShort(OSArchiver *self, short _value)
-{
-    self->serData(self->data, @selector(serializeDataAt:ofObjCType:context:),
-                  &_value, @encode(short), self);
-}
-FINAL void _writeInt(OSArchiver *self, int _value)
-{
-    self->serData(self->data, @selector(serializeDataAt:ofObjCType:context:),
-                  &_value, @encode(int), self);
-}
-FINAL void _writeLong(OSArchiver *self, long _value)
-{
-    self->serData(self->data, @selector(serializeDataAt:ofObjCType:context:),
-                  &_value, @encode(long), self);
-}
-FINAL void _writeFloat(OSArchiver *self, float _value)
-{
-    self->serData(self->data, @selector(serializeDataAt:ofObjCType:context:),
-                  &_value, @encode(float), self);
-}
-
 FINAL void _writeCString(OSArchiver *self, const char *_value)
 {
-    self->serData(self->data, @selector(serializeDataAt:ofObjCType:context:),
+    self->serData(self.data, @selector(serializeDataAt:ofObjCType:context:),
                   &_value, @encode(char *), self);
 }
 
@@ -742,7 +716,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type)
     if ((_value == NULL) || (_type == NULL))
         return;
 
-    if (self->traceMode) {
+    if (self.traceMode) {
         // no need to track base-types in trace-mode
     
         switch (*_type) {
@@ -752,7 +726,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type)
             case _C_ARY_B:
             case _C_STRUCT_B:
             case _C_PTR:
-                self->serData(self->data, @selector(serializeDataAt:ofObjCType:context:),
+                self->serData(self.data, @selector(serializeDataAt:ofObjCType:context:),
                               _value, _type, self);
                 break;
 
@@ -761,7 +735,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type)
         }
     }
     else {
-        self->serData(self->data, @selector(serializeDataAt:ofObjCType:context:),
+        self->serData(self.data, @selector(serializeDataAt:ofObjCType:context:),
                       _value, _type, self);
     }
 }
@@ -774,7 +748,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type)
 {
     NSAssert(((*_type == _C_ID) || (*_type == _C_CLASS)), @"unexpected type ..");
 
-    if (self->traceMode)
+    if (self.traceMode)
         [self _traceObject:*_object];
     else
         [self _encodeObject:*_object];
