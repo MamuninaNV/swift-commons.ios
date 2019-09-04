@@ -35,4 +35,21 @@ class StreamTypedCoderTestsMixedModelTests: StreamTypeCoderTests
             XCTAssertEqual(_mixObject, _mixResult)
         }
     }
+
+    func testMixedModel_ToStringJSON() {
+        let _mixObject: STCMixedModel? = STCMixedModel.shared
+
+        // Positive
+        assertNoThrow {
+            // Encode
+            let jsonString = _mixObject?.toJSONString()
+
+            // Decode
+            var _mixResult: STCMixedModel?
+            if let string = jsonString {
+                _mixResult = try? STCMixedModel(from: string)
+            }
+            XCTAssertEqual(_mixObject, _mixResult)
+        }
+    }
 }
