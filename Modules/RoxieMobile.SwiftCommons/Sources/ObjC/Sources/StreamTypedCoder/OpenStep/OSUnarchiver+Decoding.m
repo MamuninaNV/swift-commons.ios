@@ -24,7 +24,7 @@
 // - Properties
 
 // Source
-@property(nonatomic, strong) NSData *data;
+@property(nonatomic, strong) NSData *buffer;
 @property(nonatomic, assign) NSUInteger cursor;
 
 // --
@@ -61,7 +61,7 @@ FINAL void __checkType2(OSTagType type, OSTagType reqType1, OSTagType reqType2) 
 - (void)readBytes:(void *)bytes length:(NSUInteger)length {
 
     if ((bytes != nil) && (length > 0)) {
-        [self.data getBytes:bytes range:NSMakeRange(self.cursor, length)];
+        [self.buffer getBytes:bytes range:NSMakeRange(self.cursor, length)];
         self.cursor += length;
     }
 }

@@ -70,7 +70,7 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 @property(nonatomic, strong) NSMapTable  *outKeys;          // Src-address -> Archive-address
 
 // Destination
-@property(nonatomic, strong) NSMutableData *data;
+@property(nonatomic, strong) NSMutableData *buffer;
 @property(nonatomic, assign) NSUInteger archiveAddress;
 
 // Flags
@@ -97,7 +97,7 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 // ----------------------------------------------------------------------------
 
 - (NSMutableData *)archiverData {
-    return self.data;
+    return self.buffer;
 }
 
 // ----------------------------------------------------------------------------
@@ -132,7 +132,7 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 //        self.outKeys         = [NSMapTable strongToStrongObjectsMapTable];
 
         // Destination
-        self.data = RETAIN(mdata);
+        self.buffer = RETAIN(mdata);
         self.archiveAddress = 1;
 
         // Init instance variables
@@ -142,9 +142,9 @@ UInt16 OSCoderVersion = 1909; // 2019-09
                 @selector(replacementObjectForCoder:);
 
         self->serData =
-                (void *) [self.data methodForSelector:@selector(serializeDataAt:ofObjCType:context:)];
+                (void *) [self.buffer methodForSelector:@selector(serializeDataAt:ofObjCType:context:)];
         self->addData =
-                (void *) [self.data methodForSelector:@selector(appendBytes:length:)];
+                (void *) [self.buffer methodForSelector:@selector(appendBytes:length:)];
     }
 
     // Done
@@ -165,7 +165,7 @@ UInt16 OSCoderVersion = 1909; // 2019-09
     NSData *rdata = nil;
 
     [archiver encodeRootObject:rootObject];
-    rdata = [archiver.data copy];
+    rdata = [archiver.buffer copy];
 
     // Done
     return AUTORELEASE(rdata);
@@ -203,32 +203,39 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
 - (void)dealloc {
 
-    if (self.data) {
-        RELEASE(self.data);
+    if (self.buffer) {
+        RELEASE(self.buffer);
+        self.buffer = nil;
     }
 
     if (self.outKeys) {
         NSFreeMapTable(self.outKeys);
+        self.outKeys = nil;
     }
 
     if (self.outObjects) {
         NSFreeHashTable(self.outObjects);
+        self.outObjects = nil;
     }
 
     if (self.outConditionals) {
         NSFreeHashTable(self.outConditionals);
+        self.outConditionals = nil;
     }
 
     if (self.outPointers) {
         NSFreeHashTable(self.outPointers);
+        self.outPointers = nil;
     }
 
     if (self.replacements) {
         NSFreeMapTable(self.replacements);
+        self.replacements = nil;
     }
 
     if (self.outClassAlias) {
         NSFreeMapTable(self.outClassAlias);
+        self.outClassAlias = nil;
     }
 
     [super dealloc];
@@ -384,15 +391,14 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
 // ----------------------------------------------------------------------------
 
-// TODO: Refactoring is required
 - (void)encodeArrayOfObjCType:(const char *)type count:(NSUInteger)count at:(const void *)array {
 
     if ((self.didWriteHeader == NO) && (self.traceMode == NO)) {
         [self __writeArchiveHeader];
     }
 
-    // array header
-    if (self.traceMode == NO) { // nothing is written during trace-mode
+    // Array header
+    if (self.traceMode == NO) { // Nothing is written during trace-mode
         [self writeTag:_C_ARY_B];
         [self writeInt:count];
     }
@@ -400,56 +406,52 @@ UInt16 OSCoderVersion = 1909; // 2019-09
     // Optimize writing arrays of elementary types. If such an array has to
     // be written, write the type and then the elements of array.
 
-    if ((*type == _C_ID) || (*type == _C_CLASS)) { // object array
-        int i;
+    // Object array
+    if ((*type == _C_ID) || (*type == _C_CLASS)) {
 
-        if (self.traceMode == NO)
-            [self writeTag:*type]; // object array
-
-        for (i = 0; i < count; i++)
-            [self encodeObject:((id *)array)[i]];
-    }
-    else if ((*type == _C_CHR) || (*type == _C_UCHR)) { // byte array
         if (self.traceMode == NO) {
-            //NGLogT(@"encoder", @"encode byte-array (base='%c', count=%i)", *_type, _count);
+            [self writeTag:*type];
+        }
 
-            // write base type tag
+        for (int idx = 0; idx < count; idx++) {
+            [self encodeObject:((id *)array)[idx]];
+        }
+    }
+    // Byte array
+    else if ((*type == _C_CHR) || (*type == _C_UCHR)) {
+
+        if (self.traceMode == NO) {
+
+            // Write base type tag
             [self writeTag:*type];
 
-            // write buffer
+            // Write buffer
             [self writeBytes:array length:count];
         }
     }
+    // Basic type
     else if (isBaseType(type)) {
+
         if (self.traceMode == NO) {
-            unsigned offset, itemSize = objc_sizeof_type(type);
-            int      i;
 
-            /*
-              NGLogT(@"encoder",
-              @"encode basetype-array (base='%c', itemSize=%i, count=%i)",
-              *_type, itemSize, _count);
-              */
+            unsigned itemSize = objc_sizeof_type(type);
 
-            // write base type tag
+            // Write base type tag
             [self writeTag:*type];
 
-            // write contents
-            for (i = offset = 0; i < count; i++, offset += itemSize)
-                _writeObjC(self, (char *)array + offset, type);
+            // Write contents
+            for (int idx = 0, offset = 0; idx < count; idx++, offset += itemSize) {
+                _writeObjC(self, ((char *)array + offset), type);
+            }
         }
     }
-    else { // encoded using normal method
-        IMP      encodeValue = NULL;
-        unsigned offset, itemSize = objc_sizeof_type(type);
-        int      i;
+    // Encoded using normal method
+    else {
 
-        encodeValue = [self methodForSelector:@selector(encodeValueOfObjCType:at:)];
+        unsigned itemSize = objc_sizeof_type(type);
 
-        for (i = offset = 0; i < count; i++, offset += itemSize) {
-//             encodeValue(self, @selector(encodeValueOfObjCType:at:),
-//                         (char *)_array + offset, _type);
-            [self encodeValueOfObjCType:type at:(char *)array + offset];
+        for (int idx = 0, offset = 0; idx < count; idx++, offset += itemSize) {
+            [self encodeValueOfObjCType:type at:((char *)array + offset)];
         }
     }
 }
@@ -819,7 +821,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 
 FINAL void _writeCString(OSArchiver *self, const char *_value)
 {
-    self->serData(self.data, @selector(serializeDataAt:ofObjCType:context:),
+    self->serData(self.buffer, @selector(serializeDataAt:ofObjCType:context:),
                   &_value, @encode(char *), self);
 }
 
@@ -838,7 +840,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type)
             case _C_ARY_B:
             case _C_STRUCT_B:
             case _C_PTR:
-                self->serData(self.data, @selector(serializeDataAt:ofObjCType:context:),
+                self->serData(self.buffer, @selector(serializeDataAt:ofObjCType:context:),
                               _value, _type, self);
                 break;
 
@@ -847,7 +849,7 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type)
         }
     }
     else {
-        self->serData(self.data, @selector(serializeDataAt:ofObjCType:context:),
+        self->serData(self.buffer, @selector(serializeDataAt:ofObjCType:context:),
                       _value, _type, self);
     }
 }

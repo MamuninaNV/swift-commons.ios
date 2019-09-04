@@ -53,13 +53,12 @@ FINAL BOOL isBaseType(const char *_type)
     }
 }
 
-FINAL BOOL isReferenceTag(OSTagType _tag)
-{
-    return (_tag & REFERENCE) ? YES : NO;
+FINAL BOOL isReferenceTag(OSTagType _tag) {
+    return (_tag & REFERENCE) != 0;
 }
 
 FINAL OSTagType tagValue(OSTagType _tag) {
-    return _tag & VALUE; // mask out bit 8
+    return (_tag & VALUE); // Mask out bit 8
 }
 
 // ----------------------------------------------------------------------------
@@ -83,7 +82,7 @@ LF_DECLARE NSString *const OSInconsistentArchiveException =
 @property(nonatomic, strong) NSMapTable *inClassVersions;  // Archive name -> Class info
 
 // Source
-@property(nonatomic, strong) NSData *data;
+@property(nonatomic, strong) NSData *buffer;
 @property(nonatomic, assign) NSUInteger cursor;
 
 // Flags
@@ -111,7 +110,7 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
 // ----------------------------------------------------------------------------
 
 - (BOOL)isAtEnd {
-    return (self.cursor >= [self.data length]);
+    return (self.cursor >= [self.buffer length]);
 }
 
 // ----------------------------------------------------------------------------
@@ -154,12 +153,12 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
         self.inClassVersions = NSCreateMapTable(NSObjectMapKeyCallBacks,
                                                  NSObjectMapValueCallBacks,
                                                  19);
-        self.data = RETAIN(_data);
+        self.buffer = RETAIN(_data);
         self->deserData = (void *)
-            [self.data methodForSelector:
+            [self.buffer methodForSelector:
                  @selector(deserializeDataAt:ofObjCType:atCursor:context:)];
         self->getData = (void *)
-            [self.data methodForSelector:@selector(deserializeBytes:length:atCursor:)];
+            [self.buffer methodForSelector:@selector(deserializeBytes:length:atCursor:)];
     }
     return self;
 }
@@ -186,7 +185,7 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
 #if !LIB_FOUNDATION_BOEHM_GC
 - (void)dealloc
 {
-    RELEASE(self.data); self.data = nil;
+    RELEASE(self.buffer); self.buffer = nil;
   
     if (self.inObjects) {
         NSFreeMapTable(self.inObjects); self.inObjects = NULL; }
@@ -454,7 +453,7 @@ FINAL char *_readCString(OSUnarchiver *self)
 {
     unsigned int position = (unsigned int) self.cursor;
     char *value = NULL;
-    self->deserData(self.data,
+    self->deserData(self.buffer,
                     @selector(deserializeDataAt:ofObjCType:atCursor:context:),
                     &value, @encode(char *), &(position), self);
     self.cursor = position;
@@ -464,7 +463,7 @@ FINAL char *_readCString(OSUnarchiver *self)
 FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type)
 {
     unsigned int position = (unsigned int) self.cursor;
-    self->deserData(self.data,
+    self->deserData(self.buffer,
                     @selector(deserializeDataAt:ofObjCType:atCursor:context:),
                     _value, _type,
                     &(position),
@@ -769,7 +768,7 @@ FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type)
     void *bytes = nil;
 
     if (length > 0) {
-        bytes = (void *) ((Byte *) self.data.bytes + self.cursor);
+        bytes = (void *) ((Byte *) self.buffer.bytes + self.cursor);
         self.cursor += length;
     }
 
