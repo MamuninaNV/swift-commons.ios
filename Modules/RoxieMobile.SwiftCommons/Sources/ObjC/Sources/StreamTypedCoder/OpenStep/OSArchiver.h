@@ -31,7 +31,7 @@
 // - Methods
 
 // Initializing an Encoder
-- (instancetype)initForWritingWithMutableData:(NSMutableData *)mdata;
+- (instancetype)initForWritingWithMutableData:(NSMutableData *)data;
 
 // Archiving data
 + (NSData *)archivedDataWithRootObject:(id)rootObject;

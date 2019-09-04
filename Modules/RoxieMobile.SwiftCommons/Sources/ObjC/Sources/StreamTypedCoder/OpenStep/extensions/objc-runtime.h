@@ -219,10 +219,14 @@ void class_add_behavior(Class class, Class behavior);
 // @link http://web.mit.edu/kolya/sipb/afs/root.afs/sipb.mit.edu/project/bounds/src/gcc-2.7.2/objc/objc-api.h
 // @link https://stackoverflow.com/a/6537756
 
-static inline BOOL
-object_is_instance(id object)
-{
+static inline
+BOOL object_is_instance(id object) {
   return (object != nil) && !class_isMetaClass(object_getClass(object));
+}
+
+static inline
+BOOL object_is_class(id object) {
+  return (object != nil) &&  class_isMetaClass(object_getClass(object));
 }
 
 /** The new macros for handling exceptions. */

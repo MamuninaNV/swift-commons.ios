@@ -33,22 +33,6 @@ static NSMapTableKeyCallBacks NSIdentityObjectMapKeyCallbacks = {
   (const void *)NULL
 };
 
-FINAL BOOL isBaseType(const char *_type)
-{
-    switch (*_type) {
-        case _C_CHR:     case _C_UCHR:
-        case _C_SHT:     case _C_USHT:
-        case _C_INT:     case _C_UINT:
-        case _C_LNG:     case _C_ULNG:
-        case _C_LNG_LNG: case _C_ULNG_LNG:
-        case _C_FLT:     case _C_DBL:
-            return YES;
-
-        default:
-            return NO;
-    }
-}
-
 // ----------------------------------------------------------------------------
 
 NSString *const OSCoderSignature = @"roxie:stc";
@@ -83,6 +67,43 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 @end
 
 // ----------------------------------------------------------------------------
+#pragma mark - Private Functions
+// ----------------------------------------------------------------------------
+
+static BOOL __isBaseType(const char *type) {
+
+    // @formatter:off
+    switch (*type) {
+
+        case _C_CHR:     case _C_UCHR:
+        case _C_SHT:     case _C_USHT:
+        case _C_INT:     case _C_UINT:
+        case _C_LNG:     case _C_ULNG:
+        case _C_LNG_LNG: case _C_ULNG_LNG:
+        case _C_FLT:     case _C_DBL:
+            return YES;
+
+        default:
+            return NO;
+    }
+    // @formatter:on
+}
+
+// ----------------------------------------------------------------------------
+
+static BOOL __isCollectable(id object) {
+
+    // @formatter:off
+    return (object_is_class(object) ||
+            [object isKindOfClass:[NSString class]] ||
+            [object isKindOfClass:[NSNumber class]] ||
+            [object isKindOfClass:[NSData   class]] ||
+            [object isKindOfClass:[NSNull   class]] ||
+            [object isKindOfClass:[NSValue  class]]);
+    // @formatter:on
+}
+
+// ----------------------------------------------------------------------------
 #pragma mark -
 // ----------------------------------------------------------------------------
 
@@ -104,10 +125,10 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 #pragma mark - Methods
 // ----------------------------------------------------------------------------
 
-- (instancetype)initForWritingWithMutableData:(NSMutableData *)mdata {
+- (instancetype)initForWritingWithMutableData:(NSMutableData *)data {
 
     // Validate incoming params
-    if (mdata == nil) {
+    if (data == nil) {
         return nil;
     }
 
@@ -132,7 +153,7 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 //        self.outKeys         = [NSMapTable strongToStrongObjectsMapTable];
 
         // Destination
-        self.buffer = RETAIN(mdata);
+        self.buffer = RETAIN(data);
         self.archiveAddress = 1;
 
         // Init instance variables
@@ -162,21 +183,21 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 + (NSData *)archivedDataWithRootObject:(id)rootObject {
 
     OSArchiver *archiver = AUTORELEASE([self new]);
-    NSData *rdata = nil;
+    NSData *data = nil;
 
     [archiver encodeRootObject:rootObject];
-    rdata = [archiver.buffer copy];
+    data = [archiver.buffer copy];
 
     // Done
-    return AUTORELEASE(rdata);
+    return AUTORELEASE(data);
 }
 
 // ----------------------------------------------------------------------------
 
 + (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path {
 
-    NSData *rdata = [self archivedDataWithRootObject:rootObject];
-    return [rdata writeToFile:path atomically:YES];
+    NSData *data = [self archivedDataWithRootObject:rootObject];
+    return [data writeToFile:path atomically:YES];
 }
 
 // ----------------------------------------------------------------------------
@@ -248,14 +269,14 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 - (void)encodeValueOfObjCType:(const char *)type at:(const void *)addr {
 
     if (self.traceMode) {
-        [self _traceValueOfObjCType:type at:addr];
+        [self __traceValueOfObjCType:type at:addr];
     }
     else {
 
         if (self.didWriteHeader == NO) {
             [self __writeArchiveHeader];
         }
-        [self _encodeValueOfObjCType:type at:addr];
+        [self __encodeValueOfObjCType:type at:addr];
     }
 }
 
@@ -305,7 +326,7 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
         // Pass 2: Start writing
         [self __writeArchiveHeader];
-        [self encodeObjectsWithRoot:rootObject];
+        [self __encodeObjectsWithRoot:rootObject];
         [self __writeArchiveTrailer];
     }
     NS_HANDLER {
@@ -365,7 +386,7 @@ UInt16 OSCoderVersion = 1909; // 2019-09
             }
         }
     }
-    // Pass2: Start writing
+    // Pass 2: Start writing
     else {
         BOOL isConditional = (NSHashGet(self.outConditionals, object) != nil);
 
@@ -430,7 +451,7 @@ UInt16 OSCoderVersion = 1909; // 2019-09
         }
     }
     // Basic type
-    else if (isBaseType(type)) {
+    else if (__isBaseType(type)) {
 
         if (self.traceMode == NO) {
 
@@ -486,6 +507,54 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
 // ----------------------------------------------------------------------------
 
+- (void)__traceObject:(id)object {
+
+    // Don't trace nil objects
+    if (object == nil) {
+        return;
+    }
+
+    if (NSHashGet(self.outObjects, object) == nil) {
+
+        // Object wasn't traced yet.
+
+        // Look-up the object in the `conditionals' set. If the object is
+        // there, then remove it because it is no longer a conditional one.
+        if (NSHashGet(self.outConditionals, object)) {
+
+            // Object was marked conditional
+            NSHashRemove(self.outConditionals, object);
+        }
+
+        // Mark object as traced
+        NSHashInsert(self.outObjects, object);
+
+        if (object_is_instance(object)) {
+
+            id replacement = [object replacementObjectForCoder:self];
+            if (replacement != object) {
+
+                NSMapInsert(self.replacements, object, replacement);
+                object = replacement;
+            }
+
+            Class archiveClass = Nil;
+            if (object_is_instance(object)) {
+
+                archiveClass = [object classForCoder];
+            }
+
+            [self encodeObject:archiveClass];
+            [object encodeWithCoder:self];
+        }
+        else {
+            // There are no class-variables
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+
 - (void)__traceObjectsWithRoot:(id)rootObject {
 
     // Pass 1: Start tracing for conditionals
@@ -510,6 +579,62 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
 // ----------------------------------------------------------------------------
 
+- (void)__traceValueOfObjCType:(const char *)type at:(const void *)byteaddr {
+
+    switch (*type) {
+
+        case _C_ID:
+        case _C_CLASS: {
+            [self __traceObject:*(id *) byteaddr];
+            break;
+        }
+
+        case _C_ARY_B: {
+
+            const char *itemType = type;
+            while (isdigit((int) *(++itemType))); // Skip dimension
+
+            int count = atoi(type + 1); // eg '[15I' => count = 15
+            [self encodeArrayOfObjCType:itemType count:count at:byteaddr];
+
+            break;
+        }
+
+        case _C_STRUCT_B: { // C-structure begin '{'
+
+            while ((*type != _C_STRUCT_E) && (*type++ != '=')); // skip "<name>="
+
+            int offset = 0;
+            while (YES) {
+
+                [self encodeValueOfObjCType:type at:((char *) byteaddr) + offset];
+
+                offset += objc_sizeof_type(type);
+                type = objc_skip_typespec(type);
+
+                if (*type != _C_STRUCT_E) { // C-structure end '}'
+                    int align, remainder;
+
+                    align = objc_alignof_type(type);
+                    if ((remainder = offset % align)) {
+                        offset += (align - remainder);
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+            break;
+        }
+
+        default: {
+            // Do nothing
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+
 - (void)__writeArchiveHeader {
 
     if (self.didWriteHeader == NO) {
@@ -529,9 +654,162 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
 // ----------------------------------------------------------------------------
 
+- (void)__encodeObject:(id)object {
+
+    NSUInteger archiveId = _archiveIdOfObject(self, object);
+    if (object == nil) {
+
+        OSTagType tag = _C_ID;
+
+        // Nil object or class
+        [self writeTag:tag | REFERENCE];
+        [self writeUnsignedInteger:archiveId];
+
+        return;
+    }
+
+    BOOL isCollectable = __isCollectable(object);
+    @autoreleasepool {
+
+        OSTagType tag = (OSTagType) (object_is_instance(object) ? _C_ID : _C_CLASS);
+        if (isCollectable && NSHashGet(self.outObjects, object)) {
+
+            // Object was already written
+            [self writeTag:tag | REFERENCE];
+            [self writeUnsignedInteger:archiveId];
+        }
+        else {
+
+            // Mark object as written
+            if (isCollectable) {
+                NSHashInsert(self.outObjects, object);
+            }
+
+            [self writeTag:tag];
+            [self writeUnsignedInteger:archiveId];
+
+            // A class object
+            if (tag == _C_CLASS) {
+
+                NSString *className = NSStringFromClass(object);
+                className = [self classNameEncodedForTrueClassName:className];
+
+                [self writeString:className withTag:NO];
+                [self writeInteger:[object version]];
+            }
+            else {
+
+                id replacement = NSMapGet(self.replacements, object) ?: [object replacementObjectForCoder:self];
+                if (replacement != nil) {
+                    object = replacement;
+                }
+
+                Class archiveClass = [object classForCoder];
+                NSAssert(archiveClass, @"No archive class found.");
+
+                [self encodeObject:archiveClass];
+                [object encodeWithCoder:self];
+            }
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)__encodeObjectsWithRoot:(id)rootObject {
+
+    // Pass 2: Start writing
+    [self encodeObject:rootObject];
+}
+
+// ----------------------------------------------------------------------------
+
+// TODO: Refactoring is required
+- (void)__encodeValueOfObjCType:(const char *)_type at:(const void *)_value
+{
+    //NGLogT(@"encoder", @"encoding value of ObjC-type '%s' at %i",
+    //       _type, [self.data length]);
+
+    switch (*_type) {
+        case _C_ID:
+        case _C_CLASS:
+            // ?? Write another tag just to be possible to read using the
+            // ?? decodeObject method. (Otherwise a lookahead would be required)
+            // ?? [self writeTag:*_type];
+            [self __encodeObject:*(id *) _value];
+            break;
+
+        case _C_ARY_B: {
+            int        count     = atoi(_type + 1); // eg '[15I' => count = 15
+            const char *itemType = _type;
+
+            while(isdigit((int)*(++itemType))) ; // skip dimension
+
+            // Write another tag just to be possible to read using the
+            // decodeArrayOfObjCType:count:at: method.
+            [self writeTag:_C_ARY_B];
+            [self encodeArrayOfObjCType:itemType count:count at:_value];
+            break;
+        }
+
+        case _C_STRUCT_B: { // C-structure begin '{'
+            int offset = 0;
+
+            [self writeTag:'{'];
+
+            while ((*_type != _C_STRUCT_E) && (*_type++ != '=')); // skip "<name>="
+
+            while (YES) {
+                [self encodeValueOfObjCType:_type at:((char *)_value) + offset];
+
+                offset += objc_sizeof_type(_type);
+                _type  =  objc_skip_typespec(_type);
+
+                if(*_type != _C_STRUCT_E) { // C-structure end '}'
+                    int align, remainder;
+
+                    align = objc_alignof_type(_type);
+                    if((remainder = offset % align))
+                        offset += (align - remainder);
+                }
+                else
+                    break;
+            }
+            break;
+        }
+
+        case _C_SEL:
+            [self writeTag:_C_SEL];
+            _writeCString(self, (*(SEL *)_value) ? sel_get_name(*(SEL *)_value) : NULL);
+            break;
+
+        case _C_PTR:
+            [self writeTag:*_type];
+            _writeObjC(self, *(char **)_value, _type + 1);
+            break;
+
+        case _C_CHARPTR:
+        case _C_CHR:     case _C_UCHR:
+        case _C_SHT:     case _C_USHT:
+        case _C_INT:     case _C_UINT:
+        case _C_LNG:     case _C_ULNG:
+        case _C_LNG_LNG: case _C_ULNG_LNG:
+        case _C_FLT:     case _C_DBL:
+            [self writeTag:*_type];
+            _writeObjC(self, _value, _type);
+            break;
+
+        default:
+            NSLog(@"unsupported C type %s ..", _type);
+            break;
+    }
+}
+
+// ----------------------------------------------------------------------------
+
 // ******************** archive id's **************************
 
-FINAL int _archiveIdOfObject(OSArchiver *self, id _object)
+FINAL NSUInteger _archiveIdOfObject(OSArchiver *self, id _object)
 {
     if (_object == nil) {
         return 0;
@@ -567,255 +845,6 @@ FINAL int _archiveIdOfClass(OSArchiver *self, Class _class)
 
 FINAL void _writeCString(OSArchiver *self, const char *_value);
 FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
-
-// ******************** complex encoding **********************
-
-- (void)encodeObjectsWithRoot:(id)_root
-{
-    // encoding pass 2
-    [self encodeObject:_root];
-}
-
-- (void)_traceObject:(id)_object
-{
-    if (_object == nil) // don't trace nil objects ..
-        return;
-
-    //NSLog(@"lookup 0x%p in outObjs=0x%p", _object, self.outObjects);
-    
-    if (NSHashGet(self.outObjects, _object) == nil) {
-        //NSLog(@"lookup failed, object wasn't traced yet !");
-        
-        // object wasn't traced yet
-        // Look-up the object in the `conditionals' set. If the object is
-        // there, then remove it because it is no longer a conditional one.
-        if (NSHashGet(self.outConditionals, _object)) {
-            // object was marked conditional ..
-            NSHashRemove(self.outConditionals, _object);
-        }
-        
-        // mark object as traced
-        NSHashInsert(self.outObjects, _object);
-        
-        if (object_is_instance(_object)) {
-            Class archiveClass = Nil;
-            id    replacement  = nil;
-            
-            replacement = [_object performSelector:self->replObjectForCoder
-                                   withObject:self];
-            
-            if (replacement != _object) {
-                NSMapInsert(self.replacements, _object, replacement);
-                _object = replacement;
-            }
-            
-            if (object_is_instance(_object)) {
-                archiveClass = [_object performSelector:self->classForCoder];
-            }
-            
-            [self encodeObject:archiveClass];
-            [_object encodeWithCoder:self];
-        }
-        else {
-            // there are no class-variables ..
-        }
-    }
-}
-- (void)_encodeObject:(id)_object
-{
-    OSTagType tag;
-    int       archiveId = _archiveIdOfObject(self, _object);
-
-    if (_object == nil) { // nil object or class
-        [self writeTag:_C_ID | REFERENCE];
-        [self writeInt:archiveId];
-        return;
-    }
-    
-    tag = object_is_instance(_object) ? _C_ID : _C_CLASS;
-    
-    if (NSHashGet(self.outObjects, _object)) { // object was already written
-        [self writeTag:tag | REFERENCE];
-        [self writeInt:archiveId];
-    }
-    else {
-        // mark object as written
-        NSHashInsert(self.outObjects, _object);
-
-        /*
-          if (tag == _C_CLASS) { // a class object
-          NGLogT(@"encoder", @"encoding class %s:%i ..",
-          class_get_class_name(_object), [_object version]);
-          }
-          else {
-          NGLogT(@"encoder", @"encoding object 0x%p<%s> ..",
-          _object, class_get_class_name(*(Class *)_object));
-          }
-        */
-    
-        [self writeTag:tag];
-        [self writeInt:archiveId];
-
-        if (tag == _C_CLASS) { // a class object
-            NSString *className;
-            NSUInteger len;
-            char *buf;
-            
-            className = NSStringFromClass(_object);
-            className = [self classNameEncodedForTrueClassName:className];
-            len = [className lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
-            buf = malloc(len + 4);
-            [className getCString:buf maxLength:len + 4 encoding:NSUTF8StringEncoding]; buf[len] = '\0';
-
-            _writeCString(self, buf);
-            [self writeLong:[_object version]];
-            if (buf) free(buf);
-        }
-        else {
-            Class archiveClass = Nil;
-            id    replacement  = nil;
-
-            replacement = NSMapGet(self.replacements, _object);
-            if (replacement) _object = replacement;
-
-            /*
-              _object = [_object performSelector:self.replObjectForCoder
-              withObject:self];
-            */
-            archiveClass = [_object performSelector:self->classForCoder];
-            
-            NSAssert(archiveClass, @"no archive class found ..");
-
-            [self encodeObject:archiveClass];
-            [_object encodeWithCoder:self];
-        }
-    }
-}
-
-- (void)_traceValueOfObjCType:(const char *)_type at:(const void *)_value
-{
-    //NSLog(@"_tracing value at 0x%p of type %s", _value, _type);
-    
-    switch (*_type) {
-        case _C_ID:
-        case _C_CLASS:
-            //NSLog(@"_traceObject 0x%p", *(id *)_value);
-            [self _traceObject:*(id *)_value];
-            break;
-        
-        case _C_ARY_B: {
-            int        count     = atoi(_type + 1); // eg '[15I' => count = 15
-            const char *itemType = _type;
-            while(isdigit((int)*(++itemType))) ; // skip dimension
-            [self encodeArrayOfObjCType:itemType count:count at:_value];
-            break;
-        }
-
-        case _C_STRUCT_B: { // C-structure begin '{'
-            int offset = 0;
-
-            while ((*_type != _C_STRUCT_E) && (*_type++ != '=')); // skip "<name>="
-        
-            while (YES) {
-                [self encodeValueOfObjCType:_type at:((char *)_value) + offset];
-            
-                offset += objc_sizeof_type(_type);
-                _type  =  objc_skip_typespec(_type);
-            
-                if(*_type != _C_STRUCT_E) { // C-structure end '}'
-                    int align, remainder;
-                    
-                    align = objc_alignof_type(_type);
-                    if((remainder = offset % align))
-                        offset += (align - remainder);
-                }
-                else
-                    break;
-            }
-            break;
-        }
-    }
-}
-
-- (void)_encodeValueOfObjCType:(const char *)_type at:(const void *)_value
-{
-    //NGLogT(@"encoder", @"encoding value of ObjC-type '%s' at %i",
-    //       _type, [self.data length]);
-  
-    switch (*_type) {
-        case _C_ID:
-        case _C_CLASS:
-            // ?? Write another tag just to be possible to read using the
-            // ?? decodeObject method. (Otherwise a lookahead would be required)
-            // ?? [self writeTag:*_type];
-            [self _encodeObject:*(id *)_value];
-            break;
-
-        case _C_ARY_B: {
-            int        count     = atoi(_type + 1); // eg '[15I' => count = 15
-            const char *itemType = _type;
-
-            while(isdigit((int)*(++itemType))) ; // skip dimension
-
-            // Write another tag just to be possible to read using the
-            // decodeArrayOfObjCType:count:at: method.
-            [self writeTag:_C_ARY_B];
-            [self encodeArrayOfObjCType:itemType count:count at:_value];
-            break;
-        }
-
-        case _C_STRUCT_B: { // C-structure begin '{'
-            int offset = 0;
-
-            [self writeTag:'{'];
-
-            while ((*_type != _C_STRUCT_E) && (*_type++ != '=')); // skip "<name>="
-        
-            while (YES) {
-                [self encodeValueOfObjCType:_type at:((char *)_value) + offset];
-            
-                offset += objc_sizeof_type(_type);
-                _type  =  objc_skip_typespec(_type);
-            
-                if(*_type != _C_STRUCT_E) { // C-structure end '}'
-                    int align, remainder;
-                    
-                    align = objc_alignof_type(_type);
-                    if((remainder = offset % align))
-                        offset += (align - remainder);
-                }
-                else
-                    break;
-            }
-            break;
-        }
-
-        case _C_SEL:
-            [self writeTag:_C_SEL];
-            _writeCString(self, (*(SEL *)_value) ? sel_get_name(*(SEL *)_value) : NULL);
-            break;
-      
-        case _C_PTR:
-            [self writeTag:*_type];
-            _writeObjC(self, *(char **)_value, _type + 1);
-            break;
-
-        case _C_CHARPTR:
-        case _C_CHR:     case _C_UCHR:
-        case _C_SHT:     case _C_USHT:
-        case _C_INT:     case _C_UINT:
-        case _C_LNG:     case _C_ULNG:
-        case _C_LNG_LNG: case _C_ULNG_LNG:
-        case _C_FLT:     case _C_DBL:
-            [self writeTag:*_type];
-            _writeObjC(self, _value, _type);
-            break;
-      
-        default:
-            NSLog(@"unsupported C type %s ..", _type);
-            break;
-    }
-}
 
 // ******************** primitive encoding ********************
 
@@ -863,9 +892,9 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type)
     NSAssert(((*_type == _C_ID) || (*_type == _C_CLASS)), @"unexpected type ..");
 
     if (self.traceMode)
-        [self _traceObject:*_object];
+        [self __traceObject:*_object];
     else
-        [self _encodeObject:*_object];
+        [self __encodeObject:*_object];
 }
 - (void)deserializeObjectAt:(id *)_object
         ofObjCType:(const char *)_type

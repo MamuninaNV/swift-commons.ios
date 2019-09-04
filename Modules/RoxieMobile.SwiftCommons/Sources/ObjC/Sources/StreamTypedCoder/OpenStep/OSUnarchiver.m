@@ -114,24 +114,290 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
 }
 
 // ----------------------------------------------------------------------------
-#pragma mark - Private Methods
-// ----------------------------------------------------------------------------
-
-// TODO:
-
-// ----------------------------------------------------------------------------
 #pragma mark - Methods
 // ----------------------------------------------------------------------------
 
-+ (void)initialize
-{
++ (void)initialize {
+
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _classToAliasMappings = NSCreateMapTable(NSObjectMapKeyCallBacks,
-                                                NSObjectMapValueCallBacks,
-                                                19);
+
+        _classToAliasMappings = NSCreateMapTable(NSObjectMapKeyCallBacks, NSObjectMapValueCallBacks, 19);
     });
 }
+
+// ----------------------------------------------------------------------------
+#pragma mark - @interface NSCoder
+// ----------------------------------------------------------------------------
+
+- (NSData *)decodeDataObject {
+
+    NSData *data = nil;
+
+    // Decode bytes
+    NSUInteger length = 0;
+    void *bytes = [self decodeBytesWithReturnedLength:&length];
+
+    if ((bytes != nil) && (length > 0)) {
+        data = [NSData dataWithBytes:bytes length:length];
+    }
+    else {
+        data = [NSData data];
+    }
+
+    // Done
+    return data;
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)decodeValueOfObjCType:(const char *)type at:(void *)data size:(NSUInteger)size {
+    [self decodeValueOfObjCType:type at:data];
+}
+
+// ----------------------------------------------------------------------------
+
+// TODO: Refactoring is required
+- (void)decodeValueOfObjCType:(const char *)_type at:(void *)_value {
+
+    BOOL      startedDecoding = NO;
+    OSTagType tag             = 0;
+    BOOL      isReference     = NO;
+
+    if (self.decodingRoot == NO) {
+        self.decodingRoot = YES;
+        startedDecoding = YES;
+        [self beginDecoding];
+    }
+
+    //NGLogT(@"decoder", @"cursor is now %i", self->cursor);
+
+    tag         = [self readTag];
+    isReference = isReferenceTag(tag);
+    tag         = tagValue(tag);
+
+#if ARCHIVE_DEBUGGING
+    NSLog(@"decoder: decoding tag '%s%c' type '%s'",
+           isReference ? "&" : "", tag, _type);
+#endif
+
+    switch (tag) {
+        case _C_ID:
+            _checkType2(*_type, _C_ID, _C_CLASS);
+            *(id *)_value = [self _decodeObject:isReference];
+            break;
+        case _C_CLASS:
+            _checkType2(*_type, _C_ID, _C_CLASS);
+            *(Class *)_value = [self _decodeClass:isReference];
+            break;
+
+        case _C_ARY_B: {
+            int        count     = atoi(_type + 1); // eg '[15I' => count = 15
+            const char *itemType = _type;
+
+            _checkType(*_type, _C_ARY_B);
+
+            while(isdigit((int)*(++itemType))) ; // skip dimension
+
+            [self decodeArrayOfObjCType:itemType count:count at:_value];
+            break;
+        }
+
+        case _C_STRUCT_B: {
+            int offset = 0;
+
+            _checkType(*_type, _C_STRUCT_B);
+
+            while ((*_type != _C_STRUCT_E) && (*_type++ != '=')); // skip "<name>="
+
+            while (YES) {
+                [self decodeValueOfObjCType:_type at:((char *)_value) + offset];
+
+                offset += objc_sizeof_type(_type);
+                _type  =  objc_skip_typespec(_type);
+
+                if(*_type != _C_STRUCT_E) { // C-structure end '}'
+                    int align, remainder;
+
+                    align = objc_alignof_type(_type);
+                    if((remainder = offset % align))
+                        offset += (align - remainder);
+                }
+                else
+                    break;
+            }
+            break;
+        }
+
+        case _C_SEL: {
+            char *name = NULL;
+
+            _checkType(*_type, tag);
+
+            _readObjC(self, &name, @encode(char *));
+            *(SEL *)_value = name ? sel_get_any_uid(name) : NULL;
+            lfFree(name); name = NULL;
+        }
+
+        case _C_PTR:
+            _readObjC(self, *(char **)_value, _type + 1); // skip '^'
+            break;
+
+        case _C_CHARPTR:
+        case _C_CHR:     case _C_UCHR:
+        case _C_SHT:     case _C_USHT:
+        case _C_INT:     case _C_UINT:
+        case _C_LNG:     case _C_ULNG:
+        case _C_LNG_LNG: case _C_ULNG_LNG:
+        case _C_FLT:     case _C_DBL:
+            _checkType(*_type, tag);
+            _readObjC(self, _value, _type);
+            break;
+
+        default:
+            [NSException raise:OSInconsistentArchiveException
+                         format:@"unsupported typecode %i found.", tag];
+            break;
+    }
+
+    if (startedDecoding) {
+        [self endDecoding];
+        self.decodingRoot = NO;
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+- (NSInteger)versionForClassName:(NSString *)className {
+
+    id version = NSMapGet(self.inClassVersions, className);
+    return (version ? [version integerValue] : NSNotFound);
+}
+
+// ----------------------------------------------------------------------------
+
+- (id)decodeObject {
+
+    id object = nil;
+
+    // Decode object
+    const char type[] = {_C_ID, 0};
+    [self decodeValueOfObjCType:type at:&object];
+
+    // Done
+    return AUTORELEASE(object);
+}
+
+// ----------------------------------------------------------------------------
+
+// - (id)decodeTopLevelObjectAndReturnError:(NSError **)error {
+//     NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
+// }
+
+// ----------------------------------------------------------------------------
+
+- (void)decodeValuesOfObjCTypes:(const char *)types, ... {
+
+    va_list args;
+    va_start(args, types);
+
+    while (types && *types) {
+        [self decodeValueOfObjCType:types at:va_arg(args, void *)];
+        types = objc_skip_typespec(types);
+    }
+
+    va_end(args);
+}
+
+// ----------------------------------------------------------------------------
+
+// TODO: Refactoring is required
+- (void)decodeArrayOfObjCType:(const char *)itemType count:(NSUInteger)count at:(void *)array {
+
+    BOOL      startedDecoding = NO;
+    OSTagType tag    = [self readTag];
+    int       length = [self readInt];
+
+    if (self.decodingRoot == NO) {
+        self.decodingRoot = YES;
+        startedDecoding = YES;
+        [self beginDecoding];
+    }
+
+    NSAssert(tag == _C_ARY_B, @"invalid type ..");
+    NSAssert(count == length, @"invalid array size ..");
+
+    // Arrays of elementary types are written optimized: the type is written
+    // then the elements of array follow.
+    if ((*itemType == _C_ID) || (*itemType == _C_CLASS)) { // object array
+        int i;
+
+        tag = [self readTag]; // object array
+        NSAssert(tag == *itemType, @"invalid array element type ..");
+
+        for (i = 0; i < count; i++)
+            ((id *)array)[i] = [self decodeObject];
+    }
+    else if ((*itemType == _C_CHR) || (*itemType == _C_UCHR)) { // byte array
+        tag = [self readTag];
+        NSAssert((tag == _C_CHR) || (tag == _C_UCHR), @"invalid byte array type ..");
+
+        // read buffer
+        [self readBytes:array length:count];
+    }
+    else if (isBaseType(itemType)) {
+        unsigned offset, itemSize = objc_sizeof_type(itemType);
+        int      i;
+
+        tag = [self readTag];
+        NSAssert(tag == *itemType, @"invalid array base type ..");
+
+        for (i = offset = 0; i < count; i++, offset += itemSize)
+            _readObjC(self, (char *)array + offset, itemType);
+    }
+    else {
+        IMP      decodeValue = NULL;
+        unsigned offset, itemSize = objc_sizeof_type(itemType);
+        int      i;
+
+        decodeValue = [self methodForSelector:@selector(decodeValueOfObjCType:at:)];
+
+        for (i = offset = 0; i < length; i++, offset += itemSize) {
+            [self decodeValueOfObjCType:itemType at:(char *)array + offset];
+        }
+    }
+
+    if (startedDecoding) {
+        [self endDecoding];
+        self.decodingRoot = NO;
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+- (void *)decodeBytesWithReturnedLength:(NSUInteger *)lengthp {
+
+    NSUInteger length = [self readUnsignedInteger];
+    void *bytes = nil;
+
+    if (length > 0) {
+        bytes = (void *) ((Byte *) self.buffer.bytes + self.cursor);
+        self.cursor += length;
+    }
+
+    if (lengthp != nil) {
+        *lengthp = length;
+    }
+
+    // Done
+    return bytes;
+}
+
+// ----------------------------------------------------------------------------
+#pragma mark - Protected Methods
+// ----------------------------------------------------------------------------
+
+// TODO:
 
 // ----------------------------------------------------------------------------
 
@@ -511,273 +777,6 @@ FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type)
                            _type];
             break;
     }
-}
-
-// ----------------------------------------------------------------------------
-#pragma mark - @interface NSCoder
-// ----------------------------------------------------------------------------
-
-- (NSData *)decodeDataObject {
-
-    NSData *data = nil;
-
-    // Decode bytes
-    NSUInteger length = 0;
-    void *bytes = [self decodeBytesWithReturnedLength:&length];
-
-    if ((bytes != nil) && (length > 0)) {
-        data = [NSData dataWithBytes:bytes length:length];
-    }
-    else {
-        data = [NSData data];
-    }
-
-    // Done
-    return data;
-}
-
-// ----------------------------------------------------------------------------
-
-- (void)decodeValueOfObjCType:(const char *)type at:(void *)data size:(NSUInteger)size {
-    [self decodeValueOfObjCType:type at:data];
-}
-
-// ----------------------------------------------------------------------------
-
-// TODO: Refactoring is required
-- (void)decodeValueOfObjCType:(const char *)_type at:(void *)_value {
-
-    BOOL      startedDecoding = NO;
-    OSTagType tag             = 0;
-    BOOL      isReference     = NO;
-
-    if (self.decodingRoot == NO) {
-        self.decodingRoot = YES;
-        startedDecoding = YES;
-        [self beginDecoding];
-    }
-
-    //NGLogT(@"decoder", @"cursor is now %i", self->cursor);
-
-    tag         = [self readTag];
-    isReference = isReferenceTag(tag);
-    tag         = tagValue(tag);
-
-#if ARCHIVE_DEBUGGING
-    NSLog(@"decoder: decoding tag '%s%c' type '%s'",
-           isReference ? "&" : "", tag, _type);
-#endif
-
-    switch (tag) {
-        case _C_ID:
-            _checkType2(*_type, _C_ID, _C_CLASS);
-            *(id *)_value = [self _decodeObject:isReference];
-            break;
-        case _C_CLASS:
-            _checkType2(*_type, _C_ID, _C_CLASS);
-            *(Class *)_value = [self _decodeClass:isReference];
-            break;
-
-        case _C_ARY_B: {
-            int        count     = atoi(_type + 1); // eg '[15I' => count = 15
-            const char *itemType = _type;
-
-            _checkType(*_type, _C_ARY_B);
-
-            while(isdigit((int)*(++itemType))) ; // skip dimension
-
-            [self decodeArrayOfObjCType:itemType count:count at:_value];
-            break;
-        }
-
-        case _C_STRUCT_B: {
-            int offset = 0;
-
-            _checkType(*_type, _C_STRUCT_B);
-
-            while ((*_type != _C_STRUCT_E) && (*_type++ != '=')); // skip "<name>="
-
-            while (YES) {
-                [self decodeValueOfObjCType:_type at:((char *)_value) + offset];
-
-                offset += objc_sizeof_type(_type);
-                _type  =  objc_skip_typespec(_type);
-
-                if(*_type != _C_STRUCT_E) { // C-structure end '}'
-                    int align, remainder;
-
-                    align = objc_alignof_type(_type);
-                    if((remainder = offset % align))
-                        offset += (align - remainder);
-                }
-                else
-                    break;
-            }
-            break;
-        }
-
-        case _C_SEL: {
-            char *name = NULL;
-
-            _checkType(*_type, tag);
-
-            _readObjC(self, &name, @encode(char *));
-            *(SEL *)_value = name ? sel_get_any_uid(name) : NULL;
-            lfFree(name); name = NULL;
-        }
-
-        case _C_PTR:
-            _readObjC(self, *(char **)_value, _type + 1); // skip '^'
-            break;
-
-        case _C_CHARPTR:
-        case _C_CHR:     case _C_UCHR:
-        case _C_SHT:     case _C_USHT:
-        case _C_INT:     case _C_UINT:
-        case _C_LNG:     case _C_ULNG:
-        case _C_LNG_LNG: case _C_ULNG_LNG:
-        case _C_FLT:     case _C_DBL:
-            _checkType(*_type, tag);
-            _readObjC(self, _value, _type);
-            break;
-
-        default:
-            [NSException raise:OSInconsistentArchiveException
-                         format:@"unsupported typecode %i found.", tag];
-            break;
-    }
-
-    if (startedDecoding) {
-        [self endDecoding];
-        self.decodingRoot = NO;
-    }
-}
-
-// ----------------------------------------------------------------------------
-
-- (NSInteger)versionForClassName:(NSString *)className {
-
-    id version = NSMapGet(self.inClassVersions, className);
-    return (version ? [version integerValue] : NSNotFound);
-}
-
-// ----------------------------------------------------------------------------
-
-- (id)decodeObject {
-
-    id object = nil;
-
-    // Decode object
-    const char type[] = {_C_ID, 0};
-    [self decodeValueOfObjCType:type at:&object];
-
-    // Done
-    return AUTORELEASE(object);
-}
-
-// ----------------------------------------------------------------------------
-
-// - (id)decodeTopLevelObjectAndReturnError:(NSError **)error {
-//     NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
-// }
-
-// ----------------------------------------------------------------------------
-
-- (void)decodeValuesOfObjCTypes:(const char *)types, ... {
-
-    va_list args;
-    va_start(args, types);
-
-    while (types && *types) {
-        [self decodeValueOfObjCType:types at:va_arg(args, void *)];
-        types = objc_skip_typespec(types);
-    }
-
-    va_end(args);
-}
-
-// ----------------------------------------------------------------------------
-
-// TODO: Refactoring is required
-- (void)decodeArrayOfObjCType:(const char *)itemType count:(NSUInteger)count at:(void *)array {
-
-    BOOL      startedDecoding = NO;
-    OSTagType tag    = [self readTag];
-    int       length = [self readInt];
-
-    if (self.decodingRoot == NO) {
-        self.decodingRoot = YES;
-        startedDecoding = YES;
-        [self beginDecoding];
-    }
-
-    NSAssert(tag == _C_ARY_B, @"invalid type ..");
-    NSAssert(count == length, @"invalid array size ..");
-
-    // Arrays of elementary types are written optimized: the type is written
-    // then the elements of array follow.
-    if ((*itemType == _C_ID) || (*itemType == _C_CLASS)) { // object array
-        int i;
-
-        tag = [self readTag]; // object array
-        NSAssert(tag == *itemType, @"invalid array element type ..");
-
-        for (i = 0; i < count; i++)
-            ((id *)array)[i] = [self decodeObject];
-    }
-    else if ((*itemType == _C_CHR) || (*itemType == _C_UCHR)) { // byte array
-        tag = [self readTag];
-        NSAssert((tag == _C_CHR) || (tag == _C_UCHR), @"invalid byte array type ..");
-
-        // read buffer
-        [self readBytes:array length:count];
-    }
-    else if (isBaseType(itemType)) {
-        unsigned offset, itemSize = objc_sizeof_type(itemType);
-        int      i;
-
-        tag = [self readTag];
-        NSAssert(tag == *itemType, @"invalid array base type ..");
-
-        for (i = offset = 0; i < count; i++, offset += itemSize)
-            _readObjC(self, (char *)array + offset, itemType);
-    }
-    else {
-        IMP      decodeValue = NULL;
-        unsigned offset, itemSize = objc_sizeof_type(itemType);
-        int      i;
-
-        decodeValue = [self methodForSelector:@selector(decodeValueOfObjCType:at:)];
-
-        for (i = offset = 0; i < length; i++, offset += itemSize) {
-            [self decodeValueOfObjCType:itemType at:(char *)array + offset];
-        }
-    }
-
-    if (startedDecoding) {
-        [self endDecoding];
-        self.decodingRoot = NO;
-    }
-}
-
-// ----------------------------------------------------------------------------
-
-- (void *)decodeBytesWithReturnedLength:(NSUInteger *)lengthp {
-
-    NSUInteger length = [self readUnsignedInteger];
-    void *bytes = nil;
-
-    if (length > 0) {
-        bytes = (void *) ((Byte *) self.buffer.bytes + self.cursor);
-        self.cursor += length;
-    }
-
-    if (lengthp != nil) {
-        *lengthp = length;
-    }
-
-    // Done
-    return bytes;
 }
 
 // ----------------------------------------------------------------------------
