@@ -181,86 +181,6 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
 // ----------------------------------------------------------------------------
 
-- (void)encodeConditionalObject:(id)object {
-
-    // Pass 1: Start tracing for conditionals
-    if (self.traceMode) {
-
-        /*
-         * This is the first pass of the determining the conditionals
-         * algorithm. We traverse the graph and insert into the `conditionals'
-         * set. In the second pass all objects that are still in this set will
-         * be encoded as Nil when they receive -encodeConditionalObject:. An
-         * object is removed from this set when it receives -encodeObject:.
-         */
-
-        if (object) {
-
-            if (NSHashGet(self.outObjects, object)) {
-                // Object isn't conditional any more (was stored using encodeObject:)
-            }
-            else if (NSHashGet(self.outConditionals, object)) {
-                // Object is already stored as conditional
-            }
-            else {
-                // Insert object in conditionals set
-                NSHashInsert(self.outConditionals, object);
-            }
-        }
-    }
-    // Pass2: Start writing
-    else {
-        BOOL isConditional = (NSHashGet(self.outConditionals, object) != nil);
-
-        // If anObject is still in the ‘conditionals’ set, it is encoded as Nil.
-        [self encodeObject:(isConditional ? nil : object)];
-    }
-}
-
-// ----------------------------------------------------------------------------
-
-- (void)encodeRootObject:(id)rootObject {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool allocWithZone:[self zone]] init];
-
-    [self __beginEncoding];
-
-    NS_DURING {
-
-        /*
-         * Prepare for writing the graph objects for which `rootObject' is the root
-         * node. The algorithm consists from two passes. In the first pass it
-         * determines the nodes so-called 'conditionals' - the nodes encoded *only*
-         * with -encodeConditionalObject:. They represent nodes that are not
-         * related directly to the graph. In the second pass objects are encoded
-         * normally, except for the conditional objects which are encoded as Nil.
-         */
-
-        // Pass 1: Start tracing for conditionals
-        [self __traceObjectsWithRoot:rootObject];
-
-        // Pass 2: Start writing
-        [self __writeArchiveHeader];
-        [self encodeObjectsWithRoot:rootObject];
-        [self __writeArchiveTrailer];
-    }
-    NS_HANDLER {
-
-        // Release resources
-        [self __endEncoding];
-
-        // Re-throw exception
-        [localException raise];
-    }
-    NS_ENDHANDLER;
-
-    // Release resources
-    [self __endEncoding];
-
-    RELEASE(pool);
-}
-
-// ----------------------------------------------------------------------------
-
 - (NSString *)classNameEncodedForTrueClassName:(NSString *)trueName {
 
     NSString *name = NSMapGet(self.outClassAlias, trueName);
@@ -275,9 +195,9 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
 // ----------------------------------------------------------------------------
 
-- (void)replaceObject:(id)object withObject:(id)newObject {
-    NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
-}
+// - (void)replaceObject:(id)object withObject:(id)newObject {
+//     NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
+// }
 
 // ----------------------------------------------------------------------------
 
@@ -357,14 +277,94 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
 // ----------------------------------------------------------------------------
 
-- (void)encodeBycopyObject:(id)anObject {
-    NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
+- (void)encodeRootObject:(id)rootObject {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool allocWithZone:[self zone]] init];
+
+    [self __beginEncoding];
+
+    NS_DURING {
+
+        /*
+         * Prepare for writing the graph objects for which `rootObject' is the root
+         * node. The algorithm consists from two passes. In the first pass it
+         * determines the nodes so-called 'conditionals' - the nodes encoded *only*
+         * with -encodeConditionalObject:. They represent nodes that are not
+         * related directly to the graph. In the second pass objects are encoded
+         * normally, except for the conditional objects which are encoded as Nil.
+         */
+
+        // Pass 1: Start tracing for conditionals
+        [self __traceObjectsWithRoot:rootObject];
+
+        // Pass 2: Start writing
+        [self __writeArchiveHeader];
+        [self encodeObjectsWithRoot:rootObject];
+        [self __writeArchiveTrailer];
+    }
+    NS_HANDLER {
+
+        // Release resources
+        [self __endEncoding];
+
+        // Re-throw exception
+        [localException raise];
+    }
+    NS_ENDHANDLER;
+
+    // Release resources
+    [self __endEncoding];
+
+    RELEASE(pool);
 }
 
 // ----------------------------------------------------------------------------
 
-- (void)encodeByrefObject:(id)anObject {
-    NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
+// - (void)encodeBycopyObject:(id)anObject {
+//     NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
+// }
+
+// ----------------------------------------------------------------------------
+
+// - (void)encodeByrefObject:(id)anObject {
+//     NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
+// }
+
+// ----------------------------------------------------------------------------
+
+- (void)encodeConditionalObject:(id)object {
+
+    // Pass 1: Start tracing for conditionals
+    if (self.traceMode) {
+
+        /*
+         * This is the first pass of the determining the conditionals
+         * algorithm. We traverse the graph and insert into the `conditionals'
+         * set. In the second pass all objects that are still in this set will
+         * be encoded as Nil when they receive -encodeConditionalObject:. An
+         * object is removed from this set when it receives -encodeObject:.
+         */
+
+        if (object) {
+
+            if (NSHashGet(self.outObjects, object)) {
+                // Object isn't conditional any more (was stored using encodeObject:)
+            }
+            else if (NSHashGet(self.outConditionals, object)) {
+                // Object is already stored as conditional
+            }
+            else {
+                // Insert object in conditionals set
+                NSHashInsert(self.outConditionals, object);
+            }
+        }
+    }
+    // Pass2: Start writing
+    else {
+        BOOL isConditional = (NSHashGet(self.outConditionals, object) != nil);
+
+        // If anObject is still in the ‘conditionals’ set, it is encoded as Nil.
+        [self encodeObject:(isConditional ? nil : object)];
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -458,14 +458,11 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
 - (void)encodeBytes:(const void *)byteaddr length:(NSUInteger)length {
 
-    [self writeUnsignedInteger:length];
-    [self writeBytes:byteaddr length:length];
+    if (self.traceMode == NO) {
+        [self writeUnsignedInteger:length];
+        [self writeBytes:byteaddr length:length];
+    }
 }
-
-// ----------------------------------------------------------------------------
-
-// - (void)setObjectZone:(nullable NSZone *)zone NS_AUTOMATED_REFCOUNT_UNAVAILABLE;
-// - (nullable NSZone *)objectZone NS_AUTOMATED_REFCOUNT_UNAVAILABLE;
 
 // ----------------------------------------------------------------------------
 #pragma mark - Protected Methods

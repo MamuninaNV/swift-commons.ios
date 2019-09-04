@@ -15,8 +15,6 @@
 
 @interface OSUnarchiver : NSCoder < OSObjCTypeSerializationCallBack >
 {
-    NSZone      *objectZone;
-
     // source
     void (*getData)(id, SEL, void *, unsigned, unsigned *);
     void (*deserData)(id, SEL, void *, const char *, unsigned *, id);
@@ -36,11 +34,6 @@
 + (id)unarchiveObjectWithData:(NSData*)data;
 + (id)unarchiveObjectWithFile:(NSString*)path;
 
-/* Managing an OSUnarchiver */
-
-- (NSZone *)objectZone;
-- (void)setObjectZone:(NSZone *)_zone;
-
 // decoding
 
 - (id)decodeObject;
@@ -51,7 +44,11 @@
 + (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName;
 - (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive;
 - (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName;
-// not supported yet: replaceObject:withObject:
+
+// NOTE: Not supported
+// - (void)replaceObject:(id)object withObject:(id)newObject;
+
+// --
 
 @end
 

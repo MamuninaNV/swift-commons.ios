@@ -45,8 +45,8 @@
 - (NSString *)classNameEncodedForTrueClassName:(NSString *)trueName;
 - (void)encodeClassName:(NSString *)trueName intoClassName:(NSString *)inArchiveName;
 
-// NOTE: Not supported yet
-- (void)replaceObject:(id)object withObject:(id)newObject;
+// NOTE: Not supported
+// - (void)replaceObject:(id)object withObject:(id)newObject;
 
 // --
 

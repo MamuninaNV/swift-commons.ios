@@ -203,17 +203,6 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
 }
 #endif
 
-/* Managing an OSUnarchiver */
-
-- (void)setObjectZone:(NSZone *)_zone
-{
-    self->objectZone = _zone;
-}
-- (NSZone *)objectZone
-{
-    return self->objectZone;
-}
-
 // ******************** primitive decoding ********************
 
 FINAL char *_readCString(OSUnarchiver *self);
@@ -369,7 +358,7 @@ FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type);
         [self decodeValueOfObjCType:"#" at:&class];
         NSAssert(class, @"could not decode class for object.");
     
-        result = [class allocWithZone:self->objectZone];
+        result = [class allocWithZone:NSDefaultMallocZone()];
         NSMapInsert(self.inObjects, (void *)(long)archiveId, result);
         
 #if ARCHIVE_DEBUGGING
@@ -689,10 +678,9 @@ FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type)
 
 // ----------------------------------------------------------------------------
 
-- (id)decodeTopLevelObjectAndReturnError:(NSError **)error {
-    NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
-    return nil;
-}
+// - (id)decodeTopLevelObjectAndReturnError:(NSError **)error {
+//     NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
+// }
 
 // ----------------------------------------------------------------------------
 
