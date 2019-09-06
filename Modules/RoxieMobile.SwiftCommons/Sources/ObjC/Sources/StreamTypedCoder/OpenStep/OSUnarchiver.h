@@ -13,7 +13,7 @@
 
 // ----------------------------------------------------------------------------
 
-@interface OSUnarchiver : NSCoder < OSObjCTypeSerializationCallBack >
+@interface OSUnarchiver : NSCoder <OSObjCTypeSerializationCallBack>
 {
     // source
     void (*getData)(id, SEL, void *, unsigned, unsigned *);
@@ -28,20 +28,17 @@
 
 // - Methods
 
-- (id)initForReadingWithData:(NSData*)data;
+// Initializing an Unarchiver
+- (instancetype)initForReadingWithData:(NSData *)data;
 
-/* Decoding Objects */
-+ (id)unarchiveObjectWithData:(NSData*)data;
-+ (id)unarchiveObjectWithFile:(NSString*)path;
+// Decoding objects
++ (id)unarchiveObjectWithData:(NSData *)data;
++ (id)unarchiveObjectWithFile:(NSString *)path;
 
-// decoding
-
-- (id)decodeObject;
-
-/* Substituting One Class for Another */
-
+// Substituting one Class for another
 + (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive;
 + (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName;
+
 - (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive;
 - (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName;
 

@@ -20,8 +20,6 @@
 
 // ----------------------------------------------------------------------------
 
-#define ARCHIVE_DEBUGGING      0
-
 #define FINAL static inline
 
 static NSMapTableKeyCallBacks NSIdentityObjectMapKeyCallbacks = {
@@ -55,7 +53,7 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
 // Destination
 @property(nonatomic, strong) NSMutableData *buffer;
-@property(nonatomic, assign) NSUInteger archiveAddress;
+@property(nonatomic, assign) OSIdType archiveAddress;
 
 // Flags
 @property(nonatomic, assign) BOOL traceMode;                // YES if finding conditionals
@@ -73,18 +71,21 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 static BOOL __isBaseType(const char *type) {
 
     // @formatter:off
-    switch (*type) {
+    OSTagType tag = (OSTagType) (*type);
+    switch (tag) {
 
         case _C_CHR:     case _C_UCHR:
         case _C_SHT:     case _C_USHT:
         case _C_INT:     case _C_UINT:
         case _C_LNG:     case _C_ULNG:
         case _C_LNG_LNG: case _C_ULNG_LNG:
-        case _C_FLT:     case _C_DBL:
+        case _C_FLT:     case _C_DBL: {
             return YES;
+        }
 
-        default:
+        default: {
             return NO;
+        }
     }
     // @formatter:on
 }
@@ -157,11 +158,6 @@ static BOOL __isCollectable(id object) {
         self.archiveAddress = 1;
 
         // Init instance variables
-        self->classForCoder =
-                @selector(classForCoder);
-        self->replObjectForCoder =
-                @selector(replacementObjectForCoder:);
-
         self->serData =
                 (void *) [self.buffer methodForSelector:@selector(serializeDataAt:ofObjCType:context:)];
         self->addData =
@@ -204,8 +200,8 @@ static BOOL __isCollectable(id object) {
 
 - (NSString *)classNameEncodedForTrueClassName:(NSString *)trueName {
 
-    NSString *name = NSMapGet(self.outClassAlias, trueName);
-    return (name ? name : trueName);
+    NSString *className = NSMapGet(self.outClassAlias, trueName);
+    return (className ? className : trueName);
 }
 
 // ----------------------------------------------------------------------------
@@ -295,7 +291,7 @@ static BOOL __isCollectable(id object) {
 
     if (self.encodingRoot) {
 
-        const char type[] = {(const char) (object_is_instance(object) ? _C_ID : _C_CLASS), 0};
+        const char type[] = {(OSTagType) (object_is_instance(object) ? _C_ID : _C_CLASS), 0};
         [self encodeValueOfObjCType:type at:&object];
     }
     else {
@@ -306,43 +302,43 @@ static BOOL __isCollectable(id object) {
 // ----------------------------------------------------------------------------
 
 - (void)encodeRootObject:(id)rootObject {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool allocWithZone:[self zone]] init];
 
-    [self __beginEncoding];
+    @autoreleasepool {
 
-    NS_DURING {
+        [self __beginEncoding];
 
-        /*
-         * Prepare for writing the graph objects for which `rootObject' is the root
-         * node. The algorithm consists from two passes. In the first pass it
-         * determines the nodes so-called 'conditionals' - the nodes encoded *only*
-         * with -encodeConditionalObject:. They represent nodes that are not
-         * related directly to the graph. In the second pass objects are encoded
-         * normally, except for the conditional objects which are encoded as Nil.
-         */
+        NS_DURING {
 
-        // Pass 1: Start tracing for conditionals
-        [self __traceObjectsWithRoot:rootObject];
+            /*
+             * Prepare for writing the graph objects for which `rootObject' is the root
+             * node. The algorithm consists from two passes. In the first pass it
+             * determines the nodes so-called 'conditionals' - the nodes encoded *only*
+             * with -encodeConditionalObject:. They represent nodes that are not
+             * related directly to the graph. In the second pass objects are encoded
+             * normally, except for the conditional objects which are encoded as Nil.
+             */
 
-        // Pass 2: Start writing
-        [self __writeArchiveHeader];
-        [self __encodeObjectsWithRoot:rootObject];
-        [self __writeArchiveTrailer];
-    }
-    NS_HANDLER {
+            // Pass 1: Start tracing for conditionals
+            [self __traceObjectsWithRoot:rootObject];
+
+            // Pass 2: Start writing
+            [self __writeArchiveHeader];
+            [self __encodeObjectsWithRoot:rootObject];
+            [self __writeArchiveTrailer];
+        }
+        NS_HANDLER {
+
+            // Release resources
+            [self __endEncoding];
+
+            // Re-throw exception
+            [localException raise];
+        }
+        NS_ENDHANDLER;
 
         // Release resources
         [self __endEncoding];
-
-        // Re-throw exception
-        [localException raise];
     }
-    NS_ENDHANDLER;
-
-    // Release resources
-    [self __endEncoding];
-
-    RELEASE(pool);
 }
 
 // ----------------------------------------------------------------------------
@@ -388,6 +384,7 @@ static BOOL __isCollectable(id object) {
     }
     // Pass 2: Start writing
     else {
+
         BOOL isConditional = (NSHashGet(self.outConditionals, object) != nil);
 
         // If anObject is still in the ‘conditionals’ set, it is encoded as Nil.
@@ -421,7 +418,7 @@ static BOOL __isCollectable(id object) {
     // Array header
     if (self.traceMode == NO) { // Nothing is written during trace-mode
         [self writeTag:_C_ARY_B];
-        [self writeInt:count];
+        [self writeInt:(int) count];
     }
 
     // Optimize writing arrays of elementary types. If such an array has to
@@ -435,7 +432,7 @@ static BOOL __isCollectable(id object) {
         }
 
         for (int idx = 0; idx < count; idx++) {
-            [self encodeObject:((id *)array)[idx]];
+            [self encodeObject:((id *) array)[idx]];
         }
     }
     // Byte array
@@ -455,24 +452,26 @@ static BOOL __isCollectable(id object) {
 
         if (self.traceMode == NO) {
 
-            unsigned itemSize = objc_sizeof_type(type);
+            int itemSize = objc_sizeof_type(type);
 
             // Write base type tag
             [self writeTag:*type];
 
             // Write contents
             for (int idx = 0, offset = 0; idx < count; idx++, offset += itemSize) {
-                _writeObjC(self, ((char *)array + offset), type);
+                _writeObjC(self, ((char *) array + offset), type);
+
+// FIXME: Uncomment!
+//                [self encodeValueOfObjCType:type at:((char *) array + offset)];
             }
         }
     }
     // Encoded using normal method
     else {
 
-        unsigned itemSize = objc_sizeof_type(type);
-
+        int itemSize = objc_sizeof_type(type);
         for (int idx = 0, offset = 0; idx < count; idx++, offset += itemSize) {
-            [self encodeValueOfObjCType:type at:((char *)array + offset)];
+            [self encodeValueOfObjCType:type at:((char *) array + offset)];
         }
     }
 }
@@ -485,6 +484,27 @@ static BOOL __isCollectable(id object) {
         [self writeUnsignedInteger:length];
         [self writeBytes:byteaddr length:length];
     }
+}
+
+// ----------------------------------------------------------------------------
+#pragma mark - @protocol OSObjCTypeSerializationCallBack
+// ----------------------------------------------------------------------------
+
+- (void)serializeObjectAt:(id *)object ofObjCType:(const char *)type intoData:(NSMutableData *)data {
+    NSAssert((*type == _C_ID) || (*type == _C_CLASS), @"Unexpected type.");
+
+    if (self.traceMode) {
+        [self __traceObject:*object];
+    }
+    else {
+        [self __encodeObject:*object];
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)deserializeObjectAt:(id *)object ofObjCType:(const char *)type fromData:(NSData *)data atCursor:(unsigned int *)cursor {
+    [self doesNotRecognizeSelector:_cmd];
 }
 
 // ----------------------------------------------------------------------------
@@ -503,6 +523,25 @@ static BOOL __isCollectable(id object) {
 
     self.traceMode = NO;
     self.encodingRoot = NO;
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)__writeArchiveHeader {
+
+    if (self.didWriteHeader == NO) {
+        self.didWriteHeader = YES;
+
+        // Write archive header
+        [self writeString:OSCoderSignature withTag:NO];
+        [self writeUnsignedShort:OSCoderVersion];
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)__writeArchiveTrailer {
+    // Do nothing
 }
 
 // ----------------------------------------------------------------------------
@@ -635,28 +674,9 @@ static BOOL __isCollectable(id object) {
 
 // ----------------------------------------------------------------------------
 
-- (void)__writeArchiveHeader {
-
-    if (self.didWriteHeader == NO) {
-        self.didWriteHeader = YES;
-
-        // Write archive header
-        [self writeString:OSCoderSignature withTag:NO];
-        [self writeUnsignedShort:OSCoderVersion];
-    }
-}
-
-// ----------------------------------------------------------------------------
-
-- (void)__writeArchiveTrailer {
-    // Do nothing
-}
-
-// ----------------------------------------------------------------------------
-
 - (void)__encodeObject:(id)object {
 
-    NSUInteger archiveId = _archiveIdOfObject(self, object);
+    OSIdType archiveId = [self __archiveIdOfObject:object];
     if (object == nil) {
 
         OSTagType tag = _C_ID;
@@ -807,39 +827,39 @@ static BOOL __isCollectable(id object) {
 
 // ----------------------------------------------------------------------------
 
-// ******************** archive id's **************************
+- (OSIdType)__archiveIdOfObject:(id)object {
 
-FINAL NSUInteger _archiveIdOfObject(OSArchiver *self, id _object)
-{
-    if (_object == nil) {
+    if (object == nil) {
         return 0;
     }
-#if 0 /* this does not work with 64bit */
-    else
-        return (int)_object;
-#else
-    else {
-        int archiveId;
 
-        archiveId = (long)NSMapGet(self.outKeys, _object);
+    OSIdType archiveId = 0;
+
+    // Look-up for an index of equivalent object
+    if (__isCollectable(object)) {
+
+        archiveId = (OSIdType) NSMapGet(self.outKeys, object);
         if (archiveId == 0) {
-            archiveId = self.archiveAddress;
-            NSMapInsert(self.outKeys, _object, (void*)(long)archiveId);
-#if ARCHIVE_DEBUGGING
-            NSLog(@"mapped 0x%p => %i", _object, archiveId);
-#endif
-            self.archiveAddress++;
+
+            archiveId = (OSIdType) self.archiveAddress++;
+            NSMapInsert(self.outKeys, object, (void *) (OSIdType) archiveId);
         }
-
-        return archiveId;
     }
-#endif
+    else {
+        archiveId = (OSIdType) self.archiveAddress++;
+    }
+
+    // Done
+    return archiveId;
 }
 
-FINAL int _archiveIdOfClass(OSArchiver *self, Class _class)
-{
-    return _archiveIdOfObject(self, _class);
+// ----------------------------------------------------------------------------
+
+- (OSIdType)__archiveIdOfClass:(Class)clazz {
+    return [self __archiveIdOfObject:clazz];
 }
+
+// ----------------------------------------------------------------------------
 
 // ******************** primitive encoding ********************
 
@@ -850,8 +870,9 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type);
 
 FINAL void _writeCString(OSArchiver *self, const char *_value)
 {
-    self->serData(self.buffer, @selector(serializeDataAt:ofObjCType:context:),
-                  &_value, @encode(char *), self);
+//  self->serData(self.buffer, @selector(serializeDataAt:ofObjCType:context:),
+//                &_value, @encode(char *), self);
+    [self.buffer serializeDataAt:&_value ofObjCType:@encode(char *) context:self];
 }
 
 FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type)
@@ -869,8 +890,9 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type)
             case _C_ARY_B:
             case _C_STRUCT_B:
             case _C_PTR:
-                self->serData(self.buffer, @selector(serializeDataAt:ofObjCType:context:),
-                              _value, _type, self);
+//              self->serData(self.buffer, @selector(serializeDataAt:ofObjCType:context:),
+//                            _value, _type, self);
+                [self.buffer serializeDataAt:_value ofObjCType:_type context:self];
                 break;
 
             default:
@@ -878,30 +900,10 @@ FINAL void _writeObjC(OSArchiver *self, const void *_value, const char *_type)
         }
     }
     else {
-        self->serData(self.buffer, @selector(serializeDataAt:ofObjCType:context:),
-                      _value, _type, self);
+//      self->serData(self.buffer, @selector(serializeDataAt:ofObjCType:context:),
+//                    _value, _type, self);
+        [self.buffer serializeDataAt:_value ofObjCType:_type context:self];
     }
-}
-
-// OSObjCTypeSerializationCallBack
-
-- (void)serializeObjectAt:(id *)_object
-               ofObjCType:(const char *)_type
-                 intoData:(NSMutableData *)_data
-{
-    NSAssert(((*_type == _C_ID) || (*_type == _C_CLASS)), @"unexpected type ..");
-
-    if (self.traceMode)
-        [self __traceObject:*_object];
-    else
-        [self __encodeObject:*_object];
-}
-- (void)deserializeObjectAt:(id *)_object
-        ofObjCType:(const char *)_type
-        fromData:(NSData *)_data
-        atCursor:(unsigned int *)_cursor
-{
-    [self doesNotRecognizeSelector:_cmd];
 }
 
 // ----------------------------------------------------------------------------

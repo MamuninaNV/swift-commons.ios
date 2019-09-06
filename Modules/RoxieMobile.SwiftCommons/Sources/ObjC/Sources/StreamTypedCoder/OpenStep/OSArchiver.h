@@ -15,10 +15,7 @@
 
 @interface OSArchiver : NSCoder <OSObjCTypeSerializationCallBack>
 {
-    SEL         classForCoder;        // default: classForCoder:
-    SEL         replObjectForCoder;   // default: replacementObjectForCoder:
-
-    // destination
+    // Destination
     void (*addData)(id, SEL, const void *, unsigned);
     void (*serData)(id, SEL, const void *, const char *, id);
 }

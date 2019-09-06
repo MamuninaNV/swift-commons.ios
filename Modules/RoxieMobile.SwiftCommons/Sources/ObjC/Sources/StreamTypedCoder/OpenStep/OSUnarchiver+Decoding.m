@@ -43,7 +43,7 @@ FINAL void __checkType(OSTagType type, OSTagType reqType) {
 
 // ----------------------------------------------------------------------------
 
-FINAL void __checkType2(OSTagType type, OSTagType reqType1, OSTagType reqType2) {
+FINAL void __checkTypePair(OSTagType type, OSTagType reqType1, OSTagType reqType2) {
     __checkType(type, reqType1);
     __checkType(type, reqType2);
 }
@@ -86,7 +86,7 @@ FINAL void __checkType2(OSTagType type, OSTagType reqType1, OSTagType reqType2) 
 - (NSString *)readStringWithTag:(BOOL)withTag {
 
     if (withTag) {
-        __checkType2([self readTag], _C_ATOM, _C_CHARPTR);
+        __checkTypePair([self readTag], _C_ATOM, _C_CHARPTR);
     }
 
     NSString *value = nil;

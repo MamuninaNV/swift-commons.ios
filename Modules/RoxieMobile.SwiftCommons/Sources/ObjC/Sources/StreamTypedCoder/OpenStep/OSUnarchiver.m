@@ -23,19 +23,7 @@
 
 // ----------------------------------------------------------------------------
 
-#define ENCODE_AUTORELEASEPOOL 0
-#define ARCHIVE_DEBUGGING      0
-
 #define FINAL static inline
-
-static NSMapTableKeyCallBacks NSIdentityObjectMapKeyCallbacks = {
-  (unsigned(*)(NSMapTable *, const void *))          __NSHashPointer,
-  (BOOL(*)(NSMapTable *, const void *, const void *))__NSComparePointers,
-  (void (*)(NSMapTable *, const void *anObject))     __NSRetainObjects,
-  (void (*)(NSMapTable *, void *anObject))           __NSReleaseObjects,
-  (NSString *(*)(NSMapTable *, const void *))        __NSDescribePointers,
-  (const void *)NULL
-};
 
 FINAL BOOL isBaseType(const char *_type)
 {
@@ -64,7 +52,7 @@ FINAL OSTagType tagValue(OSTagType _tag) {
 // ----------------------------------------------------------------------------
 
 LF_DECLARE NSString *const OSInconsistentArchiveException =
-        @"Archive is inconsistent";
+        @"Archive is inconsistent.";
 
 // ----------------------------------------------------------------------------
 
@@ -99,7 +87,7 @@ LF_DECLARE NSString *const OSInconsistentArchiveException =
 
 @implementation OSUnarchiver
 
-static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
+static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded name
 
 // ----------------------------------------------------------------------------
 #pragma mark - Properties
@@ -124,6 +112,154 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
 
         _classToAliasMappings = NSCreateMapTable(NSObjectMapKeyCallBacks, NSObjectMapValueCallBacks, 19);
     });
+}
+
+// ----------------------------------------------------------------------------
+
+- (instancetype)initForReadingWithData:(NSData *)data {
+
+    int minLength = (int) (OSCoderSignature.length + sizeof(OSCoderVersion) + 1);
+
+    // Validate incoming params
+    if ([data length] < minLength) {
+        return nil;
+    }
+
+    // Init instance
+    if (self = [super init]) {
+
+        // Caches
+        self.inObjects       = NSCreateMapTable(NSIntMapKeyCallBacks, NSObjectMapValueCallBacks, 119);
+        self.inClasses       = NSCreateMapTable(NSIntMapKeyCallBacks, NSObjectMapValueCallBacks, 19);
+        self.inPointers      = NSCreateMapTable(NSIntMapKeyCallBacks, NSIntMapValueCallBacks, 19);
+        self.inClassAlias    = NSCreateMapTable(NSObjectMapKeyCallBacks, NSObjectMapValueCallBacks, 19);
+        self.inClassVersions = NSCreateMapTable(NSObjectMapKeyCallBacks, NSObjectMapValueCallBacks, 19);
+
+// FIXME: Uncomment!
+//        // Caches
+//        self.mapObjects       = [NSMapTable strongToStrongObjectsMapTable];
+//        self.mapClasses       = [NSMapTable strongToStrongObjectsMapTable];
+//        self.mapPointers      = [NSMapTable strongToStrongObjectsMapTable];
+//        self.mapClassAlias    = [NSMapTable strongToStrongObjectsMapTable];
+//        self.mapClassVersions = [NSMapTable strongToStrongObjectsMapTable];
+
+        // Source
+        self.buffer = RETAIN(data);
+        self.cursor = 0;
+
+        // Init instance variables
+        self->deserData =
+                (void *) [self.buffer methodForSelector:@selector(deserializeDataAt:ofObjCType:atCursor:context:)];
+        self->getData =
+                (void *) [self.buffer methodForSelector:@selector(deserializeBytes:length:atCursor:)];
+    }
+
+    // Done
+    return self;
+}
+
+// ----------------------------------------------------------------------------
+
+- (instancetype)init {
+    return [self initForReadingWithData:[NSData data]];
+}
+
+// ----------------------------------------------------------------------------
+
++ (id)unarchiveObjectWithData:(NSData *)data {
+
+    OSUnarchiver *unarchiver = [[self alloc] initForReadingWithData:data];
+    id object = [unarchiver decodeObject];
+
+    RELEASE(unarchiver);
+
+    // Done
+    return object;
+}
+
+// ----------------------------------------------------------------------------
+
++ (id)unarchiveObjectWithFile:(NSString *)path {
+
+    NSData *data = [NSData dataWithContentsOfFile:path];
+
+    if (data == nil) {
+        return nil;
+    }
+
+    // Done
+    return [self unarchiveObjectWithData:data];
+}
+
+// ----------------------------------------------------------------------------
+
++ (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive {
+
+    NSString *className = NSMapGet(_classToAliasMappings, nameInArchive);
+    return (className ? className : nameInArchive);
+}
+
+// ----------------------------------------------------------------------------
+
++ (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName {
+    NSMapInsert(_classToAliasMappings, nameInArchive, trueName);
+}
+
+// ----------------------------------------------------------------------------
+
+- (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive {
+
+    NSString *className = NSMapGet(self.inClassAlias, nameInArchive);
+    return (className ? className : nameInArchive);
+}
+
+// ----------------------------------------------------------------------------
+
+- (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName {
+    NSMapInsert(self.inClassAlias, nameInArchive, trueName);
+}
+
+// ----------------------------------------------------------------------------
+
+// - (void)replaceObject:(id)object withObject:(id)newObject {
+//     NSLog(@"-[%@ %s] unimplemented in %s at %d", [self class], sel_getName(_cmd), __FILE__, __LINE__);
+// }
+
+// ----------------------------------------------------------------------------
+
+- (void)dealloc {
+
+    if (self.buffer) {
+        RELEASE(self.buffer);
+        self.buffer = nil;
+    }
+
+    if (self.inObjects) {
+        NSFreeMapTable(self.inObjects);
+        self.inObjects = nil;
+    }
+
+    if (self.inClasses) {
+        NSFreeMapTable(self.inClasses);
+        self.inClasses = nil;
+    }
+
+    if (self.inPointers) {
+        NSFreeMapTable(self.inPointers);
+        self.inPointers = nil;
+    }
+
+    if (self.inClassAlias) {
+        NSFreeMapTable(self.inClassAlias);
+        self.inClassAlias = nil;
+    }
+
+    if (self.inClassVersions) {
+        NSFreeMapTable(self.inClassVersions);
+        self.inClassVersions = nil;
+    }
+
+    [super dealloc];
 }
 
 // ----------------------------------------------------------------------------
@@ -167,7 +303,7 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
     if (self.decodingRoot == NO) {
         self.decodingRoot = YES;
         startedDecoding = YES;
-        [self beginDecoding];
+        [self __beginDecoding];
     }
 
     //NGLogT(@"decoder", @"cursor is now %i", self->cursor);
@@ -176,19 +312,14 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
     isReference = isReferenceTag(tag);
     tag         = tagValue(tag);
 
-#if ARCHIVE_DEBUGGING
-    NSLog(@"decoder: decoding tag '%s%c' type '%s'",
-           isReference ? "&" : "", tag, _type);
-#endif
-
     switch (tag) {
         case _C_ID:
             _checkType2(*_type, _C_ID, _C_CLASS);
-            *(id *)_value = [self _decodeObject:isReference];
+            *(id *)_value = [self __decodeObject:isReference];
             break;
         case _C_CLASS:
             _checkType2(*_type, _C_ID, _C_CLASS);
-            *(Class *)_value = [self _decodeClass:isReference];
+            *(Class *)_value = [self __decodeClass:isReference];
             break;
 
         case _C_ARY_B: {
@@ -261,7 +392,7 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
     }
 
     if (startedDecoding) {
-        [self endDecoding];
+        [self __endDecoding];
         self.decodingRoot = NO;
     }
 }
@@ -321,7 +452,7 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
     if (self.decodingRoot == NO) {
         self.decodingRoot = YES;
         startedDecoding = YES;
-        [self beginDecoding];
+        [self __beginDecoding];
     }
 
     NSAssert(tag == _C_ARY_B, @"invalid type ..");
@@ -368,7 +499,7 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
     }
 
     if (startedDecoding) {
-        [self endDecoding];
+        [self __endDecoding];
         self.decodingRoot = NO;
     }
 }
@@ -394,88 +525,60 @@ static NSMapTable *_classToAliasMappings = NULL; // Archive name => Decoded name
 }
 
 // ----------------------------------------------------------------------------
+#pragma mark - @protocol OSObjCTypeSerializationCallBack
+// ----------------------------------------------------------------------------
+
+- (void)serializeObjectAt:(id *)object ofObjCType:(const char *)type intoData:(NSMutableData *)data {
+    [self doesNotRecognizeSelector:_cmd];
+}
+
+// ----------------------------------------------------------------------------
+
+// TODO: Refactoring is required
+- (void)deserializeObjectAt:(id *)object ofObjCType:(const char *)type fromData:(NSData *)data atCursor:(unsigned int *)cursor  {
+
+    OSTagType tag             = 0;
+    BOOL      isReference     = NO;
+
+    tag         = [self readTag];
+    isReference = isReferenceTag(tag);
+    tag         = tagValue(tag);
+
+    NSCAssert((*type == _C_ID) || (*type == _C_CLASS), @"Unexpected type.");
+
+    switch (*type) {
+        case _C_ID:
+            NSAssert((*type == _C_ID) || (*type == _C_CLASS), @"Invalid type.");
+            *object = [self __decodeObject:isReference];
+            break;
+        case _C_CLASS:
+            NSAssert((*type == _C_ID) || (*type == _C_CLASS), @"Invalid type.");
+            *object = [self __decodeClass:isReference];
+            break;
+
+        default:
+            [NSException raise:OSInconsistentArchiveException format:@"Encountered type '%s' in object context", type];
+            break;
+    }
+}
+
+// ----------------------------------------------------------------------------
 #pragma mark - Protected Methods
 // ----------------------------------------------------------------------------
 
-// TODO:
+- (void)__beginDecoding {
+    [self __readArchiveHeader];
+}
 
 // ----------------------------------------------------------------------------
 
-- (id)initForReadingWithData:(NSData*)_data
-{
-    if ((self = [super init])) {
-        self.inObjects       = NSCreateMapTable(NSIntMapKeyCallBacks,
-                                                 NSObjectMapValueCallBacks,
-                                                 119);
-        self.inClasses       = NSCreateMapTable(NSIntMapKeyCallBacks,
-                                                 NSObjectMapValueCallBacks,
-                                                 19);
-        self.inPointers      = NSCreateMapTable(NSIntMapKeyCallBacks,
-                                                 NSIntMapValueCallBacks,
-                                                 19);
-        self.inClassAlias    = NSCreateMapTable(NSObjectMapKeyCallBacks,
-                                                 NSObjectMapValueCallBacks,
-                                                 19);
-        self.inClassVersions = NSCreateMapTable(NSObjectMapKeyCallBacks,
-                                                 NSObjectMapValueCallBacks,
-                                                 19);
-        self.buffer = RETAIN(_data);
-        self->deserData = (void *)
-            [self.buffer methodForSelector:
-                 @selector(deserializeDataAt:ofObjCType:atCursor:context:)];
-        self->getData = (void *)
-            [self.buffer methodForSelector:@selector(deserializeBytes:length:atCursor:)];
-    }
-    return self;
+- (void)__endDecoding {
+    self.decodingRoot = NO;
 }
 
-/* Decoding Objects */
+// ----------------------------------------------------------------------------
 
-+ (id)unarchiveObjectWithData:(NSData*)_data
-{
-    OSUnarchiver *unarchiver = [[self alloc] initForReadingWithData:_data];
-    id           object      = [unarchiver decodeObject];
-
-    RELEASE(unarchiver); unarchiver = nil;
-  
-    return object;
-}
-+ (id)unarchiveObjectWithFile:(NSString*)path
-{
-    NSData *rdata = [NSData dataWithContentsOfFile:path];
-    if (!rdata) return nil;
-    return [self unarchiveObjectWithData:rdata];
-}
-
-
-#if !LIB_FOUNDATION_BOEHM_GC
-- (void)dealloc
-{
-    RELEASE(self.buffer); self.buffer = nil;
-  
-    if (self.inObjects) {
-        NSFreeMapTable(self.inObjects); self.inObjects = NULL; }
-    if (self.inClasses) {
-        NSFreeMapTable(self.inClasses); self.inClasses = NULL; }
-    if (self.inPointers) {
-        NSFreeMapTable(self.inPointers); self.inPointers = NULL; }
-    if (self.inClassAlias) {
-        NSFreeMapTable(self.inClassAlias); self.inClassAlias = NULL; }
-    if (self.inClassVersions) {
-        NSFreeMapTable(self.inClassVersions); self.inClassVersions = NULL; }
-  
-    [super dealloc];
-}
-#endif
-
-// ******************** primitive decoding ********************
-
-FINAL char *_readCString(OSUnarchiver *self);
-FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type);
-
-// ******************** complex decoding **********************
-
-- (void)decodeArchiveHeader {
+- (void)__readArchiveHeader {
 
     if (self.didReadHeader == NO) {
         self.didReadHeader = YES;
@@ -485,196 +588,176 @@ FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type);
         self.systemVersion = [self readUnsignedShort];
 
         if (![signature isEqualToString:OSCoderSignature]) {
-            NSLog(@"WARNING: Used a different archiver (signature %@:%i)",
+            NSLog(@"WARNING: Used a different archiver (signature %@:%i).",
                     signature, [self systemVersion]);
         }
         else if ([self systemVersion] != OSCoderVersion) {
-            NSLog(@"WARNING: Used a different archiver version (archiver=%i, unarchiver=%i)",
+            NSLog(@"WARNING: Used a different archiver version (archiver=%i, unarchiver=%i).",
                     [self systemVersion], OSCoderVersion);
         }
     }
 }
 
-- (void)beginDecoding
-{
-    //self->cursor = 0;
-    [self decodeArchiveHeader];
-}
-- (void)endDecoding
-{
-#if 0
-    NSResetMapTable(self->inObjects);
-    NSResetMapTable(self->inClasses);
-    NSResetMapTable(self->inPointers);
-    NSResetMapTable(self->inClassAlias);
-    NSResetMapTable(self->inClassVersions);
-#endif
+// ----------------------------------------------------------------------------
 
-    self.decodingRoot = NO;
-}
+// TODO: Refactoring is required
+- (Class)__decodeClass:(BOOL)isReference {
 
-- (Class)_decodeClass:(BOOL)_isReference
-{
     int   archiveId = [self readInt];
     Class result    = Nil;
 
-    if (archiveId == 0) // Nil class or unused conditional class
+    // Nil class or unused conditional class
+    if (archiveId == 0) {
         return nil;
-    
-    if (_isReference) {
-        NSAssert(archiveId, @"archive id is 0 !");
-        
-        result = (Class)NSMapGet(self.inClasses, (void *)(long)archiveId);
-        if (result == nil)
-            result = (id)NSMapGet(self.inObjects, (void *)(long)archiveId);
+    }
+
+    if (isReference) {
+        NSAssert(archiveId, @"archiveId is 0!");
+
+        result = (Class) NSMapGet(self.inClasses, (void *) (long) archiveId);
+
         if (result == nil) {
-            [NSException raise:OSInconsistentArchiveException
-                         format:@"did not find referenced class %i.", archiveId];
+            result = (id) NSMapGet(self.inObjects, (void *) (long) archiveId);
+        }
+
+        if (result == nil) {
+            [NSException raise:OSInconsistentArchiveException format:@"Did not find referenced class %i.", archiveId];
         }
     }
     else {
+
         NSString  *name   = NULL;
         NSInteger version = 0;
         char      *cname  = _readCString(self);
 
         if (cname == NULL) {
-            [NSException raise:OSInconsistentArchiveException
-                         format:@"could not decode class name."];
+            [NSException raise:OSInconsistentArchiveException format:@"Could not decode class name."];
         }
-        
-        name    = [NSString stringWithCString:cname encoding:NSUTF8StringEncoding];
+
+        name = [NSString stringWithCString:cname encoding:NSUTF8StringEncoding];
         version = [self readLong];
-        lfFree(cname); cname = NULL;
-        
+        lfFree(cname);
+        cname = NULL;
+
         if ([name lengthOfBytesUsingEncoding:NSUTF8StringEncoding] == 0) {
-            [NSException raise:OSInconsistentArchiveException
-                         format:@"could not allocate memory for class name."];
+            [NSException raise:OSInconsistentArchiveException format:@"Could not allocate memory for class name."];
         }
 
         NSMapInsert(self.inClassVersions, name, @(version));
-#if ARCHIVE_DEBUGGING
-        NSLog(@"read class version %@ => %i", name, version);
-#endif
 
         { // check whether the class is to be replaced
             NSString *newName = NSMapGet(self.inClassAlias, name);
-      
-            if (newName)
+
+            if (newName) {
                 name = newName;
+            }
             else {
                 newName = NSMapGet(_classToAliasMappings, name);
-                if (newName)
+                if (newName) {
                     name = newName;
+                }
             }
         }
-    
+
         result = NSClassFromString(name);
 
         if (result == Nil) {
-            [NSException raise:OSInconsistentArchiveException
-                         format:@"class doesn't exist in this runtime."];
+            [NSException raise:OSInconsistentArchiveException format:@"Class doesn't exist in this runtime."];
         }
         name = nil;
 
         if ([result version] != version) {
-            [NSException raise:OSInconsistentArchiveException
-                         format:@"class versions do not match."];
+            [NSException raise:OSInconsistentArchiveException format:@"Class versions do not match."];
         }
 
-        NSMapInsert(self.inClasses, (void *)(long)archiveId, result);
-#if ARCHIVE_DEBUGGING
-        NSLog(@"read class %i => 0x%p", archiveId, result);
-#endif
+        NSMapInsert(self.inClasses, (void *) (long) archiveId, result);
     }
-  
+
     NSAssert(result, @"Invalid state, class is Nil.");
-  
+
     return result;
 }
 
-- (id)_decodeObject:(BOOL)_isReference
-{
-    // this method returns a retained object !
+// ----------------------------------------------------------------------------
+
+// TODO: Refactoring is required
+- (id)__decodeObject:(BOOL)isReference {
+
+    // This method returns a retained object!
     int archiveId = [self readInt];
-    id  result    = nil;
+    id result = nil;
 
-    if (archiveId == 0) // nil object or unused conditional object
+    // Nil object or unused conditional object
+    if (archiveId == 0) {
         return nil;
+    }
 
-    if (_isReference) {
-        NSAssert(archiveId, @"archive id is 0 !");
-        
-        result = (id)NSMapGet(self.inObjects, (void *)(long)archiveId);
-        if (result == nil)
-            result = (id)NSMapGet(self.inClasses, (void *)(long)archiveId);
-        
+    if (isReference) {
+        NSAssert(archiveId, @"archiveId is 0!");
+
+        result = (id) NSMapGet(self.inObjects, (void *) (OSIdType) archiveId);
         if (result == nil) {
-            [NSException raise:OSInconsistentArchiveException
-                         format:@"did not find referenced object %i.",
-			 archiveId];
+            result = (id) NSMapGet(self.inClasses, (void *) (OSIdType) archiveId);
+        }
+
+        if (result == nil) {
+            [NSException raise:OSInconsistentArchiveException format:@"Did not find referenced object %i.", archiveId];
         }
         result = RETAIN(result);
     }
     else {
-        Class class       = Nil;
-        id    replacement = nil;
+        Class class = Nil;
+        id replacement = nil;
 
         // decode class info
         [self decodeValueOfObjCType:"#" at:&class];
-        NSAssert(class, @"could not decode class for object.");
-    
+        NSAssert(class, @"Could not decode class for object.");
+
         result = [class allocWithZone:NSDefaultMallocZone()];
-        NSMapInsert(self.inObjects, (void *)(long)archiveId, result);
-        
-#if ARCHIVE_DEBUGGING
-        NSLog(@"read object %i => 0x%p", archiveId, result);
-#endif
+        NSMapInsert(self.inObjects, (void *) (OSIdType) archiveId, result);
 
         replacement = [result initWithCoder:self];
         if (replacement != result) {
-            /*
-              NGLogT(@"decoder",
-              @"object 0x%p<%s> replaced by 0x%p<%s> in initWithCoder:",
-              result, class_get_class_name(*(Class *)result),
-              replacement, class_get_class_name(*(Class *)replacement));
-            */
 
             replacement = RETAIN(replacement);
-            NSMapRemove(self.inObjects, (void *)(long)archiveId);
+            NSMapRemove(self.inObjects, (void *) (OSIdType) archiveId);
             result = replacement;
-            NSMapInsert(self.inObjects, (void *)(long)archiveId, result);
+            NSMapInsert(self.inObjects, (void *) (OSIdType) archiveId, result);
             RELEASE(replacement);
         }
 
         replacement = [result awakeAfterUsingCoder:self];
         if (replacement != result) {
-            /*
-              NGLogT(@"decoder",
-              @"object 0x%p<%s> replaced by 0x%p<%s> in awakeAfterUsingCoder:",
-              result, class_get_class_name(*(Class *)class),
-              replacement, class_get_class_name(*(Class *)replacement));
-            */
-      
+
             replacement = RETAIN(replacement);
-            NSMapRemove(self.inObjects, (void *)(long)archiveId);
+            NSMapRemove(self.inObjects, (void *) (OSIdType) archiveId);
             result = replacement;
-            NSMapInsert(self.inObjects, (void *)(long)archiveId, result);
+            NSMapInsert(self.inObjects, (void *) (OSIdType) archiveId, result);
             RELEASE(replacement);
         }
-
-        //NGLogT(@"decoder", @"decoded object 0x%p<%@>",
-        //       (unsigned)result, NSStringFromClass([result class]));
     }
-    
+
     if (object_is_instance(result)) {
         NSAssert3([result retainCount] > 0,
-                  @"invalid retain count %i for id=%i (%@) ..",
-                  (unsigned) [result retainCount],
-                  archiveId,
-                  NSStringFromClass([result class]));
+                @"Invalid retain count %i for id=%i (%@).",
+                (unsigned) [result retainCount],
+                archiveId,
+                NSStringFromClass([result class]));
     }
+
     return result;
 }
+
+// ----------------------------------------------------------------------------
+#pragma mark -
+// ----------------------------------------------------------------------------
+
+// ******************** primitive decoding ********************
+
+FINAL char *_readCString(OSUnarchiver *self);
+FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type);
+
+// ******************** complex decoding **********************
 
 FINAL void _checkType(char _code, char _reqCode)
 {
@@ -683,6 +766,7 @@ FINAL void _checkType(char _code, char _reqCode)
                      format:@"expected different typecode"];
     }
 }
+
 FINAL void _checkType2(char _code, char _reqCode1, char _reqCode2)
 {
     if ((_code != _reqCode1) && (_code != _reqCode2)) {
@@ -691,37 +775,16 @@ FINAL void _checkType2(char _code, char _reqCode1, char _reqCode2)
     }
 }
 
-/* Substituting One Class for Another */
-
-+ (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive {
-
-    NSString *className = NSMapGet(_classToAliasMappings, nameInArchive);
-    return className ? className : nameInArchive;
-}
-
-+ (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName {
-    NSMapInsert(_classToAliasMappings, nameInArchive, trueName);
-}
-
-- (NSString *)classNameDecodedForArchiveClassName:(NSString *)nameInArchive {
-
-    NSString *className = NSMapGet(self.inClassAlias, nameInArchive);
-    return className ? className : nameInArchive;
-}
-
-- (void)decodeClassName:(NSString *)nameInArchive asClassName:(NSString *)trueName {
-    NSMapInsert(self.inClassAlias, nameInArchive, trueName);
-}
-
 // ******************** primitive decoding ********************
 
 FINAL char *_readCString(OSUnarchiver *self)
 {
     unsigned int position = (unsigned int) self.cursor;
     char *value = NULL;
-    self->deserData(self.buffer,
-                    @selector(deserializeDataAt:ofObjCType:atCursor:context:),
-                    &value, @encode(char *), &(position), self);
+//  self->deserData(self.buffer,
+//                  @selector(deserializeDataAt:ofObjCType:atCursor:context:),
+//                  &value, @encode(char *), &(position), self);
+    [self.buffer deserializeDataAt:&value ofObjCType:@encode(char *) atCursor:&(position) context:self];
     self.cursor = position;
     return value;
 }
@@ -729,54 +792,11 @@ FINAL char *_readCString(OSUnarchiver *self)
 FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type)
 {
     unsigned int position = (unsigned int) self.cursor;
-    self->deserData(self.buffer,
-                    @selector(deserializeDataAt:ofObjCType:atCursor:context:),
-                    _value, _type,
-                    &(position),
-                    self);
+//  self->deserData(self.buffer,
+//                  @selector(deserializeDataAt:ofObjCType:atCursor:context:),
+//                  _value, _type, &(position), self);
+    [self.buffer deserializeDataAt:_value ofObjCType:_type atCursor:&(position) context:self];
     self.cursor = position;
-}
-
-// OSObjCTypeSerializationCallBack
-
-- (void)serializeObjectAt:(id *)_object
-  ofObjCType:(const char *)_type
-  intoData:(NSMutableData *)_data
-{
-    [self doesNotRecognizeSelector:_cmd];
-}
-
-- (void)deserializeObjectAt:(id *)_object
-  ofObjCType:(const char *)_type
-  fromData:(NSData *)_data
-  atCursor:(unsigned int *)_cursor
-{
-    OSTagType tag             = 0;
-    BOOL      isReference     = NO;
-
-    tag         = [self readTag];
-    isReference = isReferenceTag(tag);
-    tag         = tagValue(tag);
-
-    NSCAssert(((*_type == _C_ID) || (*_type == _C_CLASS)),
-              @"unexpected type ..");
-  
-    switch (*_type) {
-        case _C_ID:
-            NSAssert((*_type == _C_ID) || (*_type == _C_CLASS), @"invalid type ..");
-            *_object = [self _decodeObject:isReference];
-            break;
-        case _C_CLASS:
-            NSAssert((*_type == _C_ID) || (*_type == _C_CLASS), @"invalid type ..");
-            *_object = [self _decodeClass:isReference];
-            break;
-      
-        default:
-            [NSException raise:OSInconsistentArchiveException
-                         format:@"encountered type '%s' in object context",
-                           _type];
-            break;
-    }
 }
 
 // ----------------------------------------------------------------------------

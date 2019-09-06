@@ -50,14 +50,14 @@
 
 - (void)writeString:(NSString *)value withTag:(BOOL)withTag {
 
-    NSData *rawData = [value dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
-    NSUInteger length = rawData.length;
+    NSData *data = [value dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:NO];
+    NSUInteger length = data.length;
 
     if (withTag) {
         [self writeTag:(OSTagType) (length >= USHRT_MAX ? _C_CHARPTR : _C_ATOM)];
     }
 
-    [self encodeBytes:rawData.bytes length:length];
+    [self encodeBytes:data.bytes length:length];
 }
 
 // ----------------------------------------------------------------------------

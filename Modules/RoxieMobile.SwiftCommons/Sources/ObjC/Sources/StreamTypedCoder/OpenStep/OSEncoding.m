@@ -19,7 +19,7 @@
 #define SIZEOF_NETWORK_DOUBLE  8
 
 // ----------------------------------------------------------------------------
-#pragma mark - Private Methods
+#pragma mark - Private Functions
 // ----------------------------------------------------------------------------
 
 static void __htonf(register unsigned char *out, register const unsigned char *in, size_t count) {
@@ -177,7 +177,7 @@ static void __ntohd(register unsigned char *out, register const unsigned char *i
 }
 
 // ----------------------------------------------------------------------------
-#pragma mark - Methods
+#pragma mark - Functions
 // ----------------------------------------------------------------------------
 
 float objc_ntohf(float value) {
