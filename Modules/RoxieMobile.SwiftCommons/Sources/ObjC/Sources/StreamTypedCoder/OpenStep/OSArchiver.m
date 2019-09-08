@@ -156,12 +156,6 @@ static BOOL __isCollectable(id object) {
         // Destination
         self.buffer = RETAIN(data);
         self.archiveAddress = 1;
-
-        // Init instance variables
-        self->serData =
-                (void *) [self.buffer methodForSelector:@selector(serializeDataAt:ofObjCType:context:)];
-        self->addData =
-                (void *) [self.buffer methodForSelector:@selector(appendBytes:length:)];
     }
 
     // Done

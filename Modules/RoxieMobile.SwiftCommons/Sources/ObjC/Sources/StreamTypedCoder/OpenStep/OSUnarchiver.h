@@ -14,11 +14,6 @@
 // ----------------------------------------------------------------------------
 
 @interface OSUnarchiver : NSCoder <OSObjCTypeSerializationCallBack>
-{
-    // source
-    void (*getData)(id, SEL, void *, unsigned, unsigned *);
-    void (*deserData)(id, SEL, void *, const char *, unsigned *, id);
-}
 
 // - Properties
 

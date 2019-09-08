@@ -14,11 +14,6 @@
 // ----------------------------------------------------------------------------
 
 @interface OSArchiver : NSCoder <OSObjCTypeSerializationCallBack>
-{
-    // Destination
-    void (*addData)(id, SEL, const void *, unsigned);
-    void (*serData)(id, SEL, const void *, const char *, id);
-}
 
 // - Properties
 

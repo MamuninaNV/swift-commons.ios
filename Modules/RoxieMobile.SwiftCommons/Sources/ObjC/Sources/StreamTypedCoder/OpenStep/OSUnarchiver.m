@@ -146,12 +146,6 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
         // Source
         self.buffer = RETAIN(data);
         self.cursor = 0;
-
-        // Init instance variables
-        self->deserData =
-                (void *) [self.buffer methodForSelector:@selector(deserializeDataAt:ofObjCType:atCursor:context:)];
-        self->getData =
-                (void *) [self.buffer methodForSelector:@selector(deserializeBytes:length:atCursor:)];
     }
 
     // Done
@@ -296,39 +290,42 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
 // TODO: Refactoring is required
 - (void)decodeValueOfObjCType:(const char *)_type at:(void *)_value {
 
-    BOOL      startedDecoding = NO;
-    OSTagType tag             = 0;
-    BOOL      isReference     = NO;
+    BOOL startedDecoding = NO;
+    OSTagType tag = 0;
+    BOOL isReference = NO;
 
     if (self.decodingRoot == NO) {
         self.decodingRoot = YES;
+
         startedDecoding = YES;
         [self __beginDecoding];
     }
 
-    //NGLogT(@"decoder", @"cursor is now %i", self->cursor);
-
-    tag         = [self readTag];
+    tag = [self readTag];
     isReference = isReferenceTag(tag);
-    tag         = tagValue(tag);
+    tag = tagValue(tag);
 
     switch (tag) {
-        case _C_ID:
+
+        case _C_ID: {
             _checkType2(*_type, _C_ID, _C_CLASS);
-            *(id *)_value = [self __decodeObject:isReference];
+            *(id *) _value = [self __decodeObject:isReference];
             break;
-        case _C_CLASS:
+        }
+
+        case _C_CLASS: {
             _checkType2(*_type, _C_ID, _C_CLASS);
-            *(Class *)_value = [self __decodeClass:isReference];
+            *(Class *) _value = [self __decodeClass:isReference];
             break;
+        }
 
         case _C_ARY_B: {
-            int        count     = atoi(_type + 1); // eg '[15I' => count = 15
+            int count = atoi(_type + 1); // eg '[15I' => count = 15
             const char *itemType = _type;
 
             _checkType(*_type, _C_ARY_B);
 
-            while(isdigit((int)*(++itemType))) ; // skip dimension
+            while (isdigit((int) *(++itemType))); // skip dimension
 
             [self decodeArrayOfObjCType:itemType count:count at:_value];
             break;
@@ -342,20 +339,22 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
             while ((*_type != _C_STRUCT_E) && (*_type++ != '=')); // skip "<name>="
 
             while (YES) {
-                [self decodeValueOfObjCType:_type at:((char *)_value) + offset];
+                [self decodeValueOfObjCType:_type at:((char *) _value) + offset];
 
                 offset += objc_sizeof_type(_type);
-                _type  =  objc_skip_typespec(_type);
+                _type = objc_skip_typespec(_type);
 
-                if(*_type != _C_STRUCT_E) { // C-structure end '}'
+                if (*_type != _C_STRUCT_E) { // C-structure end '}'
                     int align, remainder;
 
                     align = objc_alignof_type(_type);
-                    if((remainder = offset % align))
+                    if ((remainder = offset % align)) {
                         offset += (align - remainder);
+                    }
                 }
-                else
+                else {
                     break;
+                }
             }
             break;
         }
@@ -366,13 +365,15 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
             _checkType(*_type, tag);
 
             _readObjC(self, &name, @encode(char *));
-            *(SEL *)_value = name ? sel_get_any_uid(name) : NULL;
-            lfFree(name); name = NULL;
+            *(SEL *) _value = name ? sel_get_any_uid(name) : NULL;
+            lfFree(name);
+            name = NULL;
         }
 
-        case _C_PTR:
-            _readObjC(self, *(char **)_value, _type + 1); // skip '^'
+        case _C_PTR: {
+            _readObjC(self, *(char **) _value, _type + 1); // skip '^'
             break;
+        }
 
         case _C_CHARPTR:
         case _C_CHR:     case _C_UCHR:
@@ -380,15 +381,16 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
         case _C_INT:     case _C_UINT:
         case _C_LNG:     case _C_ULNG:
         case _C_LNG_LNG: case _C_ULNG_LNG:
-        case _C_FLT:     case _C_DBL:
+        case _C_FLT:     case _C_DBL: {
             _checkType(*_type, tag);
             _readObjC(self, _value, _type);
             break;
+        }
 
-        default:
-            [NSException raise:OSInconsistentArchiveException
-                         format:@"unsupported typecode %i found.", tag];
+        default: {
+            [NSException raise:OSInconsistentArchiveException format:@"unsupported typecode %i found.", tag];
             break;
+        }
     }
 
     if (startedDecoding) {
@@ -450,6 +452,7 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
 
     if (self.decodingRoot == NO) {
         self.decodingRoot = YES;
+
         startedDecoding = YES;
         [self __beginDecoding];
     }
@@ -538,27 +541,30 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
 
 // ----------------------------------------------------------------------------
 
-// TODO: Refactoring is required
-- (void)deserializeObjectAt:(id *)object ofObjCType:(const char *)type fromData:(NSData *)data atCursor:(unsigned int *)cursor  {
+- (void)deserializeObjectAt:(id *)object ofObjCType:(const char *)type fromData:(NSData *)data atCursor:(unsigned int *)cursor {
 
-    OSTagType tag             = 0;
-    BOOL      isReference     = NO;
+    OSTagType tag = 0;
+    BOOL isReference = NO;
 
-    tag         = [self readTag];
+    tag = [self readTag];
     isReference = isReferenceTag(tag);
-    tag         = tagValue(tag);
+    tag = tagValue(tag);
 
     NSCAssert((*type == _C_ID) || (*type == _C_CLASS), @"Unexpected type.");
 
     switch (*type) {
-        case _C_ID:
+
+        case _C_ID: {
             NSAssert((*type == _C_ID) || (*type == _C_CLASS), @"Invalid type.");
             *object = [self __decodeObject:isReference];
             break;
-        case _C_CLASS:
+        }
+
+        case _C_CLASS: {
             NSAssert((*type == _C_ID) || (*type == _C_CLASS), @"Invalid type.");
             *object = [self __decodeClass:isReference];
             break;
+        }
 
         default:
             [NSException raise:OSInconsistentArchiveException format:@"Encountered type '%s' in object context", type];
@@ -744,7 +750,6 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
 
 // ******************** primitive decoding ********************
 
-FINAL char *_readCString(OSUnarchiver *self);
 FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type);
 
 // ******************** complex decoding **********************
@@ -766,18 +771,6 @@ FINAL void _checkType2(char _code, char _reqCode1, char _reqCode2)
 }
 
 // ******************** primitive decoding ********************
-
-FINAL char *_readCString(OSUnarchiver *self)
-{
-    unsigned int position = (unsigned int) self.cursor;
-    char *value = NULL;
-//  self->deserData(self.buffer,
-//                  @selector(deserializeDataAt:ofObjCType:atCursor:context:),
-//                  &value, @encode(char *), &(position), self);
-    [self.buffer deserializeDataAt:&value ofObjCType:@encode(char *) atCursor:&(position) context:self];
-    self.cursor = position;
-    return value;
-}
 
 FINAL void _readObjC(OSUnarchiver *self, void *_value, const char *_type)
 {
