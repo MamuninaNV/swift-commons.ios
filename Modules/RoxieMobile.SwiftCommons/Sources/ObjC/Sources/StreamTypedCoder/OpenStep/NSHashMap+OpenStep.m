@@ -32,8 +32,8 @@
 // #include <Foundation/NSUtilities.h>
 // #include <Foundation/exceptions/GeneralExceptions.h>
 
-#include "common.h"
 #include "OSEncoding.h"
+#include "OSMemory.h"
 
 // static void __NSHashGrow(NSHashTable *table, unsigned newSize);
 // static void __NSMapGrow(NSMapTable *table, unsigned newSize);

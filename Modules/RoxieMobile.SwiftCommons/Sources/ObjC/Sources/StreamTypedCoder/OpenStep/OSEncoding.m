@@ -11,7 +11,6 @@
 
 #import <Foundation/Foundation.h>
 
-#import "common.h"
 #import "objc-runtime.h"
 
 #import "OSEncoding.h"
@@ -634,8 +633,6 @@ int roxie_strcmp(const char *str1, const char *str2)
     }
 }
 
-// ----------------------------------------------------------------------------
-#pragma mark -
 // ----------------------------------------------------------------------------
 
 int roxie_atoi(const char *str)

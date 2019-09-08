@@ -12,13 +12,13 @@
 #import <dispatch/once.h>
 
 #import "objc-runtime.h"
-#import "common.h"
 
 #import "OSUnarchiver.h"
 #import "OSUnarchiver+Decoding.h"
 
 #import "OSArchiver.h"
 #import "OSEncoding.h"
+#import "OSMemory.h"
 #import "OSUtilities.h"
 #import "NSData+OpenStep.h"
 

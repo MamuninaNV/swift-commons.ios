@@ -9,10 +9,10 @@
 // ----------------------------------------------------------------------------
 
 #import "objc-runtime.h"
-#import "common.h"
 #import "GeneralExceptions.h"
-#import "NSData+OpenStep.h"
 #import "OSEncoding.h"
+#import "OSMemory.h"
+#import "NSData+OpenStep.h"
 
 // ----------------------------------------------------------------------------
 

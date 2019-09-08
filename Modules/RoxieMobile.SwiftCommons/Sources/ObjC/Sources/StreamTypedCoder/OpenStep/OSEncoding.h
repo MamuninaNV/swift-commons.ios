@@ -22,30 +22,28 @@
 
 // ----------------------------------------------------------------------------
 
-int objc_sizeof_type(const char *type);
-int objc_alignof_type(const char *type);
-int objc_aligned_size(const char *type);
+FOUNDATION_EXPORT int objc_sizeof_type(const char *type);
+FOUNDATION_EXPORT int objc_alignof_type(const char *type);
+FOUNDATION_EXPORT int objc_aligned_size(const char *type);
 
 // ----------------------------------------------------------------------------
 
-const char *objc_skip_type_qualifiers(const char *type);
-const char *objc_skip_typespec(const char *type);
+FOUNDATION_EXPORT const char *objc_skip_type_qualifiers(const char *type);
+FOUNDATION_EXPORT const char *objc_skip_typespec(const char *type);
 
 // ----------------------------------------------------------------------------
 
-float objc_ntohf(float value);
-float objc_htonf(float value);
+FOUNDATION_EXPORT float objc_ntohf(float value);
+FOUNDATION_EXPORT float objc_htonf(float value);
 
-double objc_ntohd(double value);
-double objc_htond(double value);
-
-// ----------------------------------------------------------------------------
-
-size_t roxie_strlen(const char *str);
-int roxie_strcmp(const char *str1, const char *str2);
+FOUNDATION_EXPORT double objc_ntohd(double value);
+FOUNDATION_EXPORT double objc_htond(double value);
 
 // ----------------------------------------------------------------------------
 
-int roxie_atoi(const char *str);
+FOUNDATION_EXPORT size_t roxie_strlen(const char *str);
+FOUNDATION_EXPORT int roxie_strcmp(const char *str1, const char *str2);
+
+FOUNDATION_EXPORT int roxie_atoi(const char *str);
 
 // ----------------------------------------------------------------------------

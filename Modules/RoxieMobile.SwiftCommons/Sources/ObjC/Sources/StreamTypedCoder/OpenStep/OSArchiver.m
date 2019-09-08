@@ -10,12 +10,12 @@
 // ----------------------------------------------------------------------------
 
 #import "objc-runtime.h"
-#import "common.h"
 
 #import "OSArchiver.h"
 #import "OSArchiver+Encoding.h"
 
 #import "OSEncoding.h"
+#import "OSMemory.h"
 #import "OSUtilities.h"
 #import "NSMutableData+OpenStep.h"
 

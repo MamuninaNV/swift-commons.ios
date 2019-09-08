@@ -34,7 +34,6 @@
 // #include <config.h>
 
 #include "objc-config.h"
-#include "common.h"
 #include "OSUtilities.h"
 
 #if defined(HAVE_WINDOWS_H)

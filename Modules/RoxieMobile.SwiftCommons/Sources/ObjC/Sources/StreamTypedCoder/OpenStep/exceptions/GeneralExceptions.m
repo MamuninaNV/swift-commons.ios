@@ -50,7 +50,7 @@
     self = [self initWithName:NSInvalidArgumentException
 		    reason:@"Unknown Objective-C type encoding"
 		    userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-			    [NSString stringWithCString:type], @"type",
+			    [NSString stringWithCString:type encoding:NSUTF8StringEncoding], @"type",
 			    nil]];
     return self;
 }

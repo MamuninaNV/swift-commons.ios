@@ -26,12 +26,12 @@ Boston, MA 02111-1307, USA.  */
    however invalidate any other reasons why the executable file might be
    covered by the GNU General Public License.  */
 
+#include <stdio.h>
 #include <stdlib.h>
 // #include <Foundation/common.h>
 // #include <extensions/objc-runtime.h>
 
 #include "objc-runtime.h"
-#include "common.h"
 
 /*
 ** Error handler function

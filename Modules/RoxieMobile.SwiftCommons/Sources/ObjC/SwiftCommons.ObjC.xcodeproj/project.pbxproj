@@ -18,8 +18,6 @@
 		195A95FF23189D9E00BEF12C /* NSHashMap+OpenStep.m in Sources */ = {isa = PBXBuildFile; fileRef = 195A95FE23189D9E00BEF12C /* NSHashMap+OpenStep.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9302230B28C900D0DCF2 /* OSArchiver.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F92FE230B28C900D0DCF2 /* OSArchiver.h */; };
 		195F9303230B28C900D0DCF2 /* OSObjCTypeSerializationCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F92FF230B28C900D0DCF2 /* OSObjCTypeSerializationCallback.h */; };
-		195F930B230B2B9200D0DCF2 /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F9309230B2B9200D0DCF2 /* common.h */; };
-		195F930C230B2B9200D0DCF2 /* common.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F930A230B2B9200D0DCF2 /* common.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9310230B2D2B00D0DCF2 /* OSUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F930F230B2D2B00D0DCF2 /* OSUtilities.h */; };
 		195F9314230B30AC00D0DCF2 /* OSUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F9313230B30AC00D0DCF2 /* OSUtilities.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9316230B30D800D0DCF2 /* OSArchiver.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F9315230B30D800D0DCF2 /* OSArchiver.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -70,8 +68,6 @@
 		195A95FE23189D9E00BEF12C /* NSHashMap+OpenStep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSHashMap+OpenStep.m"; sourceTree = "<group>"; };
 		195F92FE230B28C900D0DCF2 /* OSArchiver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSArchiver.h; sourceTree = "<group>"; };
 		195F92FF230B28C900D0DCF2 /* OSObjCTypeSerializationCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSObjCTypeSerializationCallback.h; sourceTree = "<group>"; };
-		195F9309230B2B9200D0DCF2 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
-		195F930A230B2B9200D0DCF2 /* common.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = common.m; sourceTree = "<group>"; };
 		195F930F230B2D2B00D0DCF2 /* OSUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSUtilities.h; sourceTree = "<group>"; };
 		195F9313230B30AC00D0DCF2 /* OSUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSUtilities.m; sourceTree = "<group>"; };
 		195F9315230B30D800D0DCF2 /* OSArchiver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSArchiver.m; sourceTree = "<group>"; };
@@ -129,8 +125,6 @@
 			children = (
 				195F9328230CA33600D0DCF2 /* exceptions */,
 				195F9317230B312F00D0DCF2 /* extensions */,
-				195F9309230B2B9200D0DCF2 /* common.h */,
-				195F930A230B2B9200D0DCF2 /* common.m */,
 				195F931F230B3CAE00D0DCF2 /* misc.m */,
 				195F9322230C9C5200D0DCF2 /* NSData+OpenStep.h */,
 				195F9323230C9C5200D0DCF2 /* NSData+OpenStep.m */,
@@ -297,7 +291,6 @@
 				198479A6231D7BB800FE310A /* OSArchiver+Encoding.h in Headers */,
 				19C9FD861FCCAAD30069F3D1 /* TryCatchFinally.h in Headers */,
 				19CCD1091FCD0191008CEA38 /* unzip.h in Headers */,
-				195F930B230B2B9200D0DCF2 /* common.h in Headers */,
 				195F9302230B28C900D0DCF2 /* OSArchiver.h in Headers */,
 				198479A2231D669500FE310A /* OSUnarchiver.h in Headers */,
 				198479AE231D7C7200FE310A /* OSEncoding.h in Headers */,
@@ -399,7 +392,6 @@
 				198479AF231D7C7200FE310A /* OSEncoding.m in Sources */,
 				195F9316230B30D800D0DCF2 /* OSArchiver.m in Sources */,
 				195F9325230C9C5200D0DCF2 /* NSData+OpenStep.m in Sources */,
-				195F930C230B2B9200D0DCF2 /* common.m in Sources */,
 				195A95FF23189D9E00BEF12C /* NSHashMap+OpenStep.m in Sources */,
 				19CCD10A1FCD0191008CEA38 /* zip.c in Sources */,
 				19C9FD8D1FCCABBB0069F3D1 /* SwiftCommonsObjC.m in Sources */,

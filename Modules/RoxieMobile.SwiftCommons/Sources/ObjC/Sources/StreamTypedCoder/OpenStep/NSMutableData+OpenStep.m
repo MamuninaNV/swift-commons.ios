@@ -25,7 +25,6 @@
 // #include <Foundation/NSUtilities.h>
 
 #import "objc-runtime.h"
-#import "common.h"
 #import "GeneralExceptions.h"
 #import "NSMutableData+OpenStep.h"
 #import "OSEncoding.h"
