@@ -442,12 +442,11 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
 
 // ----------------------------------------------------------------------------
 
-// TODO: Refactoring is required
 - (void)decodeArrayOfObjCType:(const char *)itemType count:(NSUInteger)count at:(void *)array {
 
-    BOOL      startedDecoding = NO;
-    OSTagType tag    = [self readTag];
-    int       length = [self readInt];
+    BOOL startedDecoding = NO;
+    OSTagType tag = [self readTag];
+    int length = [self readInt];
 
     if (self.decodingRoot == NO) {
         self.decodingRoot = YES;
@@ -455,46 +454,51 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
         [self __beginDecoding];
     }
 
-    NSAssert(tag == _C_ARY_B, @"invalid type ..");
-    NSAssert(count == length, @"invalid array size ..");
+    NSAssert(tag == _C_ARY_B, @"Invalid type.");
+    NSAssert(count == length, @"Invalid array size.");
 
     // Arrays of elementary types are written optimized: the type is written
     // then the elements of array follow.
-    if ((*itemType == _C_ID) || (*itemType == _C_CLASS)) { // object array
-        int i;
 
-        tag = [self readTag]; // object array
-        NSAssert(tag == *itemType, @"invalid array element type ..");
+    // Object array
+    if ((*itemType == _C_ID) || (*itemType == _C_CLASS)) {
 
-        for (i = 0; i < count; i++)
-            ((id *)array)[i] = [self decodeObject];
-    }
-    else if ((*itemType == _C_CHR) || (*itemType == _C_UCHR)) { // byte array
         tag = [self readTag];
-        NSAssert((tag == _C_CHR) || (tag == _C_UCHR), @"invalid byte array type ..");
+        NSAssert(tag == *itemType, @"Invalid array element type.");
 
-        // read buffer
+        for (int idx = 0; idx < count; idx++) {
+            ((id *) array)[idx] = [self decodeObject];
+        }
+    }
+    // Byte array
+    else if ((*itemType == _C_CHR) || (*itemType == _C_UCHR)) {
+
+        tag = [self readTag];
+        NSAssert((tag == _C_CHR) || (tag == _C_UCHR), @"Invalid byte array type.");
+
+        // Read buffer
         [self readBytes:array length:count];
     }
     else if (isBaseType(itemType)) {
-        unsigned offset, itemSize = objc_sizeof_type(itemType);
-        int      i;
+
+        int itemSize = objc_sizeof_type(itemType);
 
         tag = [self readTag];
-        NSAssert(tag == *itemType, @"invalid array base type ..");
+        NSAssert(tag == *itemType, @"Invalid array base type.");
 
-        for (i = offset = 0; i < count; i++, offset += itemSize)
-            _readObjC(self, (char *)array + offset, itemType);
+        for (int idx = 0, offset = 0; idx < count; idx++, offset += itemSize) {
+            _readObjC(self, (char *) array + offset, itemType);
+
+// FIXME: Uncomment!
+//            [self decodeValueOfObjCType:itemType at:((char *) array + offset)];
+        }
     }
     else {
-        IMP      decodeValue = NULL;
-        unsigned offset, itemSize = objc_sizeof_type(itemType);
-        int      i;
 
-        decodeValue = [self methodForSelector:@selector(decodeValueOfObjCType:at:)];
-
-        for (i = offset = 0; i < length; i++, offset += itemSize) {
-            [self decodeValueOfObjCType:itemType at:(char *)array + offset];
+        // Decode using normal method
+        int itemSize = objc_sizeof_type(itemType);
+        for (int idx = 0, offset = 0; idx < count; idx++, offset += itemSize) {
+            [self decodeValueOfObjCType:itemType at:((char *) array + offset)];
         }
     }
 
@@ -667,12 +671,11 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
 
 // ----------------------------------------------------------------------------
 
-// TODO: Refactoring is required
-- (id)__decodeObject:(BOOL)isReference {
+- (id)__decodeObject:(BOOL)isReference NS_RETURNS_RETAINED {
 
     // This method returns a retained object!
-    int archiveId = [self readInt];
-    id result = nil;
+    OSIdType archiveId = [self readUnsignedInteger];
+    id object = nil;
 
     // Nil object or unused conditional object
     if (archiveId == 0) {
@@ -682,57 +685,57 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
     if (isReference) {
         NSAssert(archiveId, @"archiveId is 0!");
 
-        result = (id) NSMapGet(self.inObjects, (void *) (OSIdType) archiveId);
-        if (result == nil) {
-            result = (id) NSMapGet(self.inClasses, (void *) (OSIdType) archiveId);
+        object = NSMapGet(self.inObjects, (void *) (OSIdType) archiveId);
+        if (object == nil) {
+            object = NSMapGet(self.inClasses, (void *) (OSIdType) archiveId);
         }
 
-        if (result == nil) {
-            [NSException raise:OSInconsistentArchiveException format:@"Did not find referenced object %i.", archiveId];
+        if (object == nil) {
+            [NSException raise:OSInconsistentArchiveException format:@"Did not find referenced object %lu.", (unsigned long) archiveId];
         }
-        result = RETAIN(result);
     }
     else {
-        Class class = Nil;
+        Class clazz = Nil;
         id replacement = nil;
 
         // decode class info
-        [self decodeValueOfObjCType:"#" at:&class];
-        NSAssert(class, @"Could not decode class for object.");
+        [self decodeValueOfObjCType:"#" at:&clazz];
+        NSAssert(clazz, @"Could not decode class for object.");
 
-        result = [class allocWithZone:NSDefaultMallocZone()];
-        NSMapInsert(self.inObjects, (void *) (OSIdType) archiveId, result);
+        object = [clazz allocWithZone:NSDefaultMallocZone()];
+        NSMapInsert(self.inObjects, (void *) (OSIdType) archiveId, object);
 
-        replacement = [result initWithCoder:self];
-        if (replacement != result) {
+        replacement = [object initWithCoder:self];
+        if (replacement != object) {
 
             replacement = RETAIN(replacement);
             NSMapRemove(self.inObjects, (void *) (OSIdType) archiveId);
-            result = replacement;
-            NSMapInsert(self.inObjects, (void *) (OSIdType) archiveId, result);
+            object = replacement;
+            NSMapInsert(self.inObjects, (void *) (OSIdType) archiveId, object);
             RELEASE(replacement);
         }
 
-        replacement = [result awakeAfterUsingCoder:self];
-        if (replacement != result) {
+        replacement = [object awakeAfterUsingCoder:self];
+        if (replacement != object) {
 
             replacement = RETAIN(replacement);
             NSMapRemove(self.inObjects, (void *) (OSIdType) archiveId);
-            result = replacement;
-            NSMapInsert(self.inObjects, (void *) (OSIdType) archiveId, result);
+            object = replacement;
+            NSMapInsert(self.inObjects, (void *) (OSIdType) archiveId, object);
             RELEASE(replacement);
         }
     }
 
-    if (object_is_instance(result)) {
-        NSAssert3([result retainCount] > 0,
-                @"Invalid retain count %i for id=%i (%@).",
-                (unsigned) [result retainCount],
-                archiveId,
-                NSStringFromClass([result class]));
+    if (object_is_instance(object)) {
+        NSAssert3([object retainCount] > 0,
+                @"Invalid retain count %i for id=%lu (%@).",
+                (unsigned) [object retainCount],
+                (unsigned long) archiveId,
+                NSStringFromClass([object class]));
     }
 
-    return result;
+    // Done
+    return object;
 }
 
 // ----------------------------------------------------------------------------
