@@ -30,7 +30,6 @@
 		195F9327230C9F2600D0DCF2 /* byte_order.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F9326230C9F2600D0DCF2 /* byte_order.h */; };
 		195F932B230CA33600D0DCF2 /* GeneralExceptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F9329230CA33600D0DCF2 /* GeneralExceptions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F932C230CA33600D0DCF2 /* GeneralExceptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F932A230CA33600D0DCF2 /* GeneralExceptions.h */; };
-		19847993231842FA00FE310A /* objc-api.h in Headers */ = {isa = PBXBuildFile; fileRef = 19847992231842FA00FE310A /* objc-api.h */; };
 		198479A2231D669500FE310A /* OSUnarchiver.h in Headers */ = {isa = PBXBuildFile; fileRef = 198479A0231D669500FE310A /* OSUnarchiver.h */; };
 		198479A3231D669500FE310A /* OSUnarchiver.m in Sources */ = {isa = PBXBuildFile; fileRef = 198479A1231D669500FE310A /* OSUnarchiver.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		198479A6231D7BB800FE310A /* OSArchiver+Encoding.h in Headers */ = {isa = PBXBuildFile; fileRef = 198479A4231D7BB800FE310A /* OSArchiver+Encoding.h */; };
@@ -85,7 +84,6 @@
 		195F9329230CA33600D0DCF2 /* GeneralExceptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneralExceptions.m; sourceTree = "<group>"; };
 		195F932A230CA33600D0DCF2 /* GeneralExceptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneralExceptions.h; sourceTree = "<group>"; };
 		1976D4E11FCB821000C07C72 /* SwiftCommons.ObjC.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = SwiftCommons.ObjC.xcconfig; sourceTree = "<group>"; };
-		19847992231842FA00FE310A /* objc-api.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "objc-api.h"; sourceTree = "<group>"; };
 		198479A0231D669500FE310A /* OSUnarchiver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSUnarchiver.h; sourceTree = "<group>"; };
 		198479A1231D669500FE310A /* OSUnarchiver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSUnarchiver.m; sourceTree = "<group>"; };
 		198479A4231D7BB800FE310A /* OSArchiver+Encoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "OSArchiver+Encoding.h"; sourceTree = "<group>"; };
@@ -165,7 +163,6 @@
 		195F9317230B312F00D0DCF2 /* extensions */ = {
 			isa = PBXGroup;
 			children = (
-				19847992231842FA00FE310A /* objc-api.h */,
 				195A95F6231882D300BEF12C /* objc-config.h */,
 				195F9318230B312F00D0DCF2 /* objc-runtime.h */,
 				195A95F82318895500BEF12C /* support.h */,
@@ -314,7 +311,6 @@
 				195A95F92318895500BEF12C /* support.h in Headers */,
 				195F9319230B312F00D0DCF2 /* objc-runtime.h in Headers */,
 				195A95FD231889B500BEF12C /* FoundationException.h in Headers */,
-				19847993231842FA00FE310A /* objc-api.h in Headers */,
 				194B70942325871200CA5D90 /* OSMemory.h in Headers */,
 				195F932C230CA33600D0DCF2 /* GeneralExceptions.h in Headers */,
 				19CCD10B1FCD0191008CEA38 /* zip.h in Headers */,

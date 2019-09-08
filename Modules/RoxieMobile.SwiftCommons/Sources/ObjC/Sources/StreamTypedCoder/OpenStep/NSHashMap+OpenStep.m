@@ -1002,7 +1002,7 @@ unsigned __NSHashCString(void *table, const void *aString)
 {
     register const char* p = (char*)aString;
     register unsigned hash = 0, hash2;
-    register int i, n = Strlen((char*)aString);
+    register size_t i, n = Strlen((char*)aString);
 
     for(i=0; i < n; i++) {
         hash <<= 4;

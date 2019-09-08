@@ -31,8 +31,8 @@
 // #include <config.h>
 #include <Foundation/NSString.h>
 
+#include <objc/objc-api.h>
 #include "objc-config.h"
-#include "objc-api.h"
 
 #if HAVE_STRING_H
 # include <string.h>

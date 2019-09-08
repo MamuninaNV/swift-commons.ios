@@ -29,9 +29,9 @@
 // #include <objc/objc-api.h>
 // #include <objc/Protocol.h>
 
+#include <objc/objc-api.h>
 #include <objc/runtime.h>
 #include "objc-config.h"
-#include "objc-api.h"
 
 /* If neither GNU nor NeXT runtimes are defined,
    make GNU the default runtime
@@ -79,8 +79,7 @@ typedef BOOL (*objc_error_handler)(id, int code, const char *fmt, va_list ap);
 
 #define OBJC_ERR_MEMORY 10             /* Out of memory */
 
-#define OBJC_ERR_RECURSE_ROOT 20       /* Attempt to archive the root
-					  object more than once. */
+#define OBJC_ERR_RECURSE_ROOT 20       /* Attempt to archive the root object more than once. */
 #define OBJC_ERR_BAD_DATA 21           /* Didn't read expected data */
 #define OBJC_ERR_BAD_KEY 22            /* Bad key for object */
 #define OBJC_ERR_BAD_CLASS 23          /* Unknown class */
