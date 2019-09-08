@@ -40,3 +40,12 @@ double objc_ntohd(double value);
 double objc_htond(double value);
 
 // ----------------------------------------------------------------------------
+
+size_t roxie_strlen(const char *str);
+int roxie_strcmp(const char *str1, const char *str2);
+
+// ----------------------------------------------------------------------------
+
+int roxie_atoi(const char *str);
+
+// ----------------------------------------------------------------------------

@@ -51,11 +51,11 @@
 ** can take advantage of the exception/error handling available.
 */
 
-FOUNDATION_EXPORT void *objc_malloc(size_t size);
-FOUNDATION_EXPORT void *objc_atomic_malloc(size_t size);
-FOUNDATION_EXPORT void *objc_valloc(size_t size);
-FOUNDATION_EXPORT void *objc_realloc(void *mem, size_t size);
-FOUNDATION_EXPORT void *objc_calloc(size_t nelem, size_t size);
-FOUNDATION_EXPORT void objc_free(void *mem);
+void *objc_malloc(size_t size);
+void *objc_atomic_malloc(size_t size);
+void *objc_valloc(size_t size);
+void *objc_realloc(void *mem, size_t size);
+void *objc_calloc(size_t nelem, size_t size);
+void objc_free(void *mem);
 
 // ----------------------------------------------------------------------------

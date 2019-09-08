@@ -367,7 +367,7 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
 
             _readObjC(self, &name, @encode(char *));
             *(SEL *) _value = name ? sel_get_any_uid(name) : NULL;
-            lfFree(name);
+            objc_free(name);
             name = NULL;
         }
 

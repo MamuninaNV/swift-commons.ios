@@ -33,7 +33,7 @@
 // #include <Foundation/exceptions/GeneralExceptions.h>
 
 #include "common.h"
-#include "OSUtilities.h"
+#include "OSEncoding.h"
 
 // static void __NSHashGrow(NSHashTable *table, unsigned newSize);
 // static void __NSMapGrow(NSMapTable *table, unsigned newSize);
@@ -1002,7 +1002,7 @@ unsigned __NSHashCString(void *table, const void *aString)
 {
     register const char* p = (char*)aString;
     register unsigned hash = 0, hash2;
-    register size_t i, n = Strlen((char*)aString);
+    register size_t i, n = roxie_strlen((char*)aString);
 
     for(i=0; i < n; i++) {
         hash <<= 4;
@@ -1037,7 +1037,7 @@ BOOL __NSCompareCString(void *table,
 				   const void *anObject1,
 				   const void *anObject2)
 {
-    return Strcmp((char*)anObject1, (char*)anObject2) == 0;
+    return roxie_strcmp((char*)anObject1, (char*)anObject2) == 0;
 }
 
 void __NSRetainNothing(void *table, const void *anObject)
@@ -1060,7 +1060,7 @@ void __NSReleaseObjects(void *table, void *anObject)
 
 void __NSReleasePointers(void *table, void *anObject)
 {
-    lfFree(anObject);
+    objc_free(anObject);
 }
 
 NSString* __NSDescribeObjects(void *table, const void *anObject)

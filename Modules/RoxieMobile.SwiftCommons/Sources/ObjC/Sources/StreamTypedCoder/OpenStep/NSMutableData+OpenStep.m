@@ -59,7 +59,7 @@
                 return;
             }
 
-            len = Strlen(*(void **) data);
+            len = roxie_strlen(*(void **) data);
             [self serializeInt:len];
             [self appendBytes:*(void **) data length:len];
 
@@ -67,7 +67,7 @@
         }
 
         case _C_ARY_B: {
-            int itemSize, count = Atoi(type + 1);
+            int itemSize, count = roxie_atoi(type + 1);
             const char *itemType = type;
 
             while (isdigit(*++itemType));
@@ -151,7 +151,7 @@
         }
 
         default: {
-            [[[UnknownTypeException alloc] initForType:type] raise];
+            [[[OSUnknownTypeException alloc] initForType:type] raise];
         }
     }
 }

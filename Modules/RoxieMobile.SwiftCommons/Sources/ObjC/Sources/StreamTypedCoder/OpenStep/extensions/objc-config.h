@@ -220,9 +220,6 @@
 // #undef HAVE_NDIR_H
 // #undef HAVE_DIR_H
 
-/* TODO: */
-#define WITHOUT_ZONES 1
-
 /* The structure alignment as determined by configure */
 // #define STRUCT_ALIGNMENT @STRUCT_ALIGNMENT@
 

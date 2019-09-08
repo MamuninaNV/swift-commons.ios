@@ -283,7 +283,7 @@ int objc_sizeof_type(const char *type)
             }
             while (*type != _C_STRUCT_E) {
                 align = objc_alignof_type(type);     // Padd to alignment
-                acc_size = ROUND (acc_size, align);
+                acc_size = ROUND(acc_size, align);
                 acc_size += objc_sizeof_type(type);  // Add component size
                 type = objc_skip_typespec(type);     // Skip component
             }
@@ -297,7 +297,7 @@ int objc_sizeof_type(const char *type)
                 // Do nothing
             }
             while (*type != _C_UNION_E) {
-                max_size = MAX (max_size, objc_sizeof_type(type));
+                max_size = MAX(max_size, objc_sizeof_type(type));
                 type = objc_skip_typespec(type);
             }
             return max_size;
@@ -395,31 +395,31 @@ int objc_alignof_type(const char *type)
             struct {
                 int x;
                 double y;
-            } FooAlign;
+            } foo_align;
 
             while (*type != _C_STRUCT_E && *type++ != '=') {
                 // Do nothing
             }
 
             if (*type != _C_STRUCT_E) {
-                return MAX(objc_alignof_type(type), __alignof__(FooAlign));
+                return MAX(objc_alignof_type(type), (int) __alignof__(foo_align));
             }
             else {
-                return __alignof__(FooAlign);
+                return __alignof__(foo_align);
             }
         }
 
         case _C_UNION_B: {
-            int maxAlign = 0;
+            int max_align = 0;
 
             while (*type != _C_UNION_E && *type++ != '=') {
                 // Do nothing
             }
             while (*type != _C_UNION_E) {
-                maxAlign = MAX (maxAlign, objc_alignof_type(type));
+                max_align = MAX(objc_alignof_type(type), max_align);
                 type = objc_skip_typespec(type);
             }
-            return maxAlign;
+            return max_align;
         }
 
         default: {
@@ -601,6 +601,46 @@ double objc_htond(double value)
     double result = 0;
     __htond((Byte *) &result, (const Byte *) &value, 1);
     return result;
+}
+
+// ----------------------------------------------------------------------------
+#pragma mark -
+// ----------------------------------------------------------------------------
+
+size_t roxie_strlen(const char *str)
+{
+    return str ? strlen(str) : 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int roxie_strcmp(const char *str1, const char *str2)
+{
+    if (!str1) {
+        if (!str2) {
+            return 0;
+        }
+        else {
+            return -1;
+        }
+    }
+    else {
+        if (!str2) {
+            return 1;
+        }
+        else {
+            return strcmp(str1, str2);
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+#pragma mark -
+// ----------------------------------------------------------------------------
+
+int roxie_atoi(const char *str)
+{
+    return str ? atoi(str) : 0;
 }
 
 // ----------------------------------------------------------------------------

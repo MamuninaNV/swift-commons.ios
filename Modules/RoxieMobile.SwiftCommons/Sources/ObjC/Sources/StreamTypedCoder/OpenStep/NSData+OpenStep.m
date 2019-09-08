@@ -59,14 +59,14 @@
                 return;
             }
 
-            *(char **) data = MallocAtomic(len + 1);
+            (*(char **) data) = objc_atomic_malloc(len + 1);
             (*(char **) data)[len] = 0;
 
             @try {
                 [self deserializeBytes:*(char **) data length:len atCursor:cursor];
             }
             @catch (NSException *exception) {
-                lfFree(*(char **) data);
+                objc_free(*(char **) data);
                 [exception raise];
             }
 
@@ -77,7 +77,7 @@
             int count, itemSize;
             const char *itemType;
 
-            count = Atoi(type + 1);
+            count = roxie_atoi(type + 1);
             itemType = type;
             while (isdigit(*++itemType));
             itemSize = objc_sizeof_type(itemType);
@@ -115,13 +115,13 @@
         }
 
         case _C_PTR: {
-            *(char **) data = Malloc(objc_sizeof_type(++type));
+            *(char **) data = objc_malloc(objc_sizeof_type(++type));
 
             @try {
                 [self deserializeDataAt:*(char **) data ofObjCType:type atCursor:cursor context:callback];
             }
             @catch (NSException *exception) {
-                lfFree(*(char **) data);
+                objc_free(*(char **) data);
                 [exception raise];
             }
 
@@ -169,7 +169,7 @@
         }
 
         default: {
-            [[[UnknownTypeException alloc] initForType:type] raise];
+            [[[OSUnknownTypeException alloc] initForType:type] raise];
         }
     }
 }

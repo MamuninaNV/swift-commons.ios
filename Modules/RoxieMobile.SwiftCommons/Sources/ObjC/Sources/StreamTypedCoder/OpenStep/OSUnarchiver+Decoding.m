@@ -336,7 +336,7 @@ FINAL void __checkTypePair(OSTagType type, OSTagType reqType1, OSTagType reqType
 
         default: {
             char type[] = {tag, 0};
-            [[[UnknownTypeException alloc] initForType:type] raise];
+            [[[OSUnknownTypeException alloc] initForType:type] raise];
         }
     }
 
@@ -375,7 +375,7 @@ FINAL void __checkTypePair(OSTagType type, OSTagType reqType1, OSTagType reqType
 
         default: {
             char type[] = {tag, 0};
-            [[[UnknownTypeException alloc] initForType:type] raise];
+            [[[OSUnknownTypeException alloc] initForType:type] raise];
         }
     }
 
