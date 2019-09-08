@@ -566,9 +566,10 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
             break;
         }
 
-        default:
-            [NSException raise:OSInconsistentArchiveException format:@"Encountered type '%s' in object context", type];
+        default: {
+            [NSException raise:OSInconsistentArchiveException format:@"Encountered type '%s' in object context.", type];
             break;
+        }
     }
 }
 

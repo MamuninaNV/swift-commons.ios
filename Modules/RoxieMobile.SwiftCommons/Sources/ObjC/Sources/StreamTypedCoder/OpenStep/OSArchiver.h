@@ -9,11 +9,11 @@
 //
 // ----------------------------------------------------------------------------
 
-#import "OSSerialization.h"
+#import "OSObjCTypeSerializationCallback.h"
 
 // ----------------------------------------------------------------------------
 
-@interface OSArchiver : NSCoder <OSObjCTypeSerializationCallBack>
+@interface OSArchiver : NSCoder <OSObjCTypeSerializationCallback>
 
 // - Properties
 

@@ -13,12 +13,11 @@
 		195A95FD231889B500BEF12C /* FoundationException.h in Headers */ = {isa = PBXBuildFile; fileRef = 195A95FB231889B500BEF12C /* FoundationException.h */; };
 		195A95FF23189D9E00BEF12C /* NSHashMap+OpenStep.m in Sources */ = {isa = PBXBuildFile; fileRef = 195A95FE23189D9E00BEF12C /* NSHashMap+OpenStep.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9302230B28C900D0DCF2 /* OSArchiver.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F92FE230B28C900D0DCF2 /* OSArchiver.h */; };
-		195F9303230B28C900D0DCF2 /* OSSerialization.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F92FF230B28C900D0DCF2 /* OSSerialization.h */; };
+		195F9303230B28C900D0DCF2 /* OSObjCTypeSerializationCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F92FF230B28C900D0DCF2 /* OSObjCTypeSerializationCallback.h */; };
 		195F9308230B2B5200D0DCF2 /* lfmemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F9307230B2B5200D0DCF2 /* lfmemory.h */; };
 		195F930B230B2B9200D0DCF2 /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F9309230B2B9200D0DCF2 /* common.h */; };
 		195F930C230B2B9200D0DCF2 /* common.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F930A230B2B9200D0DCF2 /* common.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9310230B2D2B00D0DCF2 /* OSUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F930F230B2D2B00D0DCF2 /* OSUtilities.h */; };
-		195F9312230B2D7700D0DCF2 /* OSSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F9311230B2D7700D0DCF2 /* OSSerialization.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9314230B30AC00D0DCF2 /* OSUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F9313230B30AC00D0DCF2 /* OSUtilities.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9316230B30D800D0DCF2 /* OSArchiver.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F9315230B30D800D0DCF2 /* OSArchiver.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9319230B312F00D0DCF2 /* objc-runtime.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F9318230B312F00D0DCF2 /* objc-runtime.h */; };
@@ -67,12 +66,11 @@
 		195A95FB231889B500BEF12C /* FoundationException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FoundationException.h; sourceTree = "<group>"; };
 		195A95FE23189D9E00BEF12C /* NSHashMap+OpenStep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSHashMap+OpenStep.m"; sourceTree = "<group>"; };
 		195F92FE230B28C900D0DCF2 /* OSArchiver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSArchiver.h; sourceTree = "<group>"; };
-		195F92FF230B28C900D0DCF2 /* OSSerialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSSerialization.h; sourceTree = "<group>"; };
+		195F92FF230B28C900D0DCF2 /* OSObjCTypeSerializationCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSObjCTypeSerializationCallback.h; sourceTree = "<group>"; };
 		195F9307230B2B5200D0DCF2 /* lfmemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lfmemory.h; sourceTree = "<group>"; };
 		195F9309230B2B9200D0DCF2 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		195F930A230B2B9200D0DCF2 /* common.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = common.m; sourceTree = "<group>"; };
 		195F930F230B2D2B00D0DCF2 /* OSUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSUtilities.h; sourceTree = "<group>"; };
-		195F9311230B2D7700D0DCF2 /* OSSerialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSSerialization.m; sourceTree = "<group>"; };
 		195F9313230B30AC00D0DCF2 /* OSUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSUtilities.m; sourceTree = "<group>"; };
 		195F9315230B30D800D0DCF2 /* OSArchiver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSArchiver.m; sourceTree = "<group>"; };
 		195F9318230B312F00D0DCF2 /* objc-runtime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "objc-runtime.h"; sourceTree = "<group>"; };
@@ -149,8 +147,7 @@
 				198479B0231E679A00FE310A /* OSBasicTypes.h */,
 				198479AC231D7C7200FE310A /* OSEncoding.h */,
 				198479AD231D7C7200FE310A /* OSEncoding.m */,
-				195F92FF230B28C900D0DCF2 /* OSSerialization.h */,
-				195F9311230B2D7700D0DCF2 /* OSSerialization.m */,
+				195F92FF230B28C900D0DCF2 /* OSObjCTypeSerializationCallback.h */,
 				198479A0231D669500FE310A /* OSUnarchiver.h */,
 				198479A1231D669500FE310A /* OSUnarchiver.m */,
 				198479A8231D7BC000FE310A /* OSUnarchiver+Decoding.h */,
@@ -294,7 +291,7 @@
 				195A95F7231882D300BEF12C /* objc-config.h in Headers */,
 				19CCD10C1FCD0191008CEA38 /* SSZipArchive.h in Headers */,
 				198479AA231D7BC100FE310A /* OSUnarchiver+Decoding.h in Headers */,
-				195F9303230B28C900D0DCF2 /* OSSerialization.h in Headers */,
+				195F9303230B28C900D0DCF2 /* OSObjCTypeSerializationCallback.h in Headers */,
 				19CCD0F31FCD0144008CEA38 /* StreamTypedCoder.h in Headers */,
 				19CCD10E1FCD0191008CEA38 /* SSZipArchiveDelegate.h in Headers */,
 				19CCD1031FCD0191008CEA38 /* crypt.h in Headers */,
@@ -410,7 +407,6 @@
 				19CCD10A1FCD0191008CEA38 /* zip.c in Sources */,
 				195F9320230B3CAE00D0DCF2 /* encoding.m in Sources */,
 				19C9FD8D1FCCABBB0069F3D1 /* SwiftCommonsObjC.m in Sources */,
-				195F9312230B2D7700D0DCF2 /* OSSerialization.m in Sources */,
 				195F932B230CA33600D0DCF2 /* GeneralExceptions.m in Sources */,
 				198479A3231D669500FE310A /* OSUnarchiver.m in Sources */,
 				195F9321230B3CAE00D0DCF2 /* misc.m in Sources */,

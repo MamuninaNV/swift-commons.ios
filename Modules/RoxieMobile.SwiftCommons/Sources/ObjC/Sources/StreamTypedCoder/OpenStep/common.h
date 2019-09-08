@@ -109,7 +109,7 @@ static inline void lfFree(void*) __attribute__((unused));
 static inline void *Calloc(int, int) __attribute__((unused));
 static inline void *CallocAtomic(int, int) __attribute__((unused));
 static inline void *Realloc(void*, int) __attribute__((unused));
-static inline int Strlen(const char*) __attribute__((unused));
+static inline size_t Strlen(const char*) __attribute__((unused));
 static inline char* Strdup(const char*) __attribute__((unused));
 static inline char* Strcpy (char*, const char*) __attribute__((unused));
 static inline char* Strncpy (char*, const char*, unsigned)
@@ -329,7 +329,7 @@ static NSString *lf_quoteString (const char *cString, int length)
     return [NSString stringWithCString:(char *)buf length:j];
 }
 
-static inline int Strlen(const char* s)
+static inline size_t Strlen(const char* s)
 {
     return s ? strlen(s) : 0;
 }
