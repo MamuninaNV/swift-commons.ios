@@ -397,18 +397,18 @@ static inline long Atol(const char *str)
     return str ? atol(str) : 0;
 }
 
-LF_EXPORT char*	Ltoa(long nr, char *str, int base);
-LF_EXPORT void	vaRelease(id obj, ...);
+FOUNDATION_EXPORT char*	Ltoa(long nr, char *str, int base);
+FOUNDATION_EXPORT void	vaRelease(id obj, ...);
 
 /* Hash function used by NSString */
-LF_EXPORT unsigned hashjb(const char* name, int len);
+FOUNDATION_EXPORT unsigned hashjb(const char* name, int len);
 
 // LF_EXPORT NSString* Asprintf(NSString* format, ...);
 // LF_EXPORT NSString* Avsprintf(NSString* format, va_list args);
 
-LF_EXPORT BOOL writeToFile(NSString* path, NSData* data, BOOL atomically);
+FOUNDATION_EXPORT BOOL writeToFile(NSString* path, NSData* data, BOOL atomically);
 
-LF_EXPORT char* Tmpnam(char* s);
+FOUNDATION_EXPORT char* Tmpnam(char* s);
 
 #ifndef MAX
 #define MAX(a, b) \

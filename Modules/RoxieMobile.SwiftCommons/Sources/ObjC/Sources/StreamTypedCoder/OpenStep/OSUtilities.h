@@ -88,26 +88,26 @@
  * Convenience functions to deal with Hash and Map Table
  */
 
-LF_EXPORT unsigned __NSHashObject(void* table, const void* anObject);
-LF_EXPORT unsigned __NSHashPointer(void* table, const void* anObject);
-LF_EXPORT unsigned __NSHashInteger(void* table, const void* anObject);
-LF_EXPORT unsigned __NSHashCString(void* table, const void* anObject);
-LF_EXPORT BOOL __NSCompareObjects(void* table, 
+FOUNDATION_EXPORT unsigned __NSHashObject(void* table, const void* anObject);
+FOUNDATION_EXPORT unsigned __NSHashPointer(void* table, const void* anObject);
+FOUNDATION_EXPORT unsigned __NSHashInteger(void* table, const void* anObject);
+FOUNDATION_EXPORT unsigned __NSHashCString(void* table, const void* anObject);
+FOUNDATION_EXPORT BOOL __NSCompareObjects(void* table,
 	const void* anObject1, const void* anObject2);
-LF_EXPORT BOOL __NSComparePointers(void* table, 
+FOUNDATION_EXPORT BOOL __NSComparePointers(void* table,
 	const void* anObject1, const void* anObject2);
-LF_EXPORT BOOL __NSCompareInts(void* table, 
+FOUNDATION_EXPORT BOOL __NSCompareInts(void* table,
 	const void* anObject1, const void* anObject2);
-LF_EXPORT BOOL __NSCompareCString(void* table, 
+FOUNDATION_EXPORT BOOL __NSCompareCString(void* table,
 	const void* anObject1, const void* anObject2);
-LF_EXPORT void __NSRetainNothing(void* table, const void* anObject);
-LF_EXPORT void __NSRetainObjects(void* table, const void* anObject);
-LF_EXPORT void __NSReleaseNothing(void* table, void* anObject);
-LF_EXPORT void __NSReleaseObjects(void* table, void* anObject);
-LF_EXPORT void __NSReleasePointers(void* table, void* anObject);
-LF_EXPORT NSString* __NSDescribeObjects(void* table, const void* anObject);
-LF_EXPORT NSString* __NSDescribePointers(void* table, const void* anObject);
-LF_EXPORT NSString* __NSDescribeInts(void* table, const void* anObject);
+FOUNDATION_EXPORT void __NSRetainNothing(void* table, const void* anObject);
+FOUNDATION_EXPORT void __NSRetainObjects(void* table, const void* anObject);
+FOUNDATION_EXPORT void __NSReleaseNothing(void* table, void* anObject);
+FOUNDATION_EXPORT void __NSReleaseObjects(void* table, void* anObject);
+FOUNDATION_EXPORT void __NSReleasePointers(void* table, void* anObject);
+FOUNDATION_EXPORT NSString* __NSDescribeObjects(void* table, const void* anObject);
+FOUNDATION_EXPORT NSString* __NSDescribePointers(void* table, const void* anObject);
+FOUNDATION_EXPORT NSString* __NSDescribeInts(void* table, const void* anObject);
 
 /* Some allocation macros */
 #define OBJC_MALLOC(pointer, type, elements) \

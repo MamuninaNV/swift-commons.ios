@@ -617,21 +617,6 @@ objc_free(void *mem);
 // objc_get_uninstalled_dtable(void);
 
 
-/** Roxie: Begin */
-
-#if BUILD_libFoundation_DLL
-#  define LF_EXPORT  __declspec(dllexport)
-#  define LF_DECLARE __declspec(dllexport)
-#elif libFoundation_ISDLL
-#  define LF_EXPORT  extern __declspec(dllimport)
-#  define LF_DECLARE extern __declspec(dllimport)
-#else
-#  define LF_EXPORT  extern
-#  define LF_DECLARE
-#endif
-
-/** Roxie: End */
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

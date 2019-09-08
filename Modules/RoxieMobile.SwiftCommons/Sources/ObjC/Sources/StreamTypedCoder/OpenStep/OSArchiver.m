@@ -15,6 +15,7 @@
 #import "OSArchiver.h"
 #import "OSArchiver+Encoding.h"
 
+#import "OSEncoding.h"
 #import "OSUtilities.h"
 #import "NSMutableData+OpenStep.h"
 
@@ -633,7 +634,9 @@ static BOOL __isCollectable(id object) {
 
         case _C_STRUCT_B: { // C-structure begin '{'
 
-            while ((*type != _C_STRUCT_E) && (*type++ != '=')); // skip "<name>="
+            while ((*type != _C_STRUCT_E) && (*(type++) != '=')) {
+                // Skip "<name>="
+            }
 
             int offset = 0;
             while (YES) {

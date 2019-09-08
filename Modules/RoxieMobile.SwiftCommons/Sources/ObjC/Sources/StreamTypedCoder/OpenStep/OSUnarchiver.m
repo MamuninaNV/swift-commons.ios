@@ -18,6 +18,7 @@
 #import "OSUnarchiver+Decoding.h"
 
 #import "OSArchiver.h"
+#import "OSEncoding.h"
 #import "OSUtilities.h"
 #import "NSData+OpenStep.h"
 
@@ -51,7 +52,7 @@ FINAL OSTagType tagValue(OSTagType _tag) {
 
 // ----------------------------------------------------------------------------
 
-LF_DECLARE NSString *const OSInconsistentArchiveException =
+NSString *const OSInconsistentArchiveException =
         @"Archive is inconsistent.";
 
 // ----------------------------------------------------------------------------

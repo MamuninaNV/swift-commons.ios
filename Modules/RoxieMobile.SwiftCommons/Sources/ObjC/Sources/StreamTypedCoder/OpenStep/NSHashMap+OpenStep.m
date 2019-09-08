@@ -982,23 +982,23 @@
  * Convenience functions
  */
  
-LF_DECLARE unsigned __NSHashObject(void *table, const void *anObject)
+unsigned __NSHashObject(void *table, const void *anObject)
 {
     return (unsigned)[(id)anObject hash];
 }
 
-LF_DECLARE unsigned __NSHashPointer(void *table, const void *anObject)
+unsigned __NSHashPointer(void *table, const void *anObject)
 {
     return (unsigned)((long)anObject / 4);
 }
 
-LF_DECLARE unsigned __NSHashInteger(void *table, const void *anObject)
+unsigned __NSHashInteger(void *table, const void *anObject)
 {
     return (unsigned)(long)anObject;
 }
 
 /* From Aho, Sethi & Ullman: Principles of compiler design. */
-LF_DECLARE unsigned __NSHashCString(void *table, const void *aString)
+unsigned __NSHashCString(void *table, const void *aString)
 {
     register const char* p = (char*)aString;
     register unsigned hash = 0, hash2;
@@ -1013,67 +1013,67 @@ LF_DECLARE unsigned __NSHashCString(void *table, const void *aString)
     return hash;
 }
 
-LF_DECLARE BOOL __NSCompareObjects(void *table, 
+BOOL __NSCompareObjects(void *table,
 				   const void *anObject1,
 				   const void *anObject2)
 {
     return [(NSObject*)anObject1 isEqual:(NSObject*)anObject2];
 }
 
-LF_DECLARE BOOL __NSComparePointers(void *table, 
+BOOL __NSComparePointers(void *table,
 				    const void *anObject1,
 				    const void *anObject2)
 {
     return anObject1 == anObject2;
 }
 
-LF_DECLARE BOOL __NSCompareInts(void *table, 
+BOOL __NSCompareInts(void *table,
 				const void *anObject1, const void *anObject2)
 {
     return anObject1 == anObject2;
 }
 
-LF_DECLARE BOOL __NSCompareCString(void *table, 
+BOOL __NSCompareCString(void *table,
 				   const void *anObject1,
 				   const void *anObject2)
 {
     return Strcmp((char*)anObject1, (char*)anObject2) == 0;
 }
 
-LF_DECLARE void __NSRetainNothing(void *table, const void *anObject)
+void __NSRetainNothing(void *table, const void *anObject)
 {
 }
 
-LF_DECLARE void __NSRetainObjects(void *table, const void *anObject)
+void __NSRetainObjects(void *table, const void *anObject)
 {
     (void)RETAIN((NSObject*)anObject);
 }
 
-LF_DECLARE void __NSReleaseNothing(void *table, void *anObject)
+void __NSReleaseNothing(void *table, void *anObject)
 {
 }
 
-LF_DECLARE void __NSReleaseObjects(void *table, void *anObject)
+void __NSReleaseObjects(void *table, void *anObject)
 {
     RELEASE((NSObject*)anObject);
 }
 
-LF_DECLARE void __NSReleasePointers(void *table, void *anObject)
+void __NSReleasePointers(void *table, void *anObject)
 {
     lfFree(anObject);
 }
 
-LF_DECLARE NSString* __NSDescribeObjects(void *table, const void *anObject)
+NSString* __NSDescribeObjects(void *table, const void *anObject)
 {
     return [(NSObject*)anObject description];
 }
 
-LF_DECLARE NSString* __NSDescribePointers(void *table, const void *anObject)
+NSString* __NSDescribePointers(void *table, const void *anObject)
 {
     return [NSString stringWithFormat:@"%p", anObject];
 }
 
-LF_DECLARE NSString* __NSDescribeInts(void *table, const void *anObject)
+NSString* __NSDescribeInts(void *table, const void *anObject)
 {
     return [NSString stringWithFormat:@"%ld", (long)anObject];
 }

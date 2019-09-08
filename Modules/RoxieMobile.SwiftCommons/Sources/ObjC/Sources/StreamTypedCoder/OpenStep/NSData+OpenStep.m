@@ -13,6 +13,7 @@
 #import "common.h"
 #import "GeneralExceptions.h"
 #import "NSData+OpenStep.h"
+#import "OSEncoding.h"
 
 // ----------------------------------------------------------------------------
 

@@ -24,8 +24,6 @@
 		195F9314230B30AC00D0DCF2 /* OSUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F9313230B30AC00D0DCF2 /* OSUtilities.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9316230B30D800D0DCF2 /* OSArchiver.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F9315230B30D800D0DCF2 /* OSArchiver.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9319230B312F00D0DCF2 /* objc-runtime.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F9318230B312F00D0DCF2 /* objc-runtime.h */; };
-		195F931C230B3AFB00D0DCF2 /* encoding.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F931A230B3AFB00D0DCF2 /* encoding.h */; };
-		195F9320230B3CAE00D0DCF2 /* encoding.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F931E230B3CAE00D0DCF2 /* encoding.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9321230B3CAE00D0DCF2 /* misc.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F931F230B3CAE00D0DCF2 /* misc.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9324230C9C5200D0DCF2 /* NSData+OpenStep.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F9322230C9C5200D0DCF2 /* NSData+OpenStep.h */; };
 		195F9325230C9C5200D0DCF2 /* NSData+OpenStep.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F9323230C9C5200D0DCF2 /* NSData+OpenStep.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -80,8 +78,6 @@
 		195F9313230B30AC00D0DCF2 /* OSUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSUtilities.m; sourceTree = "<group>"; };
 		195F9315230B30D800D0DCF2 /* OSArchiver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSArchiver.m; sourceTree = "<group>"; };
 		195F9318230B312F00D0DCF2 /* objc-runtime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "objc-runtime.h"; sourceTree = "<group>"; };
-		195F931A230B3AFB00D0DCF2 /* encoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = encoding.h; sourceTree = "<group>"; };
-		195F931E230B3CAE00D0DCF2 /* encoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = encoding.m; sourceTree = "<group>"; };
 		195F931F230B3CAE00D0DCF2 /* misc.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = misc.m; sourceTree = "<group>"; };
 		195F9322230C9C5200D0DCF2 /* NSData+OpenStep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+OpenStep.h"; sourceTree = "<group>"; };
 		195F9323230C9C5200D0DCF2 /* NSData+OpenStep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+OpenStep.m"; sourceTree = "<group>"; };
@@ -140,7 +136,6 @@
 				195F9326230C9F2600D0DCF2 /* byte_order.h */,
 				195F9309230B2B9200D0DCF2 /* common.h */,
 				195F930A230B2B9200D0DCF2 /* common.m */,
-				195F931E230B3CAE00D0DCF2 /* encoding.m */,
 				195F931F230B3CAE00D0DCF2 /* misc.m */,
 				195F9322230C9C5200D0DCF2 /* NSData+OpenStep.h */,
 				195F9323230C9C5200D0DCF2 /* NSData+OpenStep.m */,
@@ -170,7 +165,6 @@
 		195F9317230B312F00D0DCF2 /* extensions */ = {
 			isa = PBXGroup;
 			children = (
-				195F931A230B3AFB00D0DCF2 /* encoding.h */,
 				19847992231842FA00FE310A /* objc-api.h */,
 				195A95F6231882D300BEF12C /* objc-config.h */,
 				195F9318230B312F00D0DCF2 /* objc-runtime.h */,
@@ -321,7 +315,6 @@
 				195F9319230B312F00D0DCF2 /* objc-runtime.h in Headers */,
 				195A95FD231889B500BEF12C /* FoundationException.h in Headers */,
 				19847993231842FA00FE310A /* objc-api.h in Headers */,
-				195F931C230B3AFB00D0DCF2 /* encoding.h in Headers */,
 				194B70942325871200CA5D90 /* OSMemory.h in Headers */,
 				195F932C230CA33600D0DCF2 /* GeneralExceptions.h in Headers */,
 				19CCD10B1FCD0191008CEA38 /* zip.h in Headers */,
@@ -417,7 +410,6 @@
 				195F930C230B2B9200D0DCF2 /* common.m in Sources */,
 				195A95FF23189D9E00BEF12C /* NSHashMap+OpenStep.m in Sources */,
 				19CCD10A1FCD0191008CEA38 /* zip.c in Sources */,
-				195F9320230B3CAE00D0DCF2 /* encoding.m in Sources */,
 				19C9FD8D1FCCABBB0069F3D1 /* SwiftCommonsObjC.m in Sources */,
 				195F932B230CA33600D0DCF2 /* GeneralExceptions.m in Sources */,
 				198479A3231D669500FE310A /* OSUnarchiver.m in Sources */,

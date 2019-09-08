@@ -95,8 +95,6 @@ typedef BOOL (*objc_error_handler)(id, int code, const char *fmt, va_list ap);
 #define OBJC_ERR_BAD_STATE 40          /* Bad thread state */
 #  endif
 
-// # include <extensions/encoding.h>
-# include "encoding.h"
 #else
 # include <objc/encoding.h>
 #endif /* !NX_CURRENT_COMPILER_RELEASE */

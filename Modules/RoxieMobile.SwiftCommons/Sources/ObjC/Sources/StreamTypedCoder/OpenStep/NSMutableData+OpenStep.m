@@ -29,6 +29,7 @@
 #import "common.h"
 #import "GeneralExceptions.h"
 #import "NSMutableData+OpenStep.h"
+#import "OSEncoding.h"
 
 // ----------------------------------------------------------------------------
 
