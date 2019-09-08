@@ -9,7 +9,6 @@
 // ----------------------------------------------------------------------------
 
 #import "objc-runtime.h"
-#import "byte_order.h"
 #import "common.h"
 #import "GeneralExceptions.h"
 #import "NSData+OpenStep.h"
@@ -182,7 +181,7 @@
     unsigned int ni, value;
 
     [self deserializeBytes:&ni length:sizeof(unsigned int) atCursor:cursor];
-    value = network_int_to_host(ni);
+    value = ntohl(ni);
 
     // Done
     return value;

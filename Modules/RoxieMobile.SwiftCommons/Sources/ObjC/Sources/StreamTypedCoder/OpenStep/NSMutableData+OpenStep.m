@@ -25,7 +25,6 @@
 // #include <Foundation/NSUtilities.h>
 
 #import "objc-runtime.h"
-#import "byte_order.h"
 #import "common.h"
 #import "GeneralExceptions.h"
 #import "NSMutableData+OpenStep.h"
@@ -161,7 +160,7 @@
 
 - (void)serializeInt:(int)value
 {
-    unsigned int ni = host_int_to_network((unsigned int) value);
+    unsigned int ni = htonl((unsigned int) value);
     [self appendBytes:&ni length:sizeof(unsigned int)];
 }
 

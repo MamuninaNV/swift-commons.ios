@@ -27,7 +27,6 @@
 		195F9321230B3CAE00D0DCF2 /* misc.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F931F230B3CAE00D0DCF2 /* misc.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9324230C9C5200D0DCF2 /* NSData+OpenStep.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F9322230C9C5200D0DCF2 /* NSData+OpenStep.h */; };
 		195F9325230C9C5200D0DCF2 /* NSData+OpenStep.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F9323230C9C5200D0DCF2 /* NSData+OpenStep.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		195F9327230C9F2600D0DCF2 /* byte_order.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F9326230C9F2600D0DCF2 /* byte_order.h */; };
 		195F932B230CA33600D0DCF2 /* GeneralExceptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F9329230CA33600D0DCF2 /* GeneralExceptions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F932C230CA33600D0DCF2 /* GeneralExceptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F932A230CA33600D0DCF2 /* GeneralExceptions.h */; };
 		198479A2231D669500FE310A /* OSUnarchiver.h in Headers */ = {isa = PBXBuildFile; fileRef = 198479A0231D669500FE310A /* OSUnarchiver.h */; };
@@ -80,7 +79,6 @@
 		195F931F230B3CAE00D0DCF2 /* misc.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = misc.m; sourceTree = "<group>"; };
 		195F9322230C9C5200D0DCF2 /* NSData+OpenStep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+OpenStep.h"; sourceTree = "<group>"; };
 		195F9323230C9C5200D0DCF2 /* NSData+OpenStep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+OpenStep.m"; sourceTree = "<group>"; };
-		195F9326230C9F2600D0DCF2 /* byte_order.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = byte_order.h; sourceTree = "<group>"; };
 		195F9329230CA33600D0DCF2 /* GeneralExceptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneralExceptions.m; sourceTree = "<group>"; };
 		195F932A230CA33600D0DCF2 /* GeneralExceptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeneralExceptions.h; sourceTree = "<group>"; };
 		1976D4E11FCB821000C07C72 /* SwiftCommons.ObjC.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = SwiftCommons.ObjC.xcconfig; sourceTree = "<group>"; };
@@ -131,7 +129,6 @@
 			children = (
 				195F9328230CA33600D0DCF2 /* exceptions */,
 				195F9317230B312F00D0DCF2 /* extensions */,
-				195F9326230C9F2600D0DCF2 /* byte_order.h */,
 				195F9309230B2B9200D0DCF2 /* common.h */,
 				195F930A230B2B9200D0DCF2 /* common.m */,
 				195F931F230B3CAE00D0DCF2 /* misc.m */,
@@ -303,7 +300,6 @@
 				195F930B230B2B9200D0DCF2 /* common.h in Headers */,
 				195F9302230B28C900D0DCF2 /* OSArchiver.h in Headers */,
 				198479A2231D669500FE310A /* OSUnarchiver.h in Headers */,
-				195F9327230C9F2600D0DCF2 /* byte_order.h in Headers */,
 				198479AE231D7C7200FE310A /* OSEncoding.h in Headers */,
 				19CCD1071FCD0191008CEA38 /* mztools.h in Headers */,
 				19CCD1051FCD0191008CEA38 /* ioapi.h in Headers */,
