@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		194B708F23257C3C00CA5D90 /* NSMutableData+OpenStep.h in Headers */ = {isa = PBXBuildFile; fileRef = 194B708D23257C3B00CA5D90 /* NSMutableData+OpenStep.h */; };
 		194B709023257C3C00CA5D90 /* NSMutableData+OpenStep.m in Sources */ = {isa = PBXBuildFile; fileRef = 194B708E23257C3B00CA5D90 /* NSMutableData+OpenStep.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		194B70932325871200CA5D90 /* OSMemory.m in Sources */ = {isa = PBXBuildFile; fileRef = 194B70912325871200CA5D90 /* OSMemory.m */; };
+		194B70942325871200CA5D90 /* OSMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 194B70922325871200CA5D90 /* OSMemory.h */; };
 		195A95F7231882D300BEF12C /* objc-config.h in Headers */ = {isa = PBXBuildFile; fileRef = 195A95F6231882D300BEF12C /* objc-config.h */; };
 		195A95F92318895500BEF12C /* support.h in Headers */ = {isa = PBXBuildFile; fileRef = 195A95F82318895500BEF12C /* support.h */; };
 		195A95FC231889B500BEF12C /* FoundationException.m in Sources */ = {isa = PBXBuildFile; fileRef = 195A95FA231889B500BEF12C /* FoundationException.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -16,7 +18,6 @@
 		195A95FF23189D9E00BEF12C /* NSHashMap+OpenStep.m in Sources */ = {isa = PBXBuildFile; fileRef = 195A95FE23189D9E00BEF12C /* NSHashMap+OpenStep.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9302230B28C900D0DCF2 /* OSArchiver.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F92FE230B28C900D0DCF2 /* OSArchiver.h */; };
 		195F9303230B28C900D0DCF2 /* OSObjCTypeSerializationCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F92FF230B28C900D0DCF2 /* OSObjCTypeSerializationCallback.h */; };
-		195F9308230B2B5200D0DCF2 /* lfmemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F9307230B2B5200D0DCF2 /* lfmemory.h */; };
 		195F930B230B2B9200D0DCF2 /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F9309230B2B9200D0DCF2 /* common.h */; };
 		195F930C230B2B9200D0DCF2 /* common.m in Sources */ = {isa = PBXBuildFile; fileRef = 195F930A230B2B9200D0DCF2 /* common.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195F9310230B2D2B00D0DCF2 /* OSUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 195F930F230B2D2B00D0DCF2 /* OSUtilities.h */; };
@@ -64,6 +65,8 @@
 /* Begin PBXFileReference section */
 		194B708D23257C3B00CA5D90 /* NSMutableData+OpenStep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableData+OpenStep.h"; sourceTree = "<group>"; };
 		194B708E23257C3B00CA5D90 /* NSMutableData+OpenStep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableData+OpenStep.m"; sourceTree = "<group>"; };
+		194B70912325871200CA5D90 /* OSMemory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSMemory.m; sourceTree = "<group>"; };
+		194B70922325871200CA5D90 /* OSMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSMemory.h; sourceTree = "<group>"; };
 		195A95F6231882D300BEF12C /* objc-config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "objc-config.h"; sourceTree = "<group>"; };
 		195A95F82318895500BEF12C /* support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = support.h; sourceTree = "<group>"; };
 		195A95FA231889B500BEF12C /* FoundationException.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FoundationException.m; sourceTree = "<group>"; };
@@ -71,7 +74,6 @@
 		195A95FE23189D9E00BEF12C /* NSHashMap+OpenStep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSHashMap+OpenStep.m"; sourceTree = "<group>"; };
 		195F92FE230B28C900D0DCF2 /* OSArchiver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSArchiver.h; sourceTree = "<group>"; };
 		195F92FF230B28C900D0DCF2 /* OSObjCTypeSerializationCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSObjCTypeSerializationCallback.h; sourceTree = "<group>"; };
-		195F9307230B2B5200D0DCF2 /* lfmemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lfmemory.h; sourceTree = "<group>"; };
 		195F9309230B2B9200D0DCF2 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		195F930A230B2B9200D0DCF2 /* common.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = common.m; sourceTree = "<group>"; };
 		195F930F230B2D2B00D0DCF2 /* OSUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSUtilities.h; sourceTree = "<group>"; };
@@ -139,7 +141,6 @@
 				195F9309230B2B9200D0DCF2 /* common.h */,
 				195F930A230B2B9200D0DCF2 /* common.m */,
 				195F931E230B3CAE00D0DCF2 /* encoding.m */,
-				195F9307230B2B5200D0DCF2 /* lfmemory.h */,
 				195F931F230B3CAE00D0DCF2 /* misc.m */,
 				195F9322230C9C5200D0DCF2 /* NSData+OpenStep.h */,
 				195F9323230C9C5200D0DCF2 /* NSData+OpenStep.m */,
@@ -153,6 +154,8 @@
 				198479B0231E679A00FE310A /* OSBasicTypes.h */,
 				198479AC231D7C7200FE310A /* OSEncoding.h */,
 				198479AD231D7C7200FE310A /* OSEncoding.m */,
+				194B70922325871200CA5D90 /* OSMemory.h */,
+				194B70912325871200CA5D90 /* OSMemory.m */,
 				195F92FF230B28C900D0DCF2 /* OSObjCTypeSerializationCallback.h */,
 				198479A0231D669500FE310A /* OSUnarchiver.h */,
 				198479A1231D669500FE310A /* OSUnarchiver.m */,
@@ -317,9 +320,9 @@
 				195A95F92318895500BEF12C /* support.h in Headers */,
 				195F9319230B312F00D0DCF2 /* objc-runtime.h in Headers */,
 				195A95FD231889B500BEF12C /* FoundationException.h in Headers */,
-				195F9308230B2B5200D0DCF2 /* lfmemory.h in Headers */,
 				19847993231842FA00FE310A /* objc-api.h in Headers */,
 				195F931C230B3AFB00D0DCF2 /* encoding.h in Headers */,
+				194B70942325871200CA5D90 /* OSMemory.h in Headers */,
 				195F932C230CA33600D0DCF2 /* GeneralExceptions.h in Headers */,
 				19CCD10B1FCD0191008CEA38 /* zip.h in Headers */,
 				194B708F23257C3C00CA5D90 /* NSMutableData+OpenStep.h in Headers */,
@@ -401,6 +404,7 @@
 				198479AB231D7BC100FE310A /* OSUnarchiver+Decoding.m in Sources */,
 				194B709023257C3C00CA5D90 /* NSMutableData+OpenStep.m in Sources */,
 				19CCD1081FCD0191008CEA38 /* unzip.c in Sources */,
+				194B70932325871200CA5D90 /* OSMemory.m in Sources */,
 				195F9314230B30AC00D0DCF2 /* OSUtilities.m in Sources */,
 				198479A7231D7BB800FE310A /* OSArchiver+Encoding.m in Sources */,
 				19CCD0F41FCD0144008CEA38 /* StreamTypedCoder.m in Sources */,

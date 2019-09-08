@@ -229,24 +229,6 @@ BOOL object_is_class(id object) {
   return (object != nil) &&  class_isMetaClass(object_getClass(object));
 }
 
-/** The new macros for handling exceptions. */
-// @link https://github.com/AlwaysRightInstitute/libFoundation/blob/master/Foundation/NSExceptionWithoutNested.h#L148
-
-#define TRY \
-  @try {
-
-#define END_TRY \
-  }
-
-#define OTHERWISE \
-  @catch (NSException *localException) {
-
-#define END_CATCH \
-  }
-
-#define RERAISE \
-  [localException raise];
-
 /** Roxie: End */
 
 #endif /* __objc_runtime_h__ */

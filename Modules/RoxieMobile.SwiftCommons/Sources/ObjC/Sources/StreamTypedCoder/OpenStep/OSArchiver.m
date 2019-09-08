@@ -53,7 +53,7 @@ UInt16 OSCoderVersion = 1909; // 2019-09
 
 // Destination
 @property(nonatomic, strong) NSMutableData *buffer;
-@property(nonatomic, assign) OSIdType archiveAddress;
+@property(nonatomic, assign) OSIndexType archiveAddress;
 
 // Flags
 @property(nonatomic, assign) BOOL traceMode;                // YES if finding conditionals
@@ -295,13 +295,13 @@ static BOOL __isCollectable(id object) {
 
 // ----------------------------------------------------------------------------
 
-- (void)encodeRootObject:(id)rootObject {
-
+- (void)encodeRootObject:(id)rootObject
+{
     @autoreleasepool {
 
         [self __beginEncoding];
 
-        NS_DURING {
+        @try {
 
             /*
              * Prepare for writing the graph objects for which `rootObject' is the root
@@ -320,15 +320,14 @@ static BOOL __isCollectable(id object) {
             [self __encodeObjectsWithRoot:rootObject];
             [self __writeArchiveTrailer];
         }
-        NS_HANDLER {
+        @catch (NSException *exception) {
 
             // Release resources
             [self __endEncoding];
 
             // Re-throw exception
-            [localException raise];
+            [exception raise];
         }
-        NS_ENDHANDLER;
 
         // Release resources
         [self __endEncoding];
@@ -591,20 +590,19 @@ static BOOL __isCollectable(id object) {
 - (void)__traceObjectsWithRoot:(id)rootObject {
 
     // Pass 1: Start tracing for conditionals
-    NS_DURING {
+    @try {
 
         self.traceMode = YES;
         [self encodeObject:rootObject];
     }
-    NS_HANDLER {
+    @catch (NSException *exception) {
 
         self.traceMode = NO;
         NSResetHashTable(self.outObjects);
 
         // Re-throw exception
-        [localException raise];
+        [exception raise];
     }
-    NS_ENDHANDLER;
 
     self.traceMode = NO;
     NSResetHashTable(self.outObjects);
@@ -670,7 +668,7 @@ static BOOL __isCollectable(id object) {
 
 - (void)__encodeObject:(id)object {
 
-    OSIdType archiveId = [self __archiveIdOfObject:object];
+    OSIndexType archiveId = [self __archiveIdOfObject:object];
     if (object == nil) {
 
         OSTagType tag = _C_ID;
@@ -826,26 +824,26 @@ static BOOL __isCollectable(id object) {
 
 // ----------------------------------------------------------------------------
 
-- (OSIdType)__archiveIdOfObject:(id)object {
+- (OSIndexType)__archiveIdOfObject:(id)object {
 
     if (object == nil) {
         return 0;
     }
 
-    OSIdType archiveId = 0;
+    OSIndexType archiveId = 0;
 
     // Look-up for an index of equivalent object
     if (__isCollectable(object)) {
 
-        archiveId = (OSIdType) NSMapGet(self.outKeys, object);
+        archiveId = (OSIndexType) NSMapGet(self.outKeys, object);
         if (archiveId == 0) {
 
-            archiveId = (OSIdType) self.archiveAddress++;
-            NSMapInsert(self.outKeys, object, (void *) (OSIdType) archiveId);
+            archiveId = (OSIndexType) self.archiveAddress++;
+            NSMapInsert(self.outKeys, object, (void *) (OSIndexType) archiveId);
         }
     }
     else {
-        archiveId = (OSIdType) self.archiveAddress++;
+        archiveId = (OSIndexType) self.archiveAddress++;
     }
 
     // Done
@@ -854,7 +852,7 @@ static BOOL __isCollectable(id object) {
 
 // ----------------------------------------------------------------------------
 
-- (OSIdType)__archiveIdOfClass:(Class)clazz {
+- (OSIndexType)__archiveIdOfClass:(Class)clazz {
     return [self __archiveIdOfObject:clazz];
 }
 

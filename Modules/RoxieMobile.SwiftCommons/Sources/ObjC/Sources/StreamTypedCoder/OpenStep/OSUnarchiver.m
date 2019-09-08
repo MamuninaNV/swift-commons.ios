@@ -613,7 +613,7 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
 
 - (Class)__decodeClass:(BOOL)isReference {
 
-    OSIdType archiveId = [self readUnsignedInteger];
+    OSIndexType archiveId = [self readUnsignedInteger];
     Class clazz = Nil;
 
     // Nil class or unused conditional class
@@ -624,9 +624,9 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
     if (isReference) {
         NSAssert(archiveId, @"archiveId is 0!");
 
-        clazz = (Class) NSMapGet(self.inClasses, (void *) (OSIdType) archiveId);
+        clazz = (Class) NSMapGet(self.inClasses, (void *) (OSIndexType) archiveId);
         if (clazz == nil) {
-            clazz = (Class) NSMapGet(self.inObjects, (void *) (OSIdType) archiveId);
+            clazz = (Class) NSMapGet(self.inObjects, (void *) (OSIndexType) archiveId);
         }
 
         if (clazz == nil) {
@@ -667,7 +667,7 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
             [NSException raise:OSInconsistentArchiveException format:@"Class versions do not match."];
         }
 
-        NSMapInsert(self.inClasses, (void *) (OSIdType) archiveId, clazz);
+        NSMapInsert(self.inClasses, (void *) (OSIndexType) archiveId, clazz);
     }
 
     NSAssert(clazz, @"Invalid state, class is Nil.");
@@ -681,7 +681,7 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
 - (id)__decodeObject:(BOOL)isReference NS_RETURNS_RETAINED {
 
     // This method returns a retained object!
-    OSIdType archiveId = [self readUnsignedInteger];
+    OSIndexType archiveId = [self readUnsignedInteger];
     id object = nil;
 
     // Nil object or unused conditional object
@@ -692,9 +692,9 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
     if (isReference) {
         NSAssert(archiveId, @"archiveId is 0!");
 
-        object = NSMapGet(self.inObjects, (void *) (OSIdType) archiveId);
+        object = NSMapGet(self.inObjects, (void *) (OSIndexType) archiveId);
         if (object == nil) {
-            object = NSMapGet(self.inClasses, (void *) (OSIdType) archiveId);
+            object = NSMapGet(self.inClasses, (void *) (OSIndexType) archiveId);
         }
 
         if (object == nil) {
@@ -710,15 +710,15 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
         NSAssert(clazz, @"Could not decode class for object.");
 
         object = [clazz allocWithZone:NSDefaultMallocZone()];
-        NSMapInsert(self.inObjects, (void *) (OSIdType) archiveId, object);
+        NSMapInsert(self.inObjects, (void *) (OSIndexType) archiveId, object);
 
         replacement = [object initWithCoder:self];
         if (replacement != object) {
 
             replacement = RETAIN(replacement);
-            NSMapRemove(self.inObjects, (void *) (OSIdType) archiveId);
+            NSMapRemove(self.inObjects, (void *) (OSIndexType) archiveId);
             object = replacement;
-            NSMapInsert(self.inObjects, (void *) (OSIdType) archiveId, object);
+            NSMapInsert(self.inObjects, (void *) (OSIndexType) archiveId, object);
             RELEASE(replacement);
         }
 
@@ -726,9 +726,9 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
         if (replacement != object) {
 
             replacement = RETAIN(replacement);
-            NSMapRemove(self.inObjects, (void *) (OSIdType) archiveId);
+            NSMapRemove(self.inObjects, (void *) (OSIndexType) archiveId);
             object = replacement;
-            NSMapInsert(self.inObjects, (void *) (OSIdType) archiveId, object);
+            NSMapInsert(self.inObjects, (void *) (OSIndexType) archiveId, object);
             RELEASE(replacement);
         }
     }

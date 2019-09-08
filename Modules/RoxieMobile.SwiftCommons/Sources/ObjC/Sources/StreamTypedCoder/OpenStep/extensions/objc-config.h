@@ -214,7 +214,7 @@
 // #undef WORDS_BIGENDIAN
 
 /* The following macros deal with directory entries. */
-#define HAVE_DIRENT_H 1
+// #undef HAVE_DIRENT_H
 // #undef HAVE_SYS_NDIR_H
 // #undef HAVE_SYS_DIR_H
 // #undef HAVE_NDIR_H

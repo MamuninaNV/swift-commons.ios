@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------------
 //
-//  lfmemory.h
-//  Based on part of libFoundation.
+//  OSMemory.h
+//  Based on part of GNU CC.
 //
 //  @author     Alexander Bragin <bragin-av@roxiemobile.com>
 //  @copyright  Copyright (c) 2019, Roxie Mobile Ltd. All rights reserved.
@@ -9,7 +9,7 @@
 //
 // ----------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "objc-config.h"
 
 // ----------------------------------------------------------------------------
 
@@ -25,7 +25,7 @@
 #    define AUTORELEASE(object) ((id) object)
 #  endif
 
-#else // !LIB_FOUNDATION_BOEHM_GC
+#else // LIB_FOUNDATION_BOEHM_GC
 
 #  ifndef RETAIN
 #    define RETAIN(object)      [object retain]
@@ -37,6 +37,6 @@
 #    define AUTORELEASE(object) [object autorelease]
 #  endif
 
-#endif // !LIB_FOUNDATION_BOEHM_GC
+#endif // LIB_FOUNDATION_BOEHM_GC
 
 // ----------------------------------------------------------------------------

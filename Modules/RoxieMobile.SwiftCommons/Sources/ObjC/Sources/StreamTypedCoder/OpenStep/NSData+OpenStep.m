@@ -61,17 +61,14 @@
 
             *(char **) data = MallocAtomic(len + 1);
             (*(char **) data)[len] = 0;
-            TRY {
-                [self deserializeBytes:*(char **) data
-                        length:len
-                        atCursor:cursor];
+
+            @try {
+                [self deserializeBytes:*(char **) data length:len atCursor:cursor];
             }
-            END_TRY
-            OTHERWISE {
+            @catch (NSException *exception) {
                 lfFree(*(char **) data);
-                RERAISE;
+                [exception raise];
             }
-            END_CATCH
 
             break;
         }
@@ -120,15 +117,13 @@
         case _C_PTR: {
             *(char **) data = Malloc(objc_sizeof_type(++type));
 
-            TRY {
+            @try {
                 [self deserializeDataAt:*(char **) data ofObjCType:type atCursor:cursor context:callback];
             }
-            END_TRY
-            OTHERWISE {
+            @catch (NSException *exception) {
                 lfFree(*(char **) data);
-                RERAISE;
+                [exception raise];
             }
-            END_CATCH
 
             break;
         }

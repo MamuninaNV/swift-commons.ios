@@ -279,17 +279,16 @@ BOOL writeToFile(NSString *path, NSData *data, BOOL atomically)
         
 	fileManager = [NSFileManager defaultManager];
 
-        NS_DURING {
+        @try {
             [fileManager removeFileAtPath:path handler:nil];
             result = [fileManager movePath:filename toPath:path handler:nil];
         }
-        NS_HANDLER {
+        @catch (NSException *exception) {
             fprintf(stderr, "Could not move file %s to file %s\n",
                     [filename fileSystemRepresentation],
                     [path fileSystemRepresentation]);
             result = NO;
         }
-        NS_ENDHANDLER;
     }
     return result;
 }

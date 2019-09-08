@@ -1,6 +1,6 @@
 // ----------------------------------------------------------------------------
 //
-//  OSBasicTypes.h
+//  OSMemory.h
 //  Based on part of GNU CC.
 //
 //  @author     Alexander Bragin <bragin-av@roxiemobile.com>
@@ -9,22 +9,10 @@
 //
 // ----------------------------------------------------------------------------
 
-#import <Foundation/Foundation.h>
+#import "OSMemory.h"
 
 // ----------------------------------------------------------------------------
 
-typedef unsigned char OSTagType;
-
-typedef unsigned long OSIndexType;
-
-// ----------------------------------------------------------------------------
-
-#ifndef REFERENCE
-#define REFERENCE  ((Byte) 128)
-#endif
-
-#ifndef VALUE
-#define VALUE      ((Byte) 127)
-#endif
+// TODO:
 
 // ----------------------------------------------------------------------------

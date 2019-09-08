@@ -91,7 +91,7 @@ extern atol();
 #define sleep(x) Sleep(x*1000)
 #endif
 
-#include "lfmemory.h"
+#include "OSMemory.h"
 
 #if (__GNUC__ == 2) && (__GNUC_MINOR__ <= 6) && !defined(__attribute__)
 #  define __attribute__(x)
