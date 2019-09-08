@@ -600,11 +600,10 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
 
 // ----------------------------------------------------------------------------
 
-// TODO: Refactoring is required
 - (Class)__decodeClass:(BOOL)isReference {
 
-    int   archiveId = [self readInt];
-    Class result    = Nil;
+    OSIdType archiveId = [self readUnsignedInteger];
+    Class clazz = Nil;
 
     // Nil class or unused conditional class
     if (archiveId == 0) {
@@ -614,35 +613,23 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
     if (isReference) {
         NSAssert(archiveId, @"archiveId is 0!");
 
-        result = (Class) NSMapGet(self.inClasses, (void *) (long) archiveId);
-
-        if (result == nil) {
-            result = (id) NSMapGet(self.inObjects, (void *) (long) archiveId);
+        clazz = (Class) NSMapGet(self.inClasses, (void *) (OSIdType) archiveId);
+        if (clazz == nil) {
+            clazz = (Class) NSMapGet(self.inObjects, (void *) (OSIdType) archiveId);
         }
 
-        if (result == nil) {
-            [NSException raise:OSInconsistentArchiveException format:@"Did not find referenced class %i.", archiveId];
+        if (clazz == nil) {
+            [NSException raise:OSInconsistentArchiveException format:@"Did not find referenced class %lu.", (unsigned long) archiveId];
         }
     }
     else {
 
-        NSString  *name   = NULL;
-        NSInteger version = 0;
-        char      *cname  = _readCString(self);
-
-        if (cname == NULL) {
+        NSString *name = [self readStringWithTag:NO];
+        if (name == nil) {
             [NSException raise:OSInconsistentArchiveException format:@"Could not decode class name."];
         }
 
-        name = [NSString stringWithCString:cname encoding:NSUTF8StringEncoding];
-        version = [self readLong];
-        lfFree(cname);
-        cname = NULL;
-
-        if ([name lengthOfBytesUsingEncoding:NSUTF8StringEncoding] == 0) {
-            [NSException raise:OSInconsistentArchiveException format:@"Could not allocate memory for class name."];
-        }
-
+        NSInteger version = [self readInteger];
         NSMapInsert(self.inClassVersions, name, @(version));
 
         { // check whether the class is to be replaced
@@ -659,23 +646,23 @@ static NSMapTable *_classToAliasMappings = NULL;  // Archive name => Decoded nam
             }
         }
 
-        result = NSClassFromString(name);
+        clazz = NSClassFromString(name);
 
-        if (result == Nil) {
+        if (clazz == Nil) {
             [NSException raise:OSInconsistentArchiveException format:@"Class doesn't exist in this runtime."];
         }
-        name = nil;
 
-        if ([result version] != version) {
+        if ([clazz version] != version) {
             [NSException raise:OSInconsistentArchiveException format:@"Class versions do not match."];
         }
 
-        NSMapInsert(self.inClasses, (void *) (long) archiveId, result);
+        NSMapInsert(self.inClasses, (void *) (OSIdType) archiveId, clazz);
     }
 
-    NSAssert(result, @"Invalid state, class is Nil.");
+    NSAssert(clazz, @"Invalid state, class is Nil.");
 
-    return result;
+    // Done
+    return clazz;
 }
 
 // ----------------------------------------------------------------------------

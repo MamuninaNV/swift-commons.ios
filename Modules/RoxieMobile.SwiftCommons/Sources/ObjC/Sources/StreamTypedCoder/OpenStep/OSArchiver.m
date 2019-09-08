@@ -745,30 +745,32 @@ static BOOL __isCollectable(id object) {
 // ----------------------------------------------------------------------------
 
 // TODO: Refactoring is required
-- (void)__encodeValueOfObjCType:(const char *)_type at:(const void *)_value
-{
-    //NGLogT(@"encoder", @"encoding value of ObjC-type '%s' at %i",
-    //       _type, [self.data length]);
+- (void)__encodeValueOfObjCType:(const char *)type at:(const void *)addr {
 
-    switch (*_type) {
+    OSTagType tag = (OSTagType) (*type);
+    switch (tag) {
+
         case _C_ID:
-        case _C_CLASS:
+        case _C_CLASS: {
+
             // ?? Write another tag just to be possible to read using the
             // ?? decodeObject method. (Otherwise a lookahead would be required)
-            // ?? [self writeTag:*_type];
-            [self __encodeObject:*(id *) _value];
+            // ?? [self writeTag:*type];
+
+            [self __encodeObject:*((id *) addr)];
             break;
+        }
 
         case _C_ARY_B: {
-            int        count     = atoi(_type + 1); // eg '[15I' => count = 15
-            const char *itemType = _type;
+            int count = atoi(type + 1); // eg '[15I' => count = 15
+            const char *itemType = type;
 
-            while(isdigit((int)*(++itemType))) ; // skip dimension
+            while (isdigit((int) *(++itemType))); // skip dimension
 
             // Write another tag just to be possible to read using the
             // decodeArrayOfObjCType:count:at: method.
             [self writeTag:_C_ARY_B];
-            [self encodeArrayOfObjCType:itemType count:count at:_value];
+            [self encodeArrayOfObjCType:itemType count:count at:addr];
             break;
         }
 
@@ -777,35 +779,37 @@ static BOOL __isCollectable(id object) {
 
             [self writeTag:'{'];
 
-            while ((*_type != _C_STRUCT_E) && (*_type++ != '=')); // skip "<name>="
+            while ((*type != _C_STRUCT_E) && (*type++ != '=')); // skip "<name>="
 
             while (YES) {
-                [self encodeValueOfObjCType:_type at:((char *)_value) + offset];
+                [self encodeValueOfObjCType:type at:((char *) addr) + offset];
 
-                offset += objc_sizeof_type(_type);
-                _type  =  objc_skip_typespec(_type);
+                offset += objc_sizeof_type(type);
+                type = objc_skip_typespec(type);
 
-                if(*_type != _C_STRUCT_E) { // C-structure end '}'
+                if (*type != _C_STRUCT_E) { // C-structure end '}'
                     int align, remainder;
 
-                    align = objc_alignof_type(_type);
-                    if((remainder = offset % align))
+                    align = objc_alignof_type(type);
+                    if ((remainder = offset % align)) {
                         offset += (align - remainder);
+                    }
                 }
-                else
+                else {
                     break;
+                }
             }
             break;
         }
 
         case _C_SEL:
             [self writeTag:_C_SEL];
-            _writeCString(self, (*(SEL *)_value) ? sel_get_name(*(SEL *)_value) : NULL);
+            _writeCString(self, (*(SEL *) addr) ? sel_get_name(*(SEL *) addr) : NULL);
             break;
 
         case _C_PTR:
-            [self writeTag:*_type];
-            _writeObjC(self, *(char **)_value, _type + 1);
+            [self writeTag:*type];
+            _writeObjC(self, *(char **) addr, type + 1);
             break;
 
         case _C_CHARPTR:
@@ -814,13 +818,14 @@ static BOOL __isCollectable(id object) {
         case _C_INT:     case _C_UINT:
         case _C_LNG:     case _C_ULNG:
         case _C_LNG_LNG: case _C_ULNG_LNG:
-        case _C_FLT:     case _C_DBL:
-            [self writeTag:*_type];
-            _writeObjC(self, _value, _type);
+        case _C_FLT:     case _C_DBL: {
+            [self writeTag:*type];
+            _writeObjC(self, addr, type);
             break;
+        }
 
         default:
-            NSLog(@"unsupported C type %s ..", _type);
+            NSLog(@"Unsupported C type %s.", type);
             break;
     }
 }
