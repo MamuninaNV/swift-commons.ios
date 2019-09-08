@@ -16,7 +16,7 @@
 #import "OSArchiver+Encoding.h"
 
 #import "OSUtilities.h"
-#import "NSData+OpenStep.h"
+#import "NSMutableData+OpenStep.h"
 
 // ----------------------------------------------------------------------------
 

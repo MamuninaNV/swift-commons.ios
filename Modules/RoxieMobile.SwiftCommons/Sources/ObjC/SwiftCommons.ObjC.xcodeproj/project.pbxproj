@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		194B708F23257C3C00CA5D90 /* NSMutableData+OpenStep.h in Headers */ = {isa = PBXBuildFile; fileRef = 194B708D23257C3B00CA5D90 /* NSMutableData+OpenStep.h */; };
+		194B709023257C3C00CA5D90 /* NSMutableData+OpenStep.m in Sources */ = {isa = PBXBuildFile; fileRef = 194B708E23257C3B00CA5D90 /* NSMutableData+OpenStep.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		195A95F7231882D300BEF12C /* objc-config.h in Headers */ = {isa = PBXBuildFile; fileRef = 195A95F6231882D300BEF12C /* objc-config.h */; };
 		195A95F92318895500BEF12C /* support.h in Headers */ = {isa = PBXBuildFile; fileRef = 195A95F82318895500BEF12C /* support.h */; };
 		195A95FC231889B500BEF12C /* FoundationException.m in Sources */ = {isa = PBXBuildFile; fileRef = 195A95FA231889B500BEF12C /* FoundationException.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -60,6 +62,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		194B708D23257C3B00CA5D90 /* NSMutableData+OpenStep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableData+OpenStep.h"; sourceTree = "<group>"; };
+		194B708E23257C3B00CA5D90 /* NSMutableData+OpenStep.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableData+OpenStep.m"; sourceTree = "<group>"; };
 		195A95F6231882D300BEF12C /* objc-config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "objc-config.h"; sourceTree = "<group>"; };
 		195A95F82318895500BEF12C /* support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = support.h; sourceTree = "<group>"; };
 		195A95FA231889B500BEF12C /* FoundationException.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FoundationException.m; sourceTree = "<group>"; };
@@ -140,6 +144,8 @@
 				195F9322230C9C5200D0DCF2 /* NSData+OpenStep.h */,
 				195F9323230C9C5200D0DCF2 /* NSData+OpenStep.m */,
 				195A95FE23189D9E00BEF12C /* NSHashMap+OpenStep.m */,
+				194B708D23257C3B00CA5D90 /* NSMutableData+OpenStep.h */,
+				194B708E23257C3B00CA5D90 /* NSMutableData+OpenStep.m */,
 				195F92FE230B28C900D0DCF2 /* OSArchiver.h */,
 				195F9315230B30D800D0DCF2 /* OSArchiver.m */,
 				198479A4231D7BB800FE310A /* OSArchiver+Encoding.h */,
@@ -316,6 +322,7 @@
 				195F931C230B3AFB00D0DCF2 /* encoding.h in Headers */,
 				195F932C230CA33600D0DCF2 /* GeneralExceptions.h in Headers */,
 				19CCD10B1FCD0191008CEA38 /* zip.h in Headers */,
+				194B708F23257C3C00CA5D90 /* NSMutableData+OpenStep.h in Headers */,
 				19C9FD8C1FCCABBB0069F3D1 /* SwiftCommonsObjC.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -392,6 +399,7 @@
 				19C9FD871FCCAAD30069F3D1 /* TryCatchFinally.m in Sources */,
 				19CCD1061FCD0191008CEA38 /* mztools.c in Sources */,
 				198479AB231D7BC100FE310A /* OSUnarchiver+Decoding.m in Sources */,
+				194B709023257C3C00CA5D90 /* NSMutableData+OpenStep.m in Sources */,
 				19CCD1081FCD0191008CEA38 /* unzip.c in Sources */,
 				195F9314230B30AC00D0DCF2 /* OSUtilities.m in Sources */,
 				198479A7231D7BB800FE310A /* OSArchiver+Encoding.m in Sources */,

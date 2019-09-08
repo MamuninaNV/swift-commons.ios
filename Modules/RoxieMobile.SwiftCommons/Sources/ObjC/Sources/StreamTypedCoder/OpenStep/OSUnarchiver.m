@@ -759,7 +759,7 @@ FINAL void _checkType(char _code, char _reqCode)
 {
     if (_code != _reqCode) {
         [NSException raise:OSInconsistentArchiveException
-                     format:@"expected different typecode"];
+                     format:@"Expected different typecode."];
     }
 }
 
@@ -767,7 +767,7 @@ FINAL void _checkType2(char _code, char _reqCode1, char _reqCode2)
 {
     if ((_code != _reqCode1) && (_code != _reqCode2)) {
         [NSException raise:OSInconsistentArchiveException
-                     format:@"expected different typecode"];
+                     format:@"Expected different typecode."];
     }
 }
 
