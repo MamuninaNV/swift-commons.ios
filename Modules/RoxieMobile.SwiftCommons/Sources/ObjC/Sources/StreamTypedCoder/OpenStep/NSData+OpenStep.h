@@ -110,7 +110,7 @@
 	atCursor:(unsigned int*)cursor
 	context:(id <OSObjCTypeSerializationCallBack>)callback;
 
-- (int)deserializeIntAtCursor:(unsigned int*)cursor;
+- (unsigned int)deserializeIntAtCursor:(unsigned int*)cursor;
 
 @end /* NSData+OpenStep */
 
