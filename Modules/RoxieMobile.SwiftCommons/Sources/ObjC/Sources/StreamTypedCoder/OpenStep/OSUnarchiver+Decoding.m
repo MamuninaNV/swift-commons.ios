@@ -9,8 +9,9 @@
 // ----------------------------------------------------------------------------
 
 #import "objc-runtime.h"
-#import "GeneralExceptions.h"
+
 #import "OSEncoding.h"
+#import "OSUnknownTypeException.h"
 #import "OSUnarchiver+Decoding.h"
 
 // ----------------------------------------------------------------------------
@@ -336,7 +337,7 @@ FINAL void __checkTypePair(OSTagType type, OSTagType reqType1, OSTagType reqType
 
         default: {
             char type[] = {tag, 0};
-            [[[OSUnknownTypeException alloc] initForType:type] raise];
+            [OSUnknownTypeException raiseForType:type];
         }
     }
 
@@ -375,7 +376,7 @@ FINAL void __checkTypePair(OSTagType type, OSTagType reqType1, OSTagType reqType
 
         default: {
             char type[] = {tag, 0};
-            [[[OSUnknownTypeException alloc] initForType:type] raise];
+            [OSUnknownTypeException raiseForType:type];
         }
     }
 
