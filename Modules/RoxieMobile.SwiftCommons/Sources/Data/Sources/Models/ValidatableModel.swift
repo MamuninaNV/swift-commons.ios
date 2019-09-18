@@ -270,6 +270,7 @@ open class ValidatableModel: SerializableObject, SerializableMappable, Hashable,
 
         var exception: NSException?
         objcTry {
+            let typeOfT = type(of: self)
 
             // Clone object
             object = try? typeOfT.init(from: Mapper().toJSON(self))
