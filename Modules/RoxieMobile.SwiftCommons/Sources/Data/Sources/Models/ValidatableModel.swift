@@ -9,6 +9,7 @@
 // ----------------------------------------------------------------------------
 
 import CryptoSwift
+import MPMessagePack
 import SwiftCommonsAbstractions
 import SwiftCommonsConcurrent
 import SwiftCommonsDiagnostics
@@ -179,8 +180,8 @@ open class ValidatableModel: SerializableObject, SerializableMappable, Hashable,
     public final func rehash() -> Int
     {
         // Encode serializable object
-        let data = NSMutableData()
-        StreamTypedEncoder(forWritingWith: data).encodeRootObject(self)
+        let data = try! MPMessagePackWriter.write(
+            Mapper().toJSON(self), options: MPMessagePackWriterOptions.sortDictionaryKeys)
 
         // Writing a good Hashable implementation in Swift
         // @link http://stackoverflow.com/a/24240011

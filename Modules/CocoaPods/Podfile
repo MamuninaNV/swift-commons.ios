@@ -1,4 +1,5 @@
 source 'https://github.com/roxiemobile/static-cocoa-frameworks.ios.git'
+source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '9.0'
 use_frameworks!
@@ -21,6 +22,10 @@ def inject_shared_dependencies_2
   pod_from 'CryptoSwift', '~> 0.13.1'
 end
 
+def inject_shared_dependencies_3
+  pod 'MPMessagePack', '~> 1.5.1'
+end
+
 
 # MARK: - Sources
 
@@ -37,6 +42,15 @@ target 'SwiftCommons.Data' do
 
   # Dependencies
   inject_shared_dependencies_2
+  inject_shared_dependencies_3
+end
+
+
+target 'SwiftCommons.ObjC' do
+  project '../RoxieMobile.SwiftCommons/Sources/ObjC/SwiftCommons.ObjC.xcodeproj'
+
+  # Dependencies
+  inject_shared_dependencies_3
 end
 
 
@@ -56,6 +70,7 @@ target 'SwiftCommons.Data.UnitTests' do
   # Dependencies
   inject_shared_dependencies_1
   inject_shared_dependencies_2
+  inject_shared_dependencies_3
 end
 
 target 'SwiftCommons.Extensions.UnitTests' do
